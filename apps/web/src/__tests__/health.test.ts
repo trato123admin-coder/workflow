@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { GET } from '../app/api/health/route.js';
+import { GET } from '../app/api/health/route';
 
 describe('Web Health API Route', () => {
   it('returns ok status and default configuration', async () => {
