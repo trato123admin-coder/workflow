@@ -99,7 +99,10 @@ export const CreateRoleSchema = z.object({
     .trim()
     .min(2, 'El código debe tener al menos 2 caracteres')
     .max(30, 'El código no puede exceder 30 caracteres')
-    .regex(/^[A-Z0-9_]+$/, 'El código solo puede contener letras mayúsculas, números y guiones bajos'),
+    .regex(
+      /^[A-Z0-9_]+$/,
+      'El código solo puede contener letras mayúsculas, números y guiones bajos',
+    ),
   name: z
     .string()
     .trim()

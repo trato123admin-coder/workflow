@@ -12,7 +12,10 @@ interface StatusBadgeProps {
   size?: 'sm' | 'md';
 }
 
-const CATEGORY_STYLES: Record<StatusCategory, { bg: string; text: string; border: string; defaultIcon: React.ReactNode }> = {
+const CATEGORY_STYLES: Record<
+  StatusCategory,
+  { bg: string; text: string; border: string; defaultIcon: React.ReactNode }
+> = {
   success: {
     bg: 'bg-emerald-50 dark:bg-emerald-950/40',
     text: 'text-emerald-700 dark:text-emerald-300',
@@ -59,7 +62,8 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   size = 'md',
 }) => {
   const style = CATEGORY_STYLES[category] || CATEGORY_STYLES.neutral;
-  const sizeClasses = size === 'sm' ? 'px-2 py-0.5 text-xs gap-1' : 'px-2.5 py-1 text-xs font-medium gap-1.5';
+  const sizeClasses =
+    size === 'sm' ? 'px-2 py-0.5 text-xs gap-1' : 'px-2.5 py-1 text-xs font-medium gap-1.5';
 
   return (
     <span
@@ -69,7 +73,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
         style.bg,
         style.text,
         style.border,
-        className
+        className,
       )}
     >
       {icon ?? style.defaultIcon}

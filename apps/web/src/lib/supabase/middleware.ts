@@ -24,7 +24,7 @@ export async function updateSession(request: NextRequest) {
           request,
         });
         cookiesToSet.forEach(({ name, value, options }) =>
-          supabaseResponse.cookies.set(name, value, options)
+          supabaseResponse.cookies.set(name, value, options),
         );
       },
     },
@@ -60,7 +60,12 @@ export async function updateSession(request: NextRequest) {
   }
 
   // If authenticated and accessing login/forgot-password, redirect to app
-  if (user && isAuthRoute && !pathname.startsWith('/auth/callback') && !pathname.startsWith('/reset-password')) {
+  if (
+    user &&
+    isAuthRoute &&
+    !pathname.startsWith('/auth/callback') &&
+    !pathname.startsWith('/reset-password')
+  ) {
     const url = request.nextUrl.clone();
     url.pathname = '/users';
     return NextResponse.redirect(url);

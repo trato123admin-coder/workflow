@@ -23,12 +23,13 @@ export const FormField: React.FC<FormFieldProps> = ({
   return (
     <div className={cn('space-y-1.5 text-left', className)}>
       {label && (
-        <label
-          htmlFor={id}
-          className="block text-xs font-semibold text-foreground tracking-wide"
-        >
+        <label htmlFor={id} className="block text-xs font-semibold text-foreground tracking-wide">
           {label}
-          {required && <span className="text-destructive ml-1" aria-hidden="true">*</span>}
+          {required && (
+            <span className="text-destructive ml-1" aria-hidden="true">
+              *
+            </span>
+          )}
         </label>
       )}
 

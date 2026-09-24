@@ -112,10 +112,7 @@ interface SidebarProps {
   isSuperuser?: boolean;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({
-  userPermissions = [],
-  isSuperuser = false,
-}) => {
+export const Sidebar: React.FC<SidebarProps> = ({ userPermissions = [], isSuperuser = false }) => {
   const pathname = usePathname();
 
   const visibleItems = NAV_ITEMS.filter((item) => {
@@ -155,10 +152,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-all group focus:outline-none focus:ring-2 focus:ring-sidebar-ring',
                 isActive
                   ? 'bg-primary text-primary-foreground shadow-sm font-semibold'
-                  : 'text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                  : 'text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
               )}
             >
-              <span className={cn('transition-transform duration-150 group-hover:scale-105', isActive ? 'text-primary-foreground' : 'text-sidebar-foreground/60 group-hover:text-sidebar-foreground')}>
+              <span
+                className={cn(
+                  'transition-transform duration-150 group-hover:scale-105',
+                  isActive
+                    ? 'text-primary-foreground'
+                    : 'text-sidebar-foreground/60 group-hover:text-sidebar-foreground',
+                )}
+              >
                 {item.icon}
               </span>
               <span className="truncate">{item.label}</span>
@@ -171,7 +175,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="p-4 border-t border-sidebar-border text-[11px] text-sidebar-foreground/50">
         <div className="flex items-center justify-between">
           <span className="font-medium">WorkFlow v0.1</span>
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Sistema en línea" />
+          <span
+            className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
+            title="Sistema en línea"
+          />
         </div>
       </div>
     </aside>

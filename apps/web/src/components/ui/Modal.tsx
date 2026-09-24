@@ -55,16 +55,12 @@ export const Modal: React.FC<ModalProps> = ({
       aria-labelledby="modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200"
     >
-      <div
-        className="fixed inset-0"
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
 
       <div
         className={cn(
           'relative w-full rounded-2xl bg-card border border-border shadow-2xl p-6 overflow-hidden z-10 animate-in zoom-in-95 duration-200',
-          maxWidthClasses
+          maxWidthClasses,
         )}
       >
         <div className="flex items-start justify-between pb-3 border-b border-border">
@@ -72,9 +68,7 @@ export const Modal: React.FC<ModalProps> = ({
             <h2 id="modal-title" className="text-base font-bold text-foreground">
               {title}
             </h2>
-            {description && (
-              <p className="mt-1 text-xs text-muted-foreground">{description}</p>
-            )}
+            {description && <p className="mt-1 text-xs text-muted-foreground">{description}</p>}
           </div>
           <button
             type="button"

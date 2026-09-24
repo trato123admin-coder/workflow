@@ -2,7 +2,14 @@
 
 import React, { useState, useMemo } from 'react';
 import { cn } from '../../lib/utils';
-import { ChevronDown, ChevronUp, ChevronsUpDown, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronUp,
+  ChevronsUpDown,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 import { Skeleton } from './Skeleton';
 import { EmptyState } from './EmptyState';
 
@@ -109,7 +116,9 @@ export function DataTable<T>({
             />
           </div>
         )}
-        {actionsSlot && <div className="flex items-center gap-2 self-end sm:self-auto">{actionsSlot}</div>}
+        {actionsSlot && (
+          <div className="flex items-center gap-2 self-end sm:self-auto">{actionsSlot}</div>
+        )}
       </div>
 
       {/* Main Content Area */}
@@ -135,8 +144,10 @@ export function DataTable<T>({
                       onClick={() => col.sortable && handleSort(col.id)}
                       className={cn(
                         'py-3.5 px-4 select-none',
-                        col.sortable ? 'cursor-pointer hover:text-foreground transition-colors' : '',
-                        col.className
+                        col.sortable
+                          ? 'cursor-pointer hover:text-foreground transition-colors'
+                          : '',
+                        col.className,
                       )}
                     >
                       <div className="flex items-center gap-1.5">
@@ -170,8 +181,8 @@ export function DataTable<T>({
                         {col.cell
                           ? col.cell(item)
                           : col.accessorKey
-                          ? String(item[col.accessorKey] ?? '')
-                          : null}
+                            ? String(item[col.accessorKey] ?? '')
+                            : null}
                       </td>
                     ))}
                   </tr>
@@ -192,14 +203,17 @@ export function DataTable<T>({
                 ) : (
                   <div className="space-y-1.5">
                     {columns.map((col) => (
-                      <div key={col.id} className="flex items-center justify-between text-xs py-1 border-b border-border/40 last:border-0">
+                      <div
+                        key={col.id}
+                        className="flex items-center justify-between text-xs py-1 border-b border-border/40 last:border-0"
+                      >
                         <span className="text-muted-foreground font-medium">{col.header}:</span>
                         <span className="text-foreground font-semibold">
                           {col.cell
                             ? col.cell(item)
                             : col.accessorKey
-                            ? String(item[col.accessorKey] ?? '')
-                            : null}
+                              ? String(item[col.accessorKey] ?? '')
+                              : null}
                         </span>
                       </div>
                     ))}

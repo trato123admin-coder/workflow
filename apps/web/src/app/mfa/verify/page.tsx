@@ -72,7 +72,9 @@ export default function MfaVerifyPage() {
       });
 
       if (verifyError) {
-        setServerError('Código incorrecto o expirado. Ingrese el código actual de su app autenticadora.');
+        setServerError(
+          'Código incorrecto o expirado. Ingrese el código actual de su app autenticadora.',
+        );
         setIsLoading(false);
         return;
       }
@@ -92,9 +94,12 @@ export default function MfaVerifyPage() {
           <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto shadow-sm">
             <ShieldCheck className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Verificación en Dos Pasos</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Verificación en Dos Pasos
+          </h1>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Abra su aplicación de autenticación (Google Authenticator, Microsoft Authenticator o similar) e ingrese el código de 6 dígitos.
+            Abra su aplicación de autenticación (Google Authenticator, Microsoft Authenticator o
+            similar) e ingrese el código de 6 dígitos.
           </p>
         </div>
 

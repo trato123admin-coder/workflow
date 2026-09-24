@@ -90,9 +90,12 @@ export default function MfaEnrollPage() {
           <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto">
             <ShieldAlert className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Configurar Doble Factor (MFA)</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Configurar Doble Factor (MFA)
+          </h1>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Su rol requiere autenticación en dos pasos obligatoria para proteger el acceso al sistema.
+            Su rol requiere autenticación en dos pasos obligatoria para proteger el acceso al
+            sistema.
           </p>
         </div>
 
@@ -146,7 +149,11 @@ export default function MfaEnrollPage() {
                   className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                   aria-label="Copiar clave manual"
                 >
-                  {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                  {copied ? (
+                    <Check className="w-4 h-4 text-emerald-600" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             </div>

@@ -16,12 +16,7 @@ interface TabsProps {
   className?: string;
 }
 
-export const Tabs: React.FC<TabsProps> = ({
-  tabs,
-  activeTab,
-  onChange,
-  className,
-}) => {
+export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, className }) => {
   return (
     <div className={cn('border-b border-border', className)}>
       <nav className="-mb-px flex space-x-6 overflow-x-auto scrollbar-none" aria-label="Pestañas">
@@ -40,7 +35,7 @@ export const Tabs: React.FC<TabsProps> = ({
                 isActive
                   ? 'border-primary text-primary font-semibold'
                   : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border',
-                tab.disabled && 'opacity-40 cursor-not-allowed'
+                tab.disabled && 'opacity-40 cursor-not-allowed',
               )}
             >
               {tab.icon}
@@ -49,9 +44,7 @@ export const Tabs: React.FC<TabsProps> = ({
                 <span
                   className={cn(
                     'ml-1 rounded-full px-2 py-0.5 text-xs font-semibold',
-                    isActive
-                      ? 'bg-primary/10 text-primary'
-                      : 'bg-muted text-muted-foreground'
+                    isActive ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground',
                   )}
                 >
                   {tab.count}

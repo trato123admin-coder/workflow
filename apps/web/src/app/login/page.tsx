@@ -89,7 +89,8 @@ export default function LoginPage() {
             Gestión de Casos Sucesorios y Trámites Notariales
           </h1>
           <p className="text-xs sm:text-sm text-sidebar-foreground/70 leading-relaxed">
-            Plataforma centralizada para intervinientes, acervo hereditario, expedientes digitales y caja chica bajo normativa peruana.
+            Plataforma centralizada para intervinientes, acervo hereditario, expedientes digitales y
+            caja chica bajo normativa peruana.
           </p>
         </div>
 
@@ -119,12 +120,7 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <FormField
-              id="email"
-              label="Correo electrónico"
-              error={errors.email}
-              required
-            >
+            <FormField id="email" label="Correo electrónico" error={errors.email} required>
               <div className="relative">
                 <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
@@ -139,12 +135,7 @@ export default function LoginPage() {
               </div>
             </FormField>
 
-            <FormField
-              id="password"
-              label="Contraseña"
-              error={errors.password}
-              required
-            >
+            <FormField id="password" label="Contraseña" error={errors.password} required>
               <div className="relative">
                 <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input

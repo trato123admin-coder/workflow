@@ -17,7 +17,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onMoreClick }) => {
     { label: 'Inicio', href: '/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
     { label: 'Casos', href: '/cases', icon: <Briefcase className="w-5 h-5" /> },
     { label: 'Documentos', href: '/documents', icon: <FileText className="w-5 h-5" /> },
-    { label: 'Más', href: '/users', icon: <MoreHorizontal className="w-5 h-5" />, onClick: onMoreClick },
+    {
+      label: 'Más',
+      href: '/users',
+      icon: <MoreHorizontal className="w-5 h-5" />,
+      onClick: onMoreClick,
+    },
   ];
 
   return (
@@ -35,9 +40,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onMoreClick }) => {
             onClick={link.onClick}
             className={cn(
               'flex flex-col items-center justify-center flex-1 h-full min-h-[44px] min-w-[44px] text-[11px] font-medium transition-colors focus:outline-none',
-              isActive
-                ? 'text-primary font-bold'
-                : 'text-muted-foreground hover:text-foreground'
+              isActive ? 'text-primary font-bold' : 'text-muted-foreground hover:text-foreground',
             )}
           >
             {link.icon}

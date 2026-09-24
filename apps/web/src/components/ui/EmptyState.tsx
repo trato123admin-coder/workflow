@@ -21,7 +21,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     <div
       className={cn(
         'flex flex-col items-center justify-center p-8 sm:p-12 text-center rounded-xl border border-dashed border-border bg-card/50',
-        className
+        className,
       )}
     >
       <div className="p-3.5 rounded-full bg-muted text-muted-foreground mb-4">
@@ -29,9 +29,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       </div>
       <h3 className="text-sm font-semibold text-foreground">{title}</h3>
       {description && (
-        <p className="mt-1.5 text-xs text-muted-foreground max-w-sm">
-          {description}
-        </p>
+        <p className="mt-1.5 text-xs text-muted-foreground max-w-sm">{description}</p>
       )}
       {action && <div className="mt-5">{action}</div>}
     </div>

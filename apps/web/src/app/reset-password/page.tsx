@@ -64,17 +64,23 @@ export default function ResetPasswordPage() {
             <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-7 h-7" />
             </div>
-            <h2 className="text-xl font-bold tracking-tight text-foreground">Contraseña Actualizada</h2>
+            <h2 className="text-xl font-bold tracking-tight text-foreground">
+              Contraseña Actualizada
+            </h2>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Su contraseña ha sido modificada con éxito. Redirigiendo a la pantalla de inicio de sesión...
+              Su contraseña ha sido modificada con éxito. Redirigiendo a la pantalla de inicio de
+              sesión...
             </p>
           </div>
         ) : (
           <>
             <div className="space-y-1">
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Nueva Contraseña</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                Nueva Contraseña
+              </h1>
               <p className="text-xs text-muted-foreground">
-                Establezca una contraseña segura con al menos 8 caracteres, una mayúscula y un número.
+                Establezca una contraseña segura con al menos 8 caracteres, una mayúscula y un
+                número.
               </p>
             </div>
 
@@ -89,12 +95,7 @@ export default function ResetPasswordPage() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <FormField
-                id="password"
-                label="Nueva contraseña"
-                error={errors.password}
-                required
-              >
+              <FormField id="password" label="Nueva contraseña" error={errors.password} required>
                 <div className="relative">
                   <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input

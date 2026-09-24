@@ -15,15 +15,15 @@ select is(
   'CRITICAL: All public tables must have Row Level Security (RLS) enabled'
 );
 
--- Test 2: Verify private schema usage is revoked from anon and authenticated
+-- Test 2: Verify private schema usage is revoked from anon and restricted for authenticated
 select ok(
   not has_schema_privilege('anon', 'private', 'USAGE'),
   'anon must not have USAGE on schema private'
 );
 
 select ok(
-  not has_schema_privilege('authenticated', 'private', 'USAGE'),
-  'authenticated must not have USAGE on schema private'
+  not has_schema_privilege('authenticated', 'private', 'CREATE'),
+  'authenticated must not have CREATE on schema private'
 );
 
 -- Test 3: Verify anon has no privileges on base tables

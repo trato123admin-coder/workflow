@@ -11,14 +11,7 @@ import { DataTable, Column } from '../../components/ui/DataTable';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { Modal } from '../../components/ui/Modal';
-import {
-  Briefcase,
-  Users,
-  CheckCircle2,
-  AlertCircle,
-  Plus,
-  Palette,
-} from 'lucide-react';
+import { Briefcase, Users, CheckCircle2, AlertCircle, Plus, Palette } from 'lucide-react';
 
 interface SampleItem {
   id: string;
@@ -29,8 +22,20 @@ interface SampleItem {
 }
 
 const SAMPLE_DATA: SampleItem[] = [
-  { id: '1', name: 'Carlos Rodríguez', role: 'Gestor Principal', status: 'Activo', category: 'success' },
-  { id: '2', name: 'Dra. María Ramos', role: 'Abogado Revisor', status: 'Activo', category: 'success' },
+  {
+    id: '1',
+    name: 'Carlos Rodríguez',
+    role: 'Gestor Principal',
+    status: 'Activo',
+    category: 'success',
+  },
+  {
+    id: '2',
+    name: 'Dra. María Ramos',
+    role: 'Abogado Revisor',
+    status: 'Activo',
+    category: 'success',
+  },
   { id: '3', name: 'Juan Alarcón', role: 'Consulta', status: 'Inactivo', category: 'danger' },
   { id: '4', name: 'Lucía Benítez', role: 'Caja Chica', status: 'En trámite', category: 'info' },
 ];
@@ -96,7 +101,9 @@ export default function DesignSystemPage() {
           <div className="space-y-8">
             {/* Section: Status Badges */}
             <section className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
-              <h2 className="text-sm font-bold text-foreground">Insignias de Estado (StatusBadge con Icono + Texto)</h2>
+              <h2 className="text-sm font-bold text-foreground">
+                Insignias de Estado (StatusBadge con Icono + Texto)
+              </h2>
               <p className="text-xs text-muted-foreground">
                 Cumplen la regla de accesibilidad AA (no dependen únicamente del color):
               </p>
@@ -175,7 +182,9 @@ export default function DesignSystemPage() {
 
             {/* Section: FormField */}
             <section className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4 max-w-xl">
-              <h2 className="text-sm font-bold text-foreground">Campos de Formulario Accesibles (FormField)</h2>
+              <h2 className="text-sm font-bold text-foreground">
+                Campos de Formulario Accesibles (FormField)
+              </h2>
               <FormField
                 id="sample-input"
                 label="Nombre del solicitante"
@@ -203,7 +212,9 @@ export default function DesignSystemPage() {
 
             {/* Section: DataTable */}
             <section className="space-y-4">
-              <h2 className="text-sm font-bold text-foreground">Tabla de Datos Responsiva (DataTable)</h2>
+              <h2 className="text-sm font-bold text-foreground">
+                Tabla de Datos Responsiva (DataTable)
+              </h2>
               <DataTable
                 data={SAMPLE_DATA}
                 columns={sampleColumns}
@@ -296,7 +307,8 @@ export default function DesignSystemPage() {
           }
         >
           <p className="text-xs text-foreground">
-            Los modales capturan el foco y responden a la tecla Escape para cumplir las pautas de accesibilidad WCAG AA.
+            Los modales capturan el foco y responden a la tecla Escape para cumplir las pautas de
+            accesibilidad WCAG AA.
           </p>
         </Modal>
       </div>

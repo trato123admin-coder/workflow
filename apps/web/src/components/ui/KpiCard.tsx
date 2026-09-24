@@ -27,7 +27,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
     <div
       className={cn(
         'bg-card text-card-foreground rounded-xl border border-border p-5 shadow-sm transition-all hover:shadow-md',
-        className
+        className,
       )}
     >
       <div className="flex items-center justify-between">
@@ -42,9 +42,12 @@ export const KpiCard: React.FC<KpiCardProps> = ({
           <span
             className={cn(
               'inline-flex items-center text-xs font-semibold px-1.5 py-0.5 rounded',
-              change.trend === 'up' && 'text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400',
-              change.trend === 'down' && 'text-rose-700 bg-rose-50 dark:bg-rose-950/40 dark:text-rose-400',
-              change.trend === 'neutral' && 'text-slate-600 bg-slate-100 dark:bg-slate-800 dark:text-slate-400'
+              change.trend === 'up' &&
+                'text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400',
+              change.trend === 'down' &&
+                'text-rose-700 bg-rose-50 dark:bg-rose-950/40 dark:text-rose-400',
+              change.trend === 'neutral' &&
+                'text-slate-600 bg-slate-100 dark:bg-slate-800 dark:text-slate-400',
             )}
           >
             {change.trend === 'up' && <TrendingUp className="w-3 h-3 mr-0.5" />}

@@ -66,7 +66,9 @@ export default function ForgotPasswordPage() {
             </div>
             <h2 className="text-xl font-bold tracking-tight text-foreground">Enlace Enviado</h2>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Hemos enviado instrucciones a <span className="font-semibold text-foreground">{email}</span> para restablecer su contraseña si la cuenta existe en el sistema.
+              Hemos enviado instrucciones a{' '}
+              <span className="font-semibold text-foreground">{email}</span> para restablecer su
+              contraseña si la cuenta existe en el sistema.
             </p>
             <div className="pt-2">
               <Link
@@ -80,9 +82,12 @@ export default function ForgotPasswordPage() {
         ) : (
           <>
             <div className="space-y-1">
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Recuperar Contraseña</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                Recuperar Contraseña
+              </h1>
               <p className="text-xs text-muted-foreground">
-                Ingrese el correo electrónico asociado a su cuenta corporativa para recibir el enlace de restablecimiento.
+                Ingrese el correo electrónico asociado a su cuenta corporativa para recibir el
+                enlace de restablecimiento.
               </p>
             </div>
 
@@ -97,12 +102,7 @@ export default function ForgotPasswordPage() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <FormField
-                id="email"
-                label="Correo electrónico"
-                error={error}
-                required
-              >
+              <FormField id="email" label="Correo electrónico" error={error} required>
                 <div className="relative">
                   <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input

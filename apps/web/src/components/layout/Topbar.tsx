@@ -89,7 +89,9 @@ export const Topbar: React.FC<TopbarProps> = ({
               {userName.charAt(0).toUpperCase()}
             </div>
             <div className="hidden lg:flex flex-col text-left">
-              <span className="text-xs font-semibold text-foreground leading-tight">{userName}</span>
+              <span className="text-xs font-semibold text-foreground leading-tight">
+                {userName}
+              </span>
               <span className="text-[11px] text-muted-foreground leading-tight">{userRole}</span>
             </div>
           </button>

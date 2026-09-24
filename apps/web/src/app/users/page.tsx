@@ -130,9 +130,7 @@ export default function UsersManagementPage() {
       const supabase = createClient();
 
       // 1. Fetch profiles & user_roles
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select(`
+      const { data: profilesData, error: profilesError } = await supabase.from('profiles').select(`
           id,
           email,
           first_name,
@@ -154,7 +152,8 @@ export default function UsersManagementPage() {
       // 2. Fetch roles and permissions
       const { data: rolesData, error: rolesError } = await supabase
         .from('roles')
-        .select(`
+        .select(
+          `
           id,
           code,
           name,
@@ -168,7 +167,8 @@ export default function UsersManagementPage() {
               code
             )
           )
-        `)
+        `,
+        )
         .order('is_system', { ascending: false });
 
       if (rolesError) throw rolesError;
@@ -223,7 +223,9 @@ export default function UsersManagementPage() {
         setSelectedRoleForMatrix(formattedRoles[0]);
       }
     } catch (err: unknown) {
-      setErrorMessage(err instanceof Error ? err.message : 'Error al cargar datos de usuarios y roles');
+      setErrorMessage(
+        err instanceof Error ? err.message : 'Error al cargar datos de usuarios y roles',
+      );
     } finally {
       setIsLoading(false);
     }
@@ -249,12 +251,8 @@ export default function UsersManagementPage() {
         return;
       }
 
-      setSuccessMessage(
-        `Usuario ${nextStatus ? 'activado' : 'desactivado'} con éxito.`
-      );
-      setUsers((prev) =>
-        prev.map((u) => (u.id === user.id ? { ...u, is_active: nextStatus } : u))
-      );
+      setSuccessMessage(`Usuario ${nextStatus ? 'activado' : 'desactivado'} con éxito.`);
+      setUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, is_active: nextStatus } : u)));
       setTimeout(() => setSuccessMessage(''), 4000);
     } catch (err: unknown) {
       setErrorMessage(err instanceof Error ? err.message : 'Error al actualizar usuario');
@@ -358,9 +356,7 @@ export default function UsersManagementPage() {
 
       const updatedRole = { ...selectedRoleForMatrix, permissions: updatedPerms };
       setSelectedRoleForMatrix(updatedRole);
-      setRoles((prev) =>
-        prev.map((r) => (r.id === updatedRole.id ? updatedRole : r))
-      );
+      setRoles((prev) => prev.map((r) => (r.id === updatedRole.id ? updatedRole : r)));
     } catch (err: unknown) {
       setErrorMessage(err instanceof Error ? err.message : 'Error al actualizar permisos del rol');
     }
@@ -491,7 +487,8 @@ export default function UsersManagementPage() {
               <span>Gestión de Usuarios y Roles</span>
             </h1>
             <p className="text-xs text-muted-foreground mt-1">
-              Administración de cuentas, autenticación en dos pasos (MFA) y matriz de control de acceso.
+              Administración de cuentas, autenticación en dos pasos (MFA) y matriz de control de
+              acceso.
             </p>
           </div>
 
@@ -601,7 +598,9 @@ export default function UsersManagementPage() {
                           </span>
                         )}
                       </div>
-                      <span className={`text-[11px] truncate ${isSelected ? 'opacity-80' : 'text-muted-foreground'}`}>
+                      <span
+                        className={`text-[11px] truncate ${isSelected ? 'opacity-80' : 'text-muted-foreground'}`}
+                      >
                         {r.code}
                       </span>
                     </button>
@@ -710,7 +709,12 @@ export default function UsersManagementPage() {
               <p className="text-xs text-destructive font-medium">{userFormErrors.general}</p>
             )}
 
-            <FormField id="new-user-email" label="Correo electrónico" error={userFormErrors.email} required>
+            <FormField
+              id="new-user-email"
+              label="Correo electrónico"
+              error={userFormErrors.email}
+              required
+            >
               <input
                 id="new-user-email"
                 type="email"
@@ -722,7 +726,12 @@ export default function UsersManagementPage() {
             </FormField>
 
             <div className="grid grid-cols-2 gap-3">
-              <FormField id="new-user-first" label="Nombres" error={userFormErrors.firstName} required>
+              <FormField
+                id="new-user-first"
+                label="Nombres"
+                error={userFormErrors.firstName}
+                required
+              >
                 <input
                   id="new-user-first"
                   type="text"
@@ -732,7 +741,12 @@ export default function UsersManagementPage() {
                   className="w-full px-3.5 py-2 text-xs rounded-xl border border-input bg-background text-foreground focus:ring-2 focus:ring-primary"
                 />
               </FormField>
-              <FormField id="new-user-last" label="Apellidos" error={userFormErrors.lastName} required>
+              <FormField
+                id="new-user-last"
+                label="Apellidos"
+                error={userFormErrors.lastName}
+                required
+              >
                 <input
                   id="new-user-last"
                   type="text"
@@ -744,7 +758,12 @@ export default function UsersManagementPage() {
               </FormField>
             </div>
 
-            <FormField id="new-user-roles" label="Asignar Roles" error={userFormErrors.roleIds} required>
+            <FormField
+              id="new-user-roles"
+              label="Asignar Roles"
+              error={userFormErrors.roleIds}
+              required
+            >
               <div className="space-y-1.5 max-h-48 overflow-y-auto p-1">
                 {roles.map((r) => (
                   <label
@@ -831,9 +850,7 @@ export default function UsersManagementPage() {
                 if (roleError) throw roleError;
 
                 if (newRolePerms.length > 0 && roleData) {
-                  const permRecords = permissions.filter((p) =>
-                    newRolePerms.includes(p.code)
-                  );
+                  const permRecords = permissions.filter((p) => newRolePerms.includes(p.code));
                   const toInsert = permRecords.map((p) => ({
                     role_id: roleData.id,
                     permission_id: p.id,
@@ -849,7 +866,9 @@ export default function UsersManagementPage() {
                 setNewRolePerms([]);
                 loadData();
               } catch (err: unknown) {
-                setRoleFormErrors({ general: err instanceof Error ? err.message : 'Error al crear rol' });
+                setRoleFormErrors({
+                  general: err instanceof Error ? err.message : 'Error al crear rol',
+                });
               } finally {
                 setIsSubmittingRole(false);
               }
@@ -860,7 +879,12 @@ export default function UsersManagementPage() {
               <p className="text-xs text-destructive font-medium">{roleFormErrors.general}</p>
             )}
 
-            <FormField id="role-code" label="Código del rol (Mayúsculas)" error={roleFormErrors.code} required>
+            <FormField
+              id="role-code"
+              label="Código del rol (Mayúsculas)"
+              error={roleFormErrors.code}
+              required
+            >
               <input
                 id="role-code"
                 type="text"
@@ -900,7 +924,9 @@ export default function UsersManagementPage() {
                 onChange={(e) => setNewRoleRequiresMfa(e.target.checked)}
                 className="rounded border-input text-primary focus:ring-primary"
               />
-              <span className="font-semibold text-foreground">Requiere autenticación en dos pasos (MFA) obligatoria</span>
+              <span className="font-semibold text-foreground">
+                Requiere autenticación en dos pasos (MFA) obligatoria
+              </span>
             </label>
 
             <div className="pt-3 border-t border-border flex justify-end gap-2">
