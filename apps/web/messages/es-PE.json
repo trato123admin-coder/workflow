@@ -1,0 +1,24 @@
+{
+  "common": {
+    "appName": "Sistema de Casos y Trámites",
+    "status": "Estado",
+    "version": "Versión",
+    "environment": "Entorno",
+    "healthy": "Operativo",
+    "degraded": "Degradado",
+    "down": "Fuera de servicio",
+    "refresh": "Actualizar"
+  },
+  "health": {
+    "title": "Diagnóstico y Salud del Sistema",
+    "subtitle": "Monitoreo del estado de la plataforma web y servicios base",
+    "webStatus": "Aplicación Web (Next.js)",
+    "engineStatus": "Motor de Reglas y Documentos (Fastify)",
+    "databaseStatus": "Base de Datos (Supabase)",
+    "uptime": "Tiempo de actividad",
+    "timestamp": "Marca de tiempo",
+    "locale": "Configuración regional",
+    "timezone": "Zona horaria",
+    "allSystemsOperational": "Todos los servicios fundacionales están operativos"
+  }
+}
