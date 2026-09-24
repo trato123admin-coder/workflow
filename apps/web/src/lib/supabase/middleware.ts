@@ -71,6 +71,23 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Check if authenticated user is deactivated
+  if (user && !isAuthRoute && !isPublicRoute) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_active')
+      .eq('id', user.id)
+      .single();
+
+    if (profile && !profile.is_active) {
+      await supabase.auth.signOut();
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      url.searchParams.set('error', 'account_deactivated');
+      return NextResponse.redirect(url);
+    }
+  }
+
   // Check MFA status if user is authenticated
   if (user && !isMfaRoute && !isAuthRoute && !isPublicRoute) {
     const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();

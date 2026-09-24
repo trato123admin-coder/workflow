@@ -35,29 +35,27 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const supabase = createClient();
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (error) {
-        setServerError('Credenciales incorrectas o usuario inactivo');
+      const result = await res.json();
+
+      if (!res.ok) {
+        setServerError(result.error || 'Credenciales incorrectas o usuario inactivo');
         setIsLoading(false);
         return;
       }
 
-      if (data.session) {
-        // Check if user requires MFA
-        const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-        if (aalData && aalData.nextLevel === 'aal2' && aalData.currentLevel !== 'aal2') {
-          router.push('/mfa/verify');
-          return;
-        }
-
-        router.push('/users');
-        router.refresh();
+      if (result.requiresMfa) {
+        router.push('/mfa/verify');
+        return;
       }
+
+      router.push('/users');
+      router.refresh();
     } catch {
       setServerError('Ocurrió un error inesperado al conectar con el servidor');
       setIsLoading(false);

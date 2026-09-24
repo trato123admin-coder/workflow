@@ -26,6 +26,11 @@ Esta guía detalla los pasos para conectar los tres servicios en sus planes grat
      - `anon public` key
      - `service_role secret` key (¡NUNCA exponer en cliente!)
 
+4. **Desactivar Registro Público de Usuarios (Obligatorio por Seguridad):**
+   - En *Authentication* > *Providers* > *Email*:
+     - Desactiva el interruptor **"Enable Email Signup"** (debe quedar en **OFF**).
+     - El registro abierto está prohibido (`enable_signup = false` en `supabase/config.toml`). Los usuarios solo se dan de alta mediante invitación administrativa o provisión del equipo de seguridad.
+
 ---
 
 ## 2. Render (`services/engine`)

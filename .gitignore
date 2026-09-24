@@ -39,3 +39,5 @@ supabase/.temp/
 tmp/
 temp/
 scratch/
+test-results/
+playwright-report/

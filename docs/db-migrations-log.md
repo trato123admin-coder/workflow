@@ -7,4 +7,5 @@ Registro de migraciones ejecutadas, entorno de aplicación y resultado de su res
 | Migración | Fecha Aplicada | Entorno | Resultado Verify | Notas |
 |---|---|---|---|---|
 | `20260924000000_initial_schema.sql` | 2026-09-24 | Staging (Cloud) | Exitoso | Extensiones, esquema `private`, `audit_logs`, `case_counters`, `job_queue`. RLS 100%. |
-| `20260924100000_identity_and_roles.sql` | *Pendiente* | Staging (Cloud) | *Pendiente* | `profiles`, `roles`, `permissions`, `role_permissions`, `user_roles`, `private.has_permission`, trigger último admin. |
+| `20260924100000_identity_and_roles.sql` | 2026-09-24 | Staging (Cloud) | Exitoso | `profiles`, `roles`, `permissions`, `role_permissions`, `user_roles`, `private.has_permission`, trigger último admin. |
+| `20260924110000_security_hardening.sql` | *Pendiente* | Staging (Cloud) | *Pendiente* | Anti-escalada, validación de `profiles.is_active` y `aal2` en `has_permission`, y disparadores de auditoría. |

@@ -282,34 +282,20 @@ export default function UsersManagementPage() {
 
     setIsSubmittingUser(true);
     try {
-      const supabase = createClient();
-
-      // Generar usuario en auth / profiles
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: newUserEmail,
-        password: `Tmp#${Math.random().toString(36).slice(-8)}A1`,
-        options: {
-          data: {
-            first_name: newUserFirstName,
-            last_name: newUserLastName,
-          },
-        },
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: newUserEmail,
+          firstName: newUserFirstName,
+          lastName: newUserLastName,
+          roleIds: newUserRoles,
+        }),
       });
 
-      if (authError) throw authError;
-
-      if (authData.user) {
-        // Asignar roles seleccionados
-        const userRolesToInsert = newUserRoles.map((roleId) => ({
-          user_id: authData.user!.id,
-          role_id: roleId,
-        }));
-
-        const { error: rolesAssignError } = await supabase
-          .from('user_roles')
-          .insert(userRolesToInsert);
-
-        if (rolesAssignError) throw rolesAssignError;
+      const result = await res.json();
+      if (!res.ok) {
+        throw new Error(result.error || 'Error al crear usuario');
       }
 
       setSuccessMessage(`Usuario ${newUserEmail} creado con éxito.`);
