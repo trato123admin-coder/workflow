@@ -6,6 +6,47 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Sprint 3 — Casos, modelos versionados, avance ponderado y compuertas
+
+#### Agregado
+
+- **Base de Datos & Seguridad (Supabase):**
+  - Migración `20260925100000_cases_and_persons_schema.sql`:
+    - Tablas de dominio: `persons`, `cases`, `case_assignments`, `process_definitions`, `workflow_statuses`, `case_models`, `case_model_versions`, `case_model_processes`, `case_model_process_deps`, `case_processes` y `case_events`.
+    - RLS activada en las 11 tablas con validación granular de permisos (`cases.read.assigned`, `cases.write.assigned`, `cases.read.all`, `clients.read`, `clients.write`).
+    - Disparadores de inmutabilidad en versiones de modelo publicadas (`PUBLISHED`), validación de suma exacta de pesos al 100.00% e inmutabilidad en `case_events`.
+    - Disparador de cálculo automático del avance ponderado (`current_progress`) en `cases` basado en pesos de procesos finalizados.
+    - Disparador de compuerta de dependencias M1 (`trg_guard_case_process_dependencies`) y función de compuerta de cierre `public.close_case()`.
+    - Función transaccional atómica `public.create_case_from_model()`.
+  - Migración `20260925110000_workflow_and_models_seeds.sql`:
+    - Semillas de estados de workflow con categorías semánticas (`PENDING`, `IN_PROGRESS`, `BLOCKED`, `DONE`, `CANCELLED`).
+    - 11 definiciones canónicas de procesos sucesorios.
+    - 5 modelos de casos iniciales, destacando `SUCESION_INTESTADA_NOTARIAL` (v1 publicada, 11 procesos, pesos al 100.00%).
+  - Migración `20260925120000_fix_persons_rls_unassigned.sql`:
+    - Actualización de `private.can_access_person` para permitir lectura de personas de directorio sin casos asociados.
+  - Scripts de verificación: `20260925100000_cases_and_persons_schema.verify.sql`, `20260925110000_workflow_and_models_seeds.verify.sql` y `20260925120000_fix_persons_rls_unassigned.verify.sql`.
+  - Suite pgTAP `supabase/tests/database/05_cases_and_persons.test.sql` con 28 pruebas automatizadas.
+- **Paquete Compartido (`@workflow/shared`):**
+  - Esquemas y validaciones Zod para personas, DNI (8 dígitos) y RUC con algoritmo Módulo 11 (`persons.ts`).
+  - Esquemas de creación de expedientes con asistente de 3 pasos y actualización de estado de procesos (`cases.ts`).
+  - Pruebas unitarias para personas y casos (13 pruebas nuevas, 35 en total).
+- **Aplicación Web (`apps/web`):**
+  - Directorio de Personas (`/persons`): listado responsivo, filtros y modal dinámico para persona natural y jurídica (`PersonModal.tsx`).
+  - Selector reutilizable de personas (`PersonPicker.tsx`).
+  - Gestión de Modelos y Procesos en `/settings?tab=workflow`: visualización de modelos, versiones y tabla de procesos con candado para versiones publicadas.
+  - Vista general de expedientes (`/cases`): lista con filtros por vía procesal y prioridad, barra de progreso ponderado y modal de asistente en 3 pasos (`CaseWizardModal.tsx`).
+  - Vista de detalle de expediente (`/cases/[id]`): cabecera con avance reactivo y tabla de procesos con compuertas de dependencias M1 integradas.
+- **Documentación:**
+  - `docs/adr/ADR-002-modelos-avance-ponderado-y-compuertas.md`.
+  - Actualización de `docs/db-migrations-log.md` y `docs/02-plan-sprints.md`.
+
+### Sprint 2 — Configuración, catálogos y feature flags
+
+#### Agregado
+
+- Catálogos del sistema, configuración dinámica (`system_settings`), feature flags con resolución de entorno, campos personalizados e historial inmutable (`settings_history`).
+- Pantallas de configuración en `/settings` (general, catálogos, flags, campos personalizados y días no laborables).
+
 ### Sprint 1 — Identidad, seguridad y sistema de diseño
 
 #### Agregado
