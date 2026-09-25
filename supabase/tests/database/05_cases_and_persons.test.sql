@@ -439,7 +439,7 @@ select throws_ok(
        set title = 'Titulo Modificado'
      where case_id = (select test_case_id from s3_test_vars)
   $$,
-  'Operacion rechazada: esta tabla es append-only y no admite modificaciones ni eliminaciones',
+  'Registro inmutable: no se permite modificacion ni eliminacion',
   '(g) case_events es inmutable frente a UPDATE mediante raise_immutable()'
 );
 
@@ -448,7 +448,7 @@ select throws_ok(
     delete from public.case_events
      where case_id = (select test_case_id from s3_test_vars)
   $$,
-  'Operacion rechazada: esta tabla es append-only y no admite modificaciones ni eliminaciones',
+  'Registro inmutable: no se permite modificacion ni eliminacion',
   '(g) case_events es inmutable frente a DELETE mediante raise_immutable()'
 );
 

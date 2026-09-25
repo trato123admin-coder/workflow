@@ -90,4 +90,4 @@ jobs:
         run: supabase start
 
       - name: Run Database Tests (pgTAP)
-        run: supabase test db
+        run: supabase test db --debug
