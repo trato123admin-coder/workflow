@@ -41,14 +41,26 @@ export async function POST(request: Request) {
       },
     });
 
-    if (createError || !createdUser.user) {
-      return NextResponse.json(
-        { error: createError?.message || 'Error al crear usuario' },
-        { status: 400 },
-      );
-    }
+    let newUserId: string;
 
-    const newUserId = createdUser.user.id;
+    if (createError || !createdUser?.user) {
+      // Si el usuario ya fue registrado en Auth en un intento previo, reutilizar su perfil
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (!existingProfile) {
+        return NextResponse.json(
+          { error: createError?.message || 'Error al crear usuario' },
+          { status: 400 },
+        );
+      }
+      newUserId = existingProfile.id;
+    } else {
+      newUserId = createdUser.user.id;
+    }
 
     // Asignar roles seleccionados
     const userRoles = roleIds.map((roleId) => ({
@@ -59,6 +71,18 @@ export async function POST(request: Request) {
 
     const { error: rolesError } = await supabase.from('user_roles').insert(userRoles);
     if (rolesError) {
+      if (
+        rolesError.message.includes('row-level security') ||
+        rolesError.message.includes('user_roles')
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              'Su rol requiere autenticación en dos factores (MFA). Ingrese a /mfa/enroll para verificar su código antes de asignar roles.',
+          },
+          { status: 403 },
+        );
+      }
       return NextResponse.json({ error: rolesError.message }, { status: 400 });
     }
 

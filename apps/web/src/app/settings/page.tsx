@@ -30,6 +30,7 @@ import { FeatureFlagsManager } from '../../components/settings/FeatureFlagsManag
 import { CustomFieldsManager } from '../../components/settings/CustomFieldsManager';
 import { AdvancedSettings } from '../../components/settings/AdvancedSettings';
 import { DynamicSettingsSection } from '../../components/settings/DynamicSettingsSection';
+import { WorkflowModelsManager } from '../../components/settings/WorkflowModelsManager';
 
 import type {
   Catalog,
@@ -593,7 +594,7 @@ export default function SettingsPage() {
     { id: 'modules', label: 'Módulos', icon: ToggleRight },
     { id: 'clients', label: 'Clientes', icon: UserCheck },
     { id: 'cases', label: 'Casos', icon: Briefcase },
-    { id: 'workflow', label: 'Workflow', icon: GitFork, isSkeleton: true },
+    { id: 'workflow', label: 'Workflow', icon: GitFork },
     { id: 'documents', label: 'Documentos', icon: FileText, isSkeleton: true },
     { id: 'users', label: 'Usuarios y Roles', icon: Users, isExternal: true },
     { id: 'alerts', label: 'Alertas', icon: Bell },
@@ -737,7 +738,7 @@ export default function SettingsPage() {
               />
             )}
 
-            {/* Workflow (Esqueleto Sprint 2) */}
+            {/* Workflow (Sprint 3) */}
             {activeTab === 'workflow' && (
               <div className="space-y-4">
                 <div className="border-b border-border pb-3">
@@ -745,18 +746,10 @@ export default function SettingsPage() {
                     Workflow y Modelos de Trámite
                   </h3>
                   <p className="text-xs text-muted-foreground">
-                    Estados de workflow con categoría semántica (Sprint 2) y modelos versionados de
-                    casos (Sprint 3).
+                    Modelos versionados con compuertas de avance y dependencias (Sprint 3).
                   </p>
                 </div>
-                <div className="p-6 rounded-xl border border-dashed border-border bg-muted/20 text-center space-y-2">
-                  <Clock className="w-8 h-8 text-primary mx-auto" />
-                  <h4 className="text-xs font-bold text-foreground">Modelos de Casos y Procesos</h4>
-                  <p className="text-xs text-muted-foreground max-w-md mx-auto">
-                    Los 5 modelos de caso versionados (Sucesión Notarial, Judicial, Testada, etc.) y
-                    compuertas de avance se implementarán en el Sprint 3.
-                  </p>
-                </div>
+                <WorkflowModelsManager />
               </div>
             )}
 

@@ -137,7 +137,7 @@ export default function UsersManagementPage() {
           last_name,
           is_active,
           last_sign_in_at,
-          user_roles (
+          user_roles!user_id (
             roles (
               id,
               code,
@@ -692,7 +692,17 @@ export default function UsersManagementPage() {
         >
           <form onSubmit={handleCreateUser} className="space-y-4">
             {userFormErrors.general && (
-              <p className="text-xs text-destructive font-medium">{userFormErrors.general}</p>
+              <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-xs text-destructive space-y-1.5">
+                <p className="font-medium leading-relaxed">{userFormErrors.general}</p>
+                {userFormErrors.general.includes('/mfa/enroll') && (
+                  <a
+                    href="/mfa/enroll"
+                    className="inline-flex items-center gap-1 font-semibold text-primary underline hover:opacity-90 transition-opacity"
+                  >
+                    <span>Configurar Doble Factor (MFA) aquí &rarr;</span>
+                  </a>
+                )}
+              </div>
             )}
 
             <FormField
