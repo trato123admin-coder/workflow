@@ -287,8 +287,10 @@ select lives_ok(
 -- TEST 5: private.can_access_person() con case_parties
 -- ============================================================================
 create temp table s4_prospect (v_id uuid);
-insert into public.persons (person_type, identity_document_type, identity_document_number, first_name, last_name)
-values ('NATURAL', 'DNI', '91000099', 'Prospecto', 'Sin Caso') returning id into s4_prospect;
+insert into s4_prospect (v_id) values (gen_random_uuid());
+
+insert into public.persons (id, person_type, identity_document_type, identity_document_number, first_name, last_name)
+values ((select v_id from s4_prospect), 'NATURAL', 'DNI', '91000099', 'Prospecto', 'Sin Caso');
 
 -- Simular identidad Gestor 2
 select set_config('request.jwt.claims', '{"sub":"33333333-4444-3333-3333-333333333333","role":"authenticated"}', true);
@@ -301,8 +303,10 @@ select is(
 
 -- Vincular una persona nueva exclusivamente a un caso confidencial donde Gestor 2 NO está asignado
 create temp table s4_conf_person (v_id uuid);
-insert into public.persons (person_type, identity_document_type, identity_document_number, first_name, last_name)
-values ('NATURAL', 'DNI', '91000098', 'Interviniente', 'Secreto') returning id into s4_conf_person;
+insert into s4_conf_person (v_id) values (gen_random_uuid());
+
+insert into public.persons (id, person_type, identity_document_type, identity_document_number, first_name, last_name)
+values ((select v_id from s4_conf_person), 'NATURAL', 'DNI', '91000098', 'Interviniente', 'Secreto');
 
 insert into public.case_parties (case_id, person_id, party_role, is_active)
 values ((select v_confidential_case_id from s4_vars), (select v_id from s4_conf_person), 'HEREDERO', true);
@@ -378,10 +382,10 @@ select is(
 -- TEST 7: Semáforos en base de datos (public.get_case_semaphore_warnings)
 -- ============================================================================
 create temp table s4_sem_case (v_id uuid);
+insert into s4_sem_case (v_id) values (gen_random_uuid());
 
-insert into public.cases (case_number, case_model_version_id, client_person_id, title, created_by)
-values ('2026-900004', (select v_model_version_id from s4_vars), (select v_client_id from s4_vars), 'Caso Semáforo Test', '11111111-4444-1111-1111-111111111111')
-returning id into s4_sem_case;
+insert into public.cases (id, case_number, case_model_version_id, client_person_id, title, created_by)
+values ((select v_id from s4_sem_case), '2026-900004', (select v_model_version_id from s4_vars), (select v_client_id from s4_vars), 'Caso Semáforo Test', '11111111-4444-1111-1111-111111111111');
 
 -- 1. Heredero menor sin representante
 insert into public.case_parties (case_id, person_id, party_role, heir_status, share_percent, represented_by)
