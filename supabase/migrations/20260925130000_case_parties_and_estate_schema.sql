@@ -370,6 +370,10 @@ grant execute on function private.can_access_person(uuid) to authenticated, serv
 -- ============================================================================
 -- Permite instanciar el caso y sus intervinientes iniciales (Causante y Herederos)
 -- en una sola transacción atómica, evitando casos huérfanos o inconsistentes.
+drop function if exists public.create_case_from_model(
+  uuid, uuid, text, text, text, boolean, text, boolean, boolean, uuid, uuid, uuid[]
+);
+
 create or replace function public.create_case_from_model(
   _model_version_id   uuid,
   _client_person_id   uuid,
@@ -530,8 +534,13 @@ begin
 end;
 $$;
 
-revoke execute on function public.create_case_from_model from public, anon;
-grant execute on function public.create_case_from_model to authenticated, service_role;
+revoke execute on function public.create_case_from_model(
+  uuid, uuid, text, text, text, boolean, text, boolean, boolean, uuid, uuid, uuid[], uuid, jsonb
+) from public, anon;
+
+grant execute on function public.create_case_from_model(
+  uuid, uuid, text, text, text, boolean, text, boolean, boolean, uuid, uuid, uuid[], uuid, jsonb
+) to authenticated, service_role;
 
 -- ============================================================================
 -- 7. FUNCIÓN Y VISTA DE SEMÁFORO EN BASE DE DATOS (S4-03, S4-05, S4-09)
