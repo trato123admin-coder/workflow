@@ -2,7 +2,7 @@
 -- Archivo: supabase/tests/database/05_cases_and_persons.test.sql
 
 begin;
-select plan(28);
+select plan(31);
 
 -- ============================================================================
 -- 1. SETUP DE USUARIOS Y ROLES DE PRUEBA
@@ -497,27 +497,59 @@ select is(
 );
 
 -- ============================================================================
--- TEST 11 (i): Gestor puede insertar y consultar personas sin casos asociados (directorio)
+-- TEST 11 (i): Directorio de personas (Opción A): visibilidad inicial y aislamiento al vincularse
 -- ============================================================================
+-- Gestor 1 crea una persona prospecto con created_by para trazabilidad
 set local role authenticated;
 set local "request.jwt.claims" to '{"sub": "22222222-2222-2222-2222-222222222222", "role": "authenticated", "aal": "aal1"}';
 
-do $$
-declare
-  v_new_pid uuid;
-begin
-  insert into public.persons (
-    person_type, identity_document_type, identity_document_number,
-    first_name, last_name
-  ) values (
-    'NATURAL', 'DNI', '79887766', 'Nuevo', 'Prospecto'
-  ) returning id into v_new_pid;
-end $$;
+insert into public.persons (
+  person_type, identity_document_type, identity_document_number,
+  first_name, last_name, created_by
+) values (
+  'NATURAL', 'DNI', '79887766', 'Nuevo', 'Prospecto',
+  '22222222-2222-2222-2222-222222222222'
+);
+
+-- 1. Gestor 2 (segundo usuario con clients.read) puede consultar la persona sin casos asociados
+set local "request.jwt.claims" to '{"sub": "33333333-3333-3333-3333-333333333333", "role": "authenticated", "aal": "aal1"}';
 
 select is(
   (select count(*)::integer from public.persons where identity_document_number = '79887766'),
   1,
-  '(i) Gestor con permiso clients.read puede consultar persona creada sin casos asociados'
+  '(i) Persona recién creada sin casos es visible para un segundo usuario con clients.read'
+);
+
+-- 2. Trazabilidad: created_by almacena correctamente el ID del creador
+select is(
+  (select created_by from public.persons where identity_document_number = '79887766'),
+  '22222222-2222-2222-2222-222222222222'::uuid,
+  '(i) Columna created_by registra el id del perfil creador'
+);
+
+-- 3. Vincular la persona a un caso confidencial de Gestor 1 (donde Gestor 2 no tiene acceso)
+reset role;
+update public.cases
+   set client_person_id = (select id from public.persons where identity_document_number = '79887766')
+ where id = (select test_case_id from s3_test_vars);
+
+-- 4. Gestor 2 intenta consultar la persona vinculada al caso confidencial ajeno (debe dar 0)
+set local role authenticated;
+set local "request.jwt.claims" to '{"sub": "33333333-3333-3333-3333-333333333333", "role": "authenticated", "aal": "aal1"}';
+
+select is(
+  (select count(*)::integer from public.persons where identity_document_number = '79887766'),
+  0,
+  '(i) Al vincularse a un caso confidencial de otro usuario sin acceso, deja de ser visible para el segundo usuario'
+);
+
+-- 5. Gestor 1 (responsable del caso confidencial) sí puede consultar a su cliente
+set local "request.jwt.claims" to '{"sub": "22222222-2222-2222-2222-222222222222", "role": "authenticated", "aal": "aal1"}';
+
+select is(
+  (select count(*)::integer from public.persons where identity_document_number = '79887766'),
+  1,
+  '(i) Gestor asignado al caso confidencial sí puede consultar a la persona vinculada'
 );
 
 reset role;

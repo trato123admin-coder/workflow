@@ -42,8 +42,16 @@ Debe retornar una fila con `role = ADMIN` y `is_superuser = true`.
 
 ---
 
-## 3. Configuración de MFA Obligatorio
-Dado que el rol `ADMIN` tiene la bandera `requires_mfa = true`:
-1. Tras iniciar sesión por primera vez con su correo y contraseña, el sistema solicitará el enrolamiento de MFA TOTP (Google Authenticator, Microsoft Authenticator o Authy).
-2. El usuario escanea el código QR y confirma con el código de 6 dígitos.
-3. El usuario queda completamente habilitado con autenticación multifactor nivel `aal2`.
+## 3. Configuración de MFA Obligatorio (Paso Adicional Obligatorio)
+
+> [!IMPORTANT]
+> **Tras crear el primer ADMIN, debe completar el enrolamiento MFA en `/mfa/enroll` antes de poder gestionar usuarios y roles, porque `requires_mfa=true` para ese rol exige `aal2`.**
+> Si intenta ejecutar operaciones administrativas (como crear usuarios o asignar roles) con sesión `aal1` (solo contraseña), PostgreSQL rechazará la operación con violación de política RLS en `user_roles`.
+
+### Procedimiento de Enrolamiento:
+1. Inicie sesión en la aplicación web (`/login`) con las credenciales del ADMIN creado.
+2. Inmediatamente acceda a la ruta obligatoria de enrolamiento: **`/mfa/enroll`** (o `http://localhost:3000/mfa/enroll` en local).
+3. Escanee el código QR provisto con su aplicación de autenticación TOTP favorita (Google Authenticator, Microsoft Authenticator o 1Password).
+4. Ingrese el código de 6 dígitos para verificar y activar el factor TOTP.
+5. El nivel de aseguramiento de la sesión se eleva a **`aal2`**. A partir de este momento, todas las operaciones de administración de usuarios, roles y configuración de seguridad estarán completamente habilitadas y autorizadas por las políticas RLS.
+
