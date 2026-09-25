@@ -7,7 +7,7 @@
     "dev": "pnpm --parallel --filter \"@workflow/*\" dev",
     "build": "pnpm --recursive --filter \"@workflow/*\" build",
     "lint": "pnpm --recursive --filter \"@workflow/*\" lint",
-    "typecheck": "pnpm --recursive --filter \"@workflow/*\" typecheck",
+    "typecheck": "pnpm --filter @workflow/shared build && pnpm --recursive --filter \"@workflow/*\" typecheck",
     "test": "pnpm --recursive --filter \"@workflow/*\" test",
     "e2e": "pnpm --filter @workflow/web e2e",
     "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
