@@ -1,13 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AppShell } from '../../components/layout/AppShell';
-import { DataTable, Column } from '../../components/ui/DataTable';
-import { StatusBadge } from '../../components/ui/StatusBadge';
 import { KpiCard } from '../../components/ui/KpiCard';
 import { CaseWizardModal } from '../../components/cases/CaseWizardModal';
+import { CaseCard } from '../../components/cases/CaseCard';
+import { CasesTable } from '../../components/cases/CasesTable';
 import { createClient } from '../../lib/supabase/client';
 import {
   Briefcase,
@@ -15,8 +14,8 @@ import {
   Search,
   CheckCircle2,
   Clock,
-  ArrowRight,
-  ShieldAlert,
+  LayoutGrid,
+  List,
 } from 'lucide-react';
 import type { CaseItem } from '@workflow/shared';
 
@@ -26,6 +25,7 @@ export default function CasesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'DONE'>('ALL');
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [isWizardOpen, setIsWizardOpen] = useState(false);
 
   const fetchCases = useCallback(async () => {
@@ -100,124 +100,24 @@ export default function CasesPage() {
   const filteredCases = useMemo(() => {
     return cases.filter((c) => {
       const matchesSearch =
-        c.case_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.title.toLowerCase().includes(searchQuery.toLowerCase());
+        c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.case_number.toLowerCase().includes(searchQuery.toLowerCase());
+
       if (!matchesSearch) return false;
 
-      if (statusFilter === 'ACTIVE') return c.status !== 'COMPLETED' && c.status !== 'CANCELLED';
-      if (statusFilter === 'DONE') return c.status === 'COMPLETED';
+      if (statusFilter === 'ACTIVE') {
+        return c.status !== 'COMPLETED' && c.status !== 'ARCHIVED';
+      }
+      if (statusFilter === 'DONE') {
+        return c.status === 'COMPLETED' || c.status === 'ARCHIVED';
+      }
       return true;
     });
   }, [cases, searchQuery, statusFilter]);
 
   const totalCases = cases.length;
-  const activeCases = cases.filter(
-    (c) => c.status !== 'COMPLETED' && c.status !== 'CANCELLED',
-  ).length;
+  const activeCases = cases.filter((c) => c.status !== 'COMPLETED' && c.status !== 'ARCHIVED').length;
   const completedCases = cases.filter((c) => c.status === 'COMPLETED').length;
-
-  const columns: Column<CaseItem>[] = [
-    {
-      id: 'case_number',
-      header: 'Expediente',
-      accessorKey: 'case_number',
-      cell: (row) => (
-        <div>
-          <Link
-            href={`/cases/${row.id}`}
-            className="font-mono font-bold text-primary hover:underline text-xs"
-          >
-            {row.case_number}
-          </Link>
-          <div className="text-[11px] text-muted-foreground">{row.route}</div>
-        </div>
-      ),
-    },
-    {
-      id: 'title',
-      header: 'Título y Cliente',
-      accessorKey: 'title',
-      cell: (row) => {
-        const p = row.client_person;
-        const clientName = p
-          ? p.person_type === 'JURIDICA'
-            ? p.legal_name
-            : `${p.first_name || ''} ${p.last_name || ''}`.trim()
-          : 'Cliente sin asignar';
-        return (
-          <div>
-            <div className="font-semibold text-foreground text-xs flex items-center gap-1.5">
-              <span>{row.title}</span>
-              {row.is_confidential && (
-                <span title="Confidencial">
-                  <ShieldAlert className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                </span>
-              )}
-            </div>
-            <div className="text-[11px] text-muted-foreground">{clientName}</div>
-          </div>
-        );
-      },
-    },
-    {
-      id: 'responsible',
-      header: 'Responsable',
-      accessorKey: 'responsible',
-      cell: (row) => (
-        <span className="text-xs text-foreground">
-          {row.responsible
-            ? `${row.responsible.first_name || ''} ${row.responsible.last_name || ''}`.trim() ||
-              row.responsible.email
-            : 'Sin asignar'}
-        </span>
-      ),
-    },
-    {
-      id: 'progress',
-      header: 'Avance Ponderado',
-      accessorKey: 'current_progress',
-      cell: (row) => (
-        <div className="w-28 space-y-1">
-          <div className="flex justify-between text-[11px] font-mono">
-            <span className="font-semibold text-foreground">
-              {Number(row.current_progress).toFixed(2)}%
-            </span>
-          </div>
-          <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
-            <div
-              className="h-full bg-primary rounded-full transition-all duration-300"
-              style={{ width: `${Math.min(100, Math.max(0, row.current_progress))}%` }}
-            />
-          </div>
-        </div>
-      ),
-    },
-    {
-      id: 'status',
-      header: 'Estado',
-      accessorKey: 'status',
-      cell: (row) => (
-        <StatusBadge
-          category={row.status === 'COMPLETED' ? 'success' : 'info'}
-          label={row.status}
-        />
-      ),
-    },
-    {
-      id: 'actions',
-      header: 'Acción',
-      accessorKey: 'id',
-      cell: (row) => (
-        <Link
-          href={`/cases/${row.id}`}
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-border bg-card text-foreground text-xs font-semibold hover:bg-muted"
-        >
-          <span>Ver caso</span>
-          <ArrowRight className="w-3.5 h-3.5" />
-        </Link>
-      ),
-    },
-  ];
 
   return (
     <AppShell breadcrumbs={[{ label: 'Inicio', href: '/cases' }, { label: 'Casos' }]}>
@@ -261,34 +161,72 @@ export default function CasesPage() {
             />
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
-            {(['ALL', 'ACTIVE', 'DONE'] as const).map((filter) => (
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-1.5">
+              {(['ALL', 'ACTIVE', 'DONE'] as const).map((filter) => (
+                <button
+                  key={filter}
+                  type="button"
+                  onClick={() => setStatusFilter(filter)}
+                  className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
+                    statusFilter === filter
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-muted/40 hover:bg-muted text-muted-foreground border-border'
+                  }`}
+                >
+                  {filter === 'ALL' ? 'Todos' : filter === 'ACTIVE' ? 'En Trámite' : 'Concluidos'}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-lg border border-border">
               <button
-                key={filter}
                 type="button"
-                onClick={() => setStatusFilter(filter)}
-                className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
-                  statusFilter === filter
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-muted/40 hover:bg-muted text-muted-foreground border-border'
+                onClick={() => setViewMode('table')}
+                className={`p-1.5 rounded text-xs ${
+                  viewMode === 'table'
+                    ? 'bg-card text-foreground shadow-sm font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
+                title="Vista Tabla"
               >
-                {filter === 'ALL' ? 'Todos' : filter === 'ACTIVE' ? 'En Trámite' : 'Concluidos'}
+                <List className="w-3.5 h-3.5" />
               </button>
-            ))}
+              <button
+                type="button"
+                onClick={() => setViewMode('cards')}
+                className={`p-1.5 rounded text-xs ${
+                  viewMode === 'cards'
+                    ? 'bg-card text-foreground shadow-sm font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Vista Tarjetas"
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="bg-card rounded-xl border border-border overflow-hidden">
-          <DataTable<CaseItem>
-            data={filteredCases}
-            columns={columns}
-            keyExtractor={(item) => item.id}
-            isLoading={isLoading}
-            emptyTitle="No hay casos registrados"
-            emptyDescription="Inicie un nuevo expediente desde el asistente guiado."
-          />
-        </div>
+        {viewMode === 'table' ? (
+          <CasesTable cases={filteredCases} isLoading={isLoading} />
+        ) : (
+          <div>
+            {isLoading ? (
+              <div className="p-8 text-center text-xs text-muted-foreground">Cargando casos...</div>
+            ) : filteredCases.length === 0 ? (
+              <div className="p-8 text-center text-xs text-muted-foreground bg-card rounded-xl border border-border">
+                No hay casos registrados con los filtros aplicados.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredCases.map((c) => (
+                  <CaseCard key={c.id} caseItem={c} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <CaseWizardModal
