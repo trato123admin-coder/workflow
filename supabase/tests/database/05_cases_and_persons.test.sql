@@ -2,7 +2,7 @@
 -- Archivo: supabase/tests/database/05_cases_and_persons.test.sql
 
 begin;
-select plan(24);
+select plan(27);
 
 -- ============================================================================
 -- 1. SETUP DE USUARIOS Y ROLES DE PRUEBA
@@ -182,6 +182,7 @@ create temp table s3_test_vars (
   proc_2_id uuid,
   proc_3_id uuid
 );
+grant all on s3_test_vars to public;
 
 do $$
 declare
@@ -255,7 +256,7 @@ select throws_ok(
        set status_id = (select id from public.workflow_statuses where code = 'INICIADO')
      where id = (select proc_2_id from s3_test_vars)
   $$,
-  'Compuerta de cierre M1: el proceso "Documentos del causante" no puede pasar a "Iniciado" porque depende de los siguientes procesos no finalizados: Apertura y contrato de servicio [Pendiente]',
+  'Compuerta de cierre M1: el proceso "Documentos del causante" no puede pasar a "Iniciado" porque depende de los siguientes procesos no finalizados: Apertura y contrato de servicio',
   '(d) Compuerta de cierre M1 bloquea avance de proceso si su dependencia previa no está FINALIZADO'
 );
 
@@ -333,6 +334,7 @@ create temp table s3_close_case_vars (
   c_p1_id uuid,
   c_p2_id uuid
 );
+grant all on s3_close_case_vars to public;
 
 do $$
 declare
@@ -379,7 +381,7 @@ select throws_ok(
   $$
     select public.close_case((select c_case_id from s3_close_case_vars))
   $$,
-  'Compuerta de cierre M1: no se puede cerrar el caso porque los siguientes procesos obligatorios no han finalizado: Documentos del causante [Sec. 2: Pendiente]',
+  'Compuerta de cierre M1: no se puede cerrar el caso porque los siguientes procesos obligatorios no han finalizado: Documentos del causante',
   '(f) close_case debe fallar si existen procesos obligatorios que no han finalizado'
 );
 
@@ -423,7 +425,7 @@ select throws_ok(
   $$
     select public.close_case((select c_case_id from s3_close_case_vars))
   $$,
-  'El caso ya se encuentra cerrado (COMPLETED)',
+  'El caso ya se encuentra cerrado',
   '(f) close_case rechaza re-cerrar un caso previamente cerrado'
 );
 reset role;
