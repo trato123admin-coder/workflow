@@ -11,28 +11,13 @@ export const ASSET_TYPES = [
 ] as const;
 export type AssetType = (typeof ASSET_TYPES)[number];
 
-export const ASSET_STATUSES = [
-  'IDENTIFICADO',
-  'VERIFICADO',
-  'TRANSFERIDO',
-  'EN_LITIGIO',
-] as const;
+export const ASSET_STATUSES = ['IDENTIFICADO', 'VERIFICADO', 'TRANSFERIDO', 'EN_LITIGIO'] as const;
 export type AssetStatus = (typeof ASSET_STATUSES)[number];
 
-export const LIABILITY_TYPES = [
-  'TRIBUTARIA',
-  'BANCARIA',
-  'PERSONAL',
-  'OTRA',
-] as const;
+export const LIABILITY_TYPES = ['TRIBUTARIA', 'BANCARIA', 'PERSONAL', 'OTRA'] as const;
 export type LiabilityType = (typeof LIABILITY_TYPES)[number];
 
-export const LIABILITY_STATUSES = [
-  'IDENTIFICADA',
-  'VERIFICADA',
-  'PAGADA',
-  'DISPUTADA',
-] as const;
+export const LIABILITY_STATUSES = ['IDENTIFICADA', 'VERIFICADA', 'PAGADA', 'DISPUTADA'] as const;
 export type LiabilityStatus = (typeof LIABILITY_STATUSES)[number];
 
 export const ESTATE_CURRENCIES = ['PEN', 'USD'] as const;
@@ -68,7 +53,7 @@ export const CreateCaseAssetSchema = z
     {
       message: 'En cuentas bancarias solo debe ingresar los últimos 4 dígitos exactos.',
       path: ['registry_ref'],
-    }
+    },
   );
 
 export type CreateCaseAssetInput = z.infer<typeof CreateCaseAssetSchema>;
@@ -95,7 +80,7 @@ export const UpdateCaseAssetSchema = z
     {
       message: 'En cuentas bancarias solo debe ingresar los últimos 4 dígitos exactos.',
       path: ['registry_ref'],
-    }
+    },
   );
 
 export type UpdateCaseAssetInput = z.infer<typeof UpdateCaseAssetSchema>;

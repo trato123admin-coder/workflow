@@ -55,7 +55,8 @@ export default function CaseDetailPage() {
             Caso No Encontrado o Acceso Denegado
           </h2>
           <p className="text-xs text-muted-foreground">
-            No tiene permisos para visualizar este caso por política de seguridad a nivel de fila (RLS).
+            No tiene permisos para visualizar este caso por política de seguridad a nivel de fila
+            (RLS).
           </p>
           <Link
             href="/cases"
@@ -204,15 +205,10 @@ export default function CaseDetailPage() {
         )}
 
         {activeTab === 'parties' && (
-          <CasePartiesTab
-            caseId={caseId}
-            isConfidential={caseData?.is_confidential}
-          />
+          <CasePartiesTab caseId={caseId} isConfidential={caseData?.is_confidential} />
         )}
 
-        {activeTab === 'estate' && (
-          <CaseEstateTab caseId={caseId} />
-        )}
+        {activeTab === 'estate' && <CaseEstateTab caseId={caseId} />}
       </div>
     </AppShell>
   );

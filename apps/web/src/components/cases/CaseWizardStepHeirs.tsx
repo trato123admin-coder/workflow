@@ -60,7 +60,9 @@ export const CaseWizardStepHeirs: React.FC<CaseWizardStepHeirsProps> = ({
       heir_status: heirStatus,
       share_percent: sharePercent ? Number(sharePercent) : null,
       represented_by: representedBy || null,
-      personName: `${selectedPerson.first_name || ''} ${selectedPerson.last_name || ''}`.trim() || 'Sin nombre',
+      personName:
+        `${selectedPerson.first_name || ''} ${selectedPerson.last_name || ''}`.trim() ||
+        'Sin nombre',
       docNumber: selectedPerson.identity_document_number,
       birthDate: selectedPerson.birth_date,
     };

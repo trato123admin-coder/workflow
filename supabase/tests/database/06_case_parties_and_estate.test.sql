@@ -1,8 +1,6 @@
 -- pgTAP Tests: Sprint 4a — Intervinientes, patrimonio, semáforos y compuertas
 -- Archivo: supabase/tests/database/06_case_parties_and_estate.test.sql
 
-create extension if not exists pgtap with schema extensions;
-
 begin;
 set local search_path = public, extensions;
 
@@ -498,4 +496,5 @@ select is(
 
 reset role;
 
+select * from finish();
 rollback;

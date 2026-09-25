@@ -51,7 +51,9 @@ export const PartyModal: React.FC<PartyModalProps> = ({
       setPartyRole(editingParty.party_role);
       setRelationship(editingParty.relationship_to_deceased || 'OTRO');
       setHeirStatus(editingParty.heir_status || 'PRESUNTO');
-      setSharePercent(editingParty.share_percent !== null ? String(editingParty.share_percent) : '');
+      setSharePercent(
+        editingParty.share_percent !== null ? String(editingParty.share_percent) : '',
+      );
       setRepresentedBy(editingParty.represented_by || '');
       setDeathDate(editingParty.person?.death_date || '');
     } else {
@@ -94,15 +96,16 @@ export const PartyModal: React.FC<PartyModalProps> = ({
         relationship_to_deceased: partyRole === 'HEREDERO' ? relationship : null,
         heir_status: partyRole === 'HEREDERO' ? heirStatus : null,
         share_percent:
-          partyRole === 'HEREDERO' && sharePercent.trim() !== ''
-            ? Number(sharePercent)
-            : null,
+          partyRole === 'HEREDERO' && sharePercent.trim() !== '' ? Number(sharePercent) : null,
         represented_by: representedBy || null,
         is_active: true,
       };
 
       if (editingParty) {
-        const { error } = await supabase.from('case_parties').update(payload).eq('id', editingParty.id);
+        const { error } = await supabase
+          .from('case_parties')
+          .update(payload)
+          .eq('id', editingParty.id);
         if (error) throw error;
       } else {
         const { error } = await supabase.from('case_parties').insert(payload);
@@ -147,7 +150,8 @@ export const PartyModal: React.FC<PartyModalProps> = ({
             <strong className="text-foreground">
               {editingParty.person?.first_name} {editingParty.person?.last_name}
             </strong>{' '}
-            ({editingParty.person?.identity_document_type}: {editingParty.person?.identity_document_number})
+            ({editingParty.person?.identity_document_type}:{' '}
+            {editingParty.person?.identity_document_number})
           </div>
         )}
 
@@ -160,7 +164,9 @@ export const PartyModal: React.FC<PartyModalProps> = ({
               className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-xs"
             >
               {PARTY_ROLES.map((r) => (
-                <option key={r} value={r}>{r}</option>
+                <option key={r} value={r}>
+                  {r}
+                </option>
               ))}
             </select>
           </FormField>
@@ -174,7 +180,9 @@ export const PartyModal: React.FC<PartyModalProps> = ({
                 className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-xs"
               >
                 {RELATIONSHIP_TYPES.map((rel) => (
-                  <option key={rel} value={rel}>{rel}</option>
+                  <option key={rel} value={rel}>
+                    {rel}
+                  </option>
                 ))}
               </select>
             </FormField>
@@ -203,7 +211,9 @@ export const PartyModal: React.FC<PartyModalProps> = ({
                 className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-xs"
               >
                 {HEIR_STATUSES.map((st) => (
-                  <option key={st} value={st}>{st}</option>
+                  <option key={st} value={st}>
+                    {st}
+                  </option>
                 ))}
               </select>
             </FormField>
@@ -234,7 +244,10 @@ export const PartyModal: React.FC<PartyModalProps> = ({
             >
               <option value="">-- Sin representante --</option>
               {parties
-                .filter((p) => p.person_id !== selectedPerson?.id && p.person_id !== editingParty?.person_id)
+                .filter(
+                  (p) =>
+                    p.person_id !== selectedPerson?.id && p.person_id !== editingParty?.person_id,
+                )
                 .map((p) => (
                   <option key={p.person_id} value={p.person_id}>
                     {p.person?.first_name} {p.person?.last_name} ({p.party_role})

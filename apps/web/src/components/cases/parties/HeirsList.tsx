@@ -1,15 +1,7 @@
 'use client';
 
 import React from 'react';
-import {
-  Users,
-  Plus,
-  Edit2,
-  Trash2,
-  ShieldAlert,
-  CheckCircle2,
-  AlertTriangle,
-} from 'lucide-react';
+import { Users, Plus, Edit2, Trash2, ShieldAlert, CheckCircle2, AlertTriangle } from 'lucide-react';
 import type { CasePartyItem } from '@workflow/shared';
 import { isMinor, calculateAge } from '@workflow/shared';
 
@@ -38,11 +30,7 @@ export const HeirsList: React.FC<HeirsListProps> = ({
           </h3>
           <p className="text-xs text-muted-foreground">
             Cuotas confirmadas acumuladas:{' '}
-            <strong
-              className={
-                totalConfirmedShare === 100 ? 'text-emerald-600' : 'text-amber-600'
-              }
-            >
+            <strong className={totalConfirmedShare === 100 ? 'text-emerald-600' : 'text-amber-600'}>
               {totalConfirmedShare.toFixed(2)}% de 100.00%
             </strong>
           </p>

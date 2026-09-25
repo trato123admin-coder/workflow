@@ -43,7 +43,8 @@ export const CausanteCard: React.FC<CausanteCardProps> = ({
                 {causante.person?.second_last_name || ''}
               </span>
               <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground">
-                {causante.person?.identity_document_type}: {causante.person?.identity_document_number}
+                {causante.person?.identity_document_type}:{' '}
+                {causante.person?.identity_document_number}
               </span>
             </div>
             <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-4 pt-1">
@@ -57,9 +58,7 @@ export const CausanteCard: React.FC<CausanteCardProps> = ({
                   </span>
                 )}
               </span>
-              {causante.person?.birth_date && (
-                <span>Nacimiento: {causante.person.birth_date}</span>
-              )}
+              {causante.person?.birth_date && <span>Nacimiento: {causante.person.birth_date}</span>}
             </div>
           </div>
           <div className="flex items-center gap-1.5">

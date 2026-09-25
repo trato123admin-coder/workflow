@@ -87,7 +87,10 @@ export const LiabilityModal: React.FC<LiabilityModalProps> = ({
     try {
       const supabase = createClient();
       if (editingLiab) {
-        const { error } = await supabase.from('case_liabilities').update(payload).eq('id', editingLiab.id);
+        const { error } = await supabase
+          .from('case_liabilities')
+          .update(payload)
+          .eq('id', editingLiab.id);
         if (error) throw error;
       } else {
         const { error } = await supabase.from('case_liabilities').insert(payload);
@@ -124,7 +127,9 @@ export const LiabilityModal: React.FC<LiabilityModalProps> = ({
               className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-xs"
             >
               {LIABILITY_TYPES.map((t) => (
-                <option key={t} value={t}>{t}</option>
+                <option key={t} value={t}>
+                  {t}
+                </option>
               ))}
             </select>
           </FormField>
@@ -137,7 +142,9 @@ export const LiabilityModal: React.FC<LiabilityModalProps> = ({
               className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-xs"
             >
               {LIABILITY_STATUSES.map((s) => (
-                <option key={s} value={s}>{s}</option>
+                <option key={s} value={s}>
+                  {s}
+                </option>
               ))}
             </select>
           </FormField>
@@ -175,7 +182,9 @@ export const LiabilityModal: React.FC<LiabilityModalProps> = ({
               className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-xs"
             >
               {ESTATE_CURRENCIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c} value={c}>
+                  {c}
+                </option>
               ))}
             </select>
           </FormField>

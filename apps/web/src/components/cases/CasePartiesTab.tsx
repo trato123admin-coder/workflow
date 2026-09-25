@@ -2,11 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { createClient } from '../../lib/supabase/client';
-import {
-  type CasePartyItem,
-  type PartyRole,
-  validateCaseSemaphore,
-} from '@workflow/shared';
+import { type CasePartyItem, type PartyRole, validateCaseSemaphore } from '@workflow/shared';
 import { AlertTriangle } from 'lucide-react';
 import { CausanteCard } from './parties/CausanteCard';
 import { HeirsList } from './parties/HeirsList';
@@ -34,11 +30,13 @@ export const CasePartiesTab: React.FC<CasePartiesTabProps> = ({ caseId }) => {
       const supabase = createClient();
       const { data, error } = await supabase
         .from('case_parties')
-        .select(`
+        .select(
+          `
           *,
           person:persons!case_parties_person_id_fkey (*),
           representative:persons!case_parties_represented_by_fkey (*)
-        `)
+        `,
+        )
         .eq('case_id', caseId)
         .eq('is_active', true)
         .order('created_at', { ascending: true });
@@ -76,7 +74,11 @@ export const CasePartiesTab: React.FC<CasePartiesTabProps> = ({ caseId }) => {
   const heirs = parties.filter((p) => p.party_role === 'HEREDERO');
 
   if (isLoading) {
-    return <div className="p-8 text-center text-xs text-muted-foreground">Cargando intervinientes...</div>;
+    return (
+      <div className="p-8 text-center text-xs text-muted-foreground">
+        Cargando intervinientes...
+      </div>
+    );
   }
 
   return (

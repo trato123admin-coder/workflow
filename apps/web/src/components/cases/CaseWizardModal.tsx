@@ -175,14 +175,13 @@ export const CaseWizardModal: React.FC<CaseWizardModalProps> = ({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Nuevo Expediente Sucesorio"
-      maxWidth="xl"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title="Nuevo Expediente Sucesorio" maxWidth="xl">
       <div className="space-y-6">
-        <Stepper steps={STEP_ITEMS} currentStep={currentStep} onStepClick={(s) => s < currentStep && setCurrentStep(s)} />
+        <Stepper
+          steps={STEP_ITEMS}
+          currentStep={currentStep}
+          onStepClick={(s) => s < currentStep && setCurrentStep(s)}
+        />
 
         {generalError && (
           <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-2">

@@ -19,9 +19,7 @@ export const CasesTable: React.FC<CasesTableProps> = ({ cases, isLoading }) => {
       header: 'N.º Expediente',
       accessorKey: 'case_number',
       cell: (row) => (
-        <span className="font-mono text-xs font-bold text-foreground">
-          {row.case_number}
-        </span>
+        <span className="font-mono text-xs font-bold text-foreground">{row.case_number}</span>
       ),
     },
     {

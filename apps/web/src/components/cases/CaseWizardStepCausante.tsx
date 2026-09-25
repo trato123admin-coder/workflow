@@ -54,7 +54,8 @@ export const CaseWizardStepCausante: React.FC<CaseWizardStepCausanteProps> = ({
               {selectedCausante.second_last_name || ''}
             </strong>{' '}
             <span className="font-mono text-[11px] text-muted-foreground">
-              ({selectedCausante.identity_document_type}: {selectedCausante.identity_document_number})
+              ({selectedCausante.identity_document_type}:{' '}
+              {selectedCausante.identity_document_number})
             </span>
           </div>
 

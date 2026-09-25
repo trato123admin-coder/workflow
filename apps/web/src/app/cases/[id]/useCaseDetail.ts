@@ -29,7 +29,8 @@ export function useCaseDetail(caseId: string) {
 
       const { data: cData, error: cErr } = await supabase
         .from('cases')
-        .select(`
+        .select(
+          `
           *,
           client_person:persons!cases_client_person_id_fkey (
             id,
@@ -49,7 +50,8 @@ export function useCaseDetail(caseId: string) {
               last_name
             )
           )
-        `)
+        `,
+        )
         .eq('id', caseId)
         .single();
 
@@ -85,7 +87,8 @@ export function useCaseDetail(caseId: string) {
 
       const { data: pData, error: pErr } = await supabase
         .from('case_processes')
-        .select(`
+        .select(
+          `
           id,
           case_id,
           case_model_process_id,
@@ -107,7 +110,8 @@ export function useCaseDetail(caseId: string) {
             semantic_category:category,
             color:semantic_color
           )
-        `)
+        `,
+        )
         .eq('case_id', caseId)
         .order('sequence');
 

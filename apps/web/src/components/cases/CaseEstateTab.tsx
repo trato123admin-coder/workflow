@@ -80,7 +80,11 @@ export const CaseEstateTab: React.FC<CaseEstateTabProps> = ({ caseId }) => {
   const summary = calculateConsolidatedEstate(assets, liabilities);
 
   if (isLoading) {
-    return <div className="p-8 text-center text-xs text-muted-foreground">Cargando inventario de patrimonio...</div>;
+    return (
+      <div className="p-8 text-center text-xs text-muted-foreground">
+        Cargando inventario de patrimonio...
+      </div>
+    );
   }
 
   return (

@@ -1,9 +1,5 @@
 import type { CasePartyItem } from './case-parties.js';
-import type {
-  CaseAssetItem,
-  CaseLiabilityItem,
-  ConsolidatedEstateSummary,
-} from './case-estate.js';
+import type { CaseAssetItem, CaseLiabilityItem, ConsolidatedEstateSummary } from './case-estate.js';
 import type { CaseItem } from './cases.js';
 
 export type SemaphoreWarningCode =
@@ -27,7 +23,7 @@ export interface CaseSemaphoreSummary {
 
 export function calculateAge(
   birthDate: string | Date,
-  referenceDate: string | Date = new Date()
+  referenceDate: string | Date = new Date(),
 ): number {
   const birth = new Date(birthDate);
   const ref = new Date(referenceDate);
@@ -48,7 +44,7 @@ export function calculateAge(
 
 export function isMinor(
   birthDate: string | Date | null | undefined,
-  referenceDate: string | Date = new Date()
+  referenceDate: string | Date = new Date(),
 ): boolean {
   if (!birthDate) return false;
   return calculateAge(birthDate, referenceDate) < 18;
@@ -61,13 +57,10 @@ export function validateHeirQuotas(parties: CasePartyItem[]): {
   diff: number;
 } {
   const confirmedHeirs = parties.filter(
-    (p) => p.is_active && p.party_role === 'HEREDERO' && p.heir_status === 'CONFIRMADO'
+    (p) => p.is_active && p.party_role === 'HEREDERO' && p.heir_status === 'CONFIRMADO',
   );
 
-  const totalPercent = confirmedHeirs.reduce(
-    (sum, h) => sum + (Number(h.share_percent) || 0),
-    0
-  );
+  const totalPercent = confirmedHeirs.reduce((sum, h) => sum + (Number(h.share_percent) || 0), 0);
 
   const roundedTotal = Math.round(totalPercent * 10000) / 10000;
   const isValid = confirmedHeirs.length === 0 || Math.abs(roundedTotal - 100) < 0.001;
@@ -103,9 +96,7 @@ export function validateCausanteDeathDate(parties: CasePartyItem[]): {
   hasMissingDeathDate: boolean;
   causante?: CasePartyItem;
 } {
-  const causante = parties.find(
-    (p) => p.is_active && p.party_role === 'CAUSANTE'
-  );
+  const causante = parties.find((p) => p.is_active && p.party_role === 'CAUSANTE');
 
   if (!causante) {
     return { hasMissingDeathDate: false };
@@ -121,7 +112,7 @@ export function validateCausanteDeathDate(parties: CasePartyItem[]): {
 
 export function validateCaseSemaphore(
   caseItem?: Partial<CaseItem> | null,
-  parties: CasePartyItem[] = []
+  parties: CasePartyItem[] = [],
 ): CaseSemaphoreSummary {
   const warnings: SemaphoreWarningItem[] = [];
 
@@ -177,7 +168,7 @@ export function validateCaseSemaphore(
 
 export function calculateConsolidatedEstate(
   assets: CaseAssetItem[] = [],
-  liabilities: CaseLiabilityItem[] = []
+  liabilities: CaseLiabilityItem[] = [],
 ): ConsolidatedEstateSummary {
   let totalAssetsPen = 0;
   let totalAssetsUsd = 0;
@@ -186,7 +177,8 @@ export function calculateConsolidatedEstate(
 
   for (const asset of assets) {
     if (!asset.is_active) continue;
-    const value = (Number(asset.estimated_value) || 0) * ((Number(asset.ownership_percent) || 100) / 100);
+    const value =
+      (Number(asset.estimated_value) || 0) * ((Number(asset.ownership_percent) || 100) / 100);
     if (asset.currency === 'USD') {
       totalAssetsUsd += value;
     } else {

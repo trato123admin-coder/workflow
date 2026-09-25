@@ -1,13 +1,7 @@
 import { z } from 'zod';
 import type { PersonItem } from './persons.js';
 
-export const PARTY_ROLES = [
-  'CAUSANTE',
-  'HEREDERO',
-  'REPRESENTANTE',
-  'CURADOR',
-  'OTRO',
-] as const;
+export const PARTY_ROLES = ['CAUSANTE', 'HEREDERO', 'REPRESENTANTE', 'CURADOR', 'OTRO'] as const;
 export type PartyRole = (typeof PARTY_ROLES)[number];
 
 export const RELATIONSHIP_TYPES = [
@@ -22,12 +16,7 @@ export const RELATIONSHIP_TYPES = [
 ] as const;
 export type RelationshipType = (typeof RELATIONSHIP_TYPES)[number];
 
-export const HEIR_STATUSES = [
-  'PRESUNTO',
-  'CONFIRMADO',
-  'EXCLUIDO',
-  'RENUNCIANTE',
-] as const;
+export const HEIR_STATUSES = ['PRESUNTO', 'CONFIRMADO', 'EXCLUIDO', 'RENUNCIANTE'] as const;
 export type HeirStatus = (typeof HEIR_STATUSES)[number];
 
 export const CreateCasePartySchema = z
@@ -58,7 +47,7 @@ export const CreateCasePartySchema = z
     {
       message: 'Un heredero confirmado debe tener asignada una cuota porcentual',
       path: ['share_percent'],
-    }
+    },
   );
 
 export type CreateCasePartyInput = z.infer<typeof CreateCasePartySchema>;

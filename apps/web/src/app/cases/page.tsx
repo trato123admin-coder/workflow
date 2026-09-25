@@ -8,15 +8,7 @@ import { CaseWizardModal } from '../../components/cases/CaseWizardModal';
 import { CaseCard } from '../../components/cases/CaseCard';
 import { CasesTable } from '../../components/cases/CasesTable';
 import { createClient } from '../../lib/supabase/client';
-import {
-  Briefcase,
-  Plus,
-  Search,
-  CheckCircle2,
-  Clock,
-  LayoutGrid,
-  List,
-} from 'lucide-react';
+import { Briefcase, Plus, Search, CheckCircle2, Clock, LayoutGrid, List } from 'lucide-react';
 import type { CaseItem } from '@workflow/shared';
 
 export default function CasesPage() {
@@ -116,7 +108,9 @@ export default function CasesPage() {
   }, [cases, searchQuery, statusFilter]);
 
   const totalCases = cases.length;
-  const activeCases = cases.filter((c) => c.status !== 'COMPLETED' && c.status !== 'ARCHIVED').length;
+  const activeCases = cases.filter(
+    (c) => c.status !== 'COMPLETED' && c.status !== 'ARCHIVED',
+  ).length;
   const completedCases = cases.filter((c) => c.status === 'COMPLETED').length;
 
   return (

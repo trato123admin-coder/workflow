@@ -95,7 +95,9 @@ describe('Validaciones de Patrimonio y Cuentas Bancarias', () => {
       });
       expect(parsed.success).toBe(false);
       if (!parsed.success) {
-        expect(parsed.error.errors[0]?.message).toContain('solo debe ingresar los últimos 4 dígitos');
+        expect(parsed.error.errors[0]?.message).toContain(
+          'solo debe ingresar los últimos 4 dígitos',
+        );
       }
     });
 

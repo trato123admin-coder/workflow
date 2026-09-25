@@ -34,7 +34,10 @@ export const CaseCard: React.FC<CaseCardProps> = ({ caseItem }) => {
             {caseItem.case_number}
           </span>
           {caseItem.is_confidential && (
-            <span className="p-0.5 rounded bg-destructive/10 text-destructive text-[10px] font-semibold flex items-center gap-0.5" title="Expediente Confidencial">
+            <span
+              className="p-0.5 rounded bg-destructive/10 text-destructive text-[10px] font-semibold flex items-center gap-0.5"
+              title="Expediente Confidencial"
+            >
               <Lock className="w-3 h-3" />
             </span>
           )}

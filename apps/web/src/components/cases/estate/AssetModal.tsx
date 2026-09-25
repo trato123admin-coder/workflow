@@ -48,7 +48,9 @@ export const AssetModal: React.FC<AssetModalProps> = ({
       setRegistryOffice(editingAsset.registry_office || '');
       setRegistryRef(editingAsset.registry_ref || '');
       setOwnershipPercent(String(editingAsset.ownership_percent));
-      setEstimatedValue(editingAsset.estimated_value !== null ? String(editingAsset.estimated_value) : '');
+      setEstimatedValue(
+        editingAsset.estimated_value !== null ? String(editingAsset.estimated_value) : '',
+      );
       setAssetCurrency(editingAsset.currency);
       setAssetStatus(editingAsset.status);
     } else {
@@ -91,7 +93,10 @@ export const AssetModal: React.FC<AssetModalProps> = ({
     try {
       const supabase = createClient();
       if (editingAsset) {
-        const { error } = await supabase.from('case_assets').update(payload).eq('id', editingAsset.id);
+        const { error } = await supabase
+          .from('case_assets')
+          .update(payload)
+          .eq('id', editingAsset.id);
         if (error) throw error;
       } else {
         const { error } = await supabase.from('case_assets').insert(payload);
@@ -128,7 +133,9 @@ export const AssetModal: React.FC<AssetModalProps> = ({
               className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-xs"
             >
               {ASSET_TYPES.map((t) => (
-                <option key={t} value={t}>{t}</option>
+                <option key={t} value={t}>
+                  {t}
+                </option>
               ))}
             </select>
           </FormField>
@@ -141,7 +148,9 @@ export const AssetModal: React.FC<AssetModalProps> = ({
               className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-xs"
             >
               {ASSET_STATUSES.map((s) => (
-                <option key={s} value={s}>{s}</option>
+                <option key={s} value={s}>
+                  {s}
+                </option>
               ))}
             </select>
           </FormField>
@@ -229,7 +238,9 @@ export const AssetModal: React.FC<AssetModalProps> = ({
               className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-xs"
             >
               {ESTATE_CURRENCIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c} value={c}>
+                  {c}
+                </option>
               ))}
             </select>
           </FormField>
