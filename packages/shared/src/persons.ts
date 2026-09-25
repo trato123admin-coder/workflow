@@ -64,6 +64,10 @@ export const PersonBaseSchema = z.object({
   address: z.string().nullish(),
   birth_date: z.string().nullish(),
   marital_status: z.string().nullish(),
+  is_deceased: z.boolean().default(false),
+  death_date: z.string().nullish(),
+  death_place: z.string().nullish(),
+  death_certificate_number: z.string().nullish(),
   custom_data: z.record(z.unknown()).default({}),
 });
 
@@ -134,6 +138,10 @@ export interface PersonItem {
   address: string | null;
   birth_date: string | null;
   marital_status: string | null;
+  is_deceased: boolean;
+  death_date: string | null;
+  death_place: string | null;
+  death_certificate_number: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { InitialPartyInputSchema } from './case-parties.js';
 
 export const CASE_ROUTES = ['NOTARIAL', 'JUDICIAL', 'MIXTA', 'POR_DEFINIR'] as const;
 export type CaseRoute = (typeof CASE_ROUTES)[number];
@@ -16,6 +17,8 @@ export const CreateCaseWizardSchema = z.object({
   responsible_id: z.string().uuid('Debe asignar un gestor responsable'),
   lawyer_id: z.string().uuid('Abogado inválido').nullish().or(z.literal('')),
   collaborator_ids: z.array(z.string().uuid()).default([]),
+  causante_person_id: z.string().uuid('Causante inválido').nullish(),
+  initial_parties: z.array(InitialPartyInputSchema).default([]),
 });
 
 export type CreateCaseWizardInput = z.infer<typeof CreateCaseWizardSchema>;
