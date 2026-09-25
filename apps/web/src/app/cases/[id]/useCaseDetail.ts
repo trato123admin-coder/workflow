@@ -105,7 +105,7 @@ export function useCaseDetail(caseId: string) {
             code,
             name,
             semantic_category:category,
-            color
+            color:semantic_color
           )
         `)
         .eq('case_id', caseId)
