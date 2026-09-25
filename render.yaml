@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: workflow-engine
+    env: docker
+    plan: free
+    region: oregon
+    dockerContext: .
+    dockerfilePath: services/engine/Dockerfile
+    healthCheckPath: /healthz
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: HOST
+        value: 0.0.0.0
+      - key: NODE_ENV
+        value: production
+      - key: ENGINE_ALLOWED_ORIGINS
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
