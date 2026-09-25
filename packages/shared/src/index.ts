@@ -10,3 +10,5 @@ export * from './custom-fields.js';
 export * from './theme.js';
 export * from './config-io.js';
 export * from './usage-resolvers.js';
+export * from './persons.js';
+export * from './cases.js';
