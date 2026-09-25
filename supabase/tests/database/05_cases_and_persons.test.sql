@@ -256,7 +256,7 @@ select throws_ok(
        set status_id = (select id from public.workflow_statuses where code = 'INICIADO')
      where id = (select proc_2_id from s3_test_vars)
   $$,
-  'Compuerta de cierre M1: el proceso "Documentos del causante" no puede pasar a "Iniciado" porque depende de los siguientes procesos no finalizados: Apertura y contrato de servicio',
+  'Compuerta de cierre M1: el proceso "Documentos del causante" no puede pasar a "Iniciado" porque depende de los siguientes procesos no finalizados: Apertura y contrato de servicio [Pendiente]',
   '(d) Compuerta de cierre M1 bloquea avance de proceso si su dependencia previa no está FINALIZADO'
 );
 
@@ -381,7 +381,7 @@ select throws_ok(
   $$
     select public.close_case((select c_case_id from s3_close_case_vars))
   $$,
-  'Compuerta de cierre M1: no se puede cerrar el caso porque los siguientes procesos obligatorios no han finalizado: Documentos del causante',
+  'Compuerta de cierre M1: no se puede cerrar el caso porque los siguientes procesos obligatorios no han finalizado: Documentos del causante [Sec. 2: Pendiente]',
   '(f) close_case debe fallar si existen procesos obligatorios que no han finalizado'
 );
 
@@ -425,7 +425,7 @@ select throws_ok(
   $$
     select public.close_case((select c_case_id from s3_close_case_vars))
   $$,
-  'El caso ya se encuentra cerrado',
+  'El caso ya se encuentra cerrado (COMPLETED)',
   '(f) close_case rechaza re-cerrar un caso previamente cerrado'
 );
 reset role;
