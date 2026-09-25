@@ -414,6 +414,9 @@ values ((select v_id from s4_sem_case), '2026-900004', (select v_model_version_i
 insert into public.case_parties (case_id, person_id, party_role, heir_status, share_percent, represented_by)
 values ((select v_id from s4_sem_case), (select v_heir_minor_id from s4_vars), 'HEREDERO', 'CONFIRMADO', 60.00, null);
 
+-- Simular usuario con acceso al caso (Admin con permiso cases.read.all)
+select set_config('request.jwt.claims', '{"sub":"11111111-4444-1111-1111-111111111111","role":"authenticated","aal":"aal2"}', true);
+
 select is(
   (select public.get_case_semaphore_warnings((select v_id from s4_sem_case))->'warning_codes' ? 'MINOR_WITHOUT_REPRESENTATIVE'),
   true,
