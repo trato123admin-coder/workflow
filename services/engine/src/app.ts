@@ -2,6 +2,7 @@ import Fastify, { type FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import { randomUUID } from 'node:crypto';
 import { healthRoutes } from './routes/health.js';
+import { moduleRoutes } from './routes/modules.js';
 import { getEngineEnv } from './config/env.js';
 
 export async function buildApp(): Promise<FastifyInstance> {
@@ -41,6 +42,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   });
 
   await fastify.register(healthRoutes);
+  await fastify.register(moduleRoutes);
 
   return fastify;
 }

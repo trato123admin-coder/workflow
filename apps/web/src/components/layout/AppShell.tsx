@@ -12,6 +12,8 @@ interface AppShellProps {
   userRole?: string;
   userPermissions?: string[];
   isSuperuser?: boolean;
+  disabledFeatureFlags?: string[];
+  breadcrumbs?: { label: string; href?: string }[];
 }
 
 export const AppShell: React.FC<AppShellProps> = ({
@@ -21,11 +23,16 @@ export const AppShell: React.FC<AppShellProps> = ({
   userRole,
   userPermissions = [],
   isSuperuser = false,
+  disabledFeatureFlags,
 }) => {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
       {/* Sidebar for Desktop & Tablet */}
-      <Sidebar userPermissions={userPermissions} isSuperuser={isSuperuser} />
+      <Sidebar
+        userPermissions={userPermissions}
+        isSuperuser={isSuperuser}
+        disabledFeatureFlags={disabledFeatureFlags}
+      />
 
       {/* Main Content Viewport */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">

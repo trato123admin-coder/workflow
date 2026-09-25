@@ -20,14 +20,17 @@ import {
   Activity,
 } from 'lucide-react';
 
+import type { FeatureFlagKey } from '@workflow/shared';
+
 interface NavItem {
   label: string;
   href: string;
   icon: React.ReactNode;
   permission?: string[];
+  featureFlag?: FeatureFlagKey;
 }
 
-const NAV_ITEMS: NavItem[] = [
+export const NAV_ITEMS: NavItem[] = [
   {
     label: 'Inicio',
     href: '/dashboard',
@@ -74,18 +77,21 @@ const NAV_ITEMS: NavItem[] = [
     href: '/assistant',
     icon: <Sparkles className="w-5 h-5 shrink-0" />,
     permission: ['documents.generate'],
+    featureFlag: 'module.ai',
   },
   {
     label: 'Reportes',
     href: '/reports',
     icon: <BarChart3 className="w-5 h-5 shrink-0" />,
     permission: ['reports.read'],
+    featureFlag: 'module.reports_export',
   },
   {
     label: 'Caja Chica',
     href: '/cash',
     icon: <Coins className="w-5 h-5 shrink-0" />,
     permission: ['cash.read'],
+    featureFlag: 'module.cash',
   },
   {
     label: 'Usuarios y roles',
@@ -104,18 +110,30 @@ const NAV_ITEMS: NavItem[] = [
     href: '/monitoring',
     icon: <Activity className="w-5 h-5 shrink-0" />,
     permission: ['monitoring.read'],
+    featureFlag: 'module.monitoring',
   },
 ];
 
 interface SidebarProps {
   userPermissions?: string[];
   isSuperuser?: boolean;
+  disabledFeatureFlags?: string[];
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ userPermissions = [], isSuperuser = false }) => {
+export const Sidebar: React.FC<SidebarProps> = ({
+  userPermissions = [],
+  isSuperuser = false,
+  disabledFeatureFlags = ['module.ai'], // module.ai apagado por defecto
+}) => {
   const pathname = usePathname();
 
   const visibleItems = NAV_ITEMS.filter((item) => {
+    // 1. Filtrar si la función o módulo está desactivado por feature flag
+    if (item.featureFlag && disabledFeatureFlags.includes(item.featureFlag)) {
+      return false;
+    }
+
+    // 2. Filtrar por permisos
     if (!item.permission || item.permission.length === 0) return true;
     if (isSuperuser) return true;
     return item.permission.some((p) => userPermissions.includes(p));
