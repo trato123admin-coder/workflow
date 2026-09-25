@@ -110,8 +110,8 @@ begin
   ) returning id into v_cs;
 
   -- Asignar gestor 1 al caso normal
-  insert into public.case_assignments (case_id, user_id, assignment_type, assigned_by)
-  values (v_cs, '22222222-4444-2222-2222-222222222222', 'RESPONSIBLE', '11111111-4444-1111-1111-111111111111');
+  insert into public.case_assignments (case_id, user_id, assignment_type, is_primary)
+  values (v_cs, '22222222-4444-2222-2222-222222222222', 'RESPONSIBLE', true);
 
   -- Caso confidencial asignado SOLO a gestor 1
   insert into public.cases (
@@ -120,8 +120,8 @@ begin
     '2026-900002', v_mv, v_cl, 'Caso Test S4 Confidencial', 'OPEN', 'NORMAL', true, '11111111-4444-1111-1111-111111111111'
   ) returning id into v_cc;
 
-  insert into public.case_assignments (case_id, user_id, assignment_type, assigned_by)
-  values (v_cc, '22222222-4444-2222-2222-222222222222', 'RESPONSIBLE', '11111111-4444-1111-1111-111111111111');
+  insert into public.case_assignments (case_id, user_id, assignment_type, is_primary)
+  values (v_cc, '22222222-4444-2222-2222-222222222222', 'RESPONSIBLE', true);
 
   insert into s4_vars values (v_cl, v_ca, v_ha, v_hm, v_rp, v_mv, v_cs, v_cc);
 end;
@@ -144,7 +144,6 @@ select throws_ok(
     values ((select v_case_id from s4_vars), (select v_heir_adult_id from s4_vars), 'CAUSANTE', true)
   $$,
   '23505',
-  null,
   '2.2 Segundo CAUSANTE activo en el mismo caso es rechazado por el índice único'
 );
 
@@ -164,7 +163,7 @@ select throws_ok(
     insert into public.case_assets (case_id, asset_type, description, registry_ref, status)
     values ((select v_case_id from s4_vars), 'CUENTA_BANCARIA', 'Cuenta BCP Corriente', '123456', 'IDENTIFICADO')
   $$,
-  'chk_case_assets_bank_account_digits',
+  '23514',
   '3.1 Cuenta bancaria con más de 4 dígitos (123456) es rechazada por CHECK'
 );
 
@@ -173,8 +172,17 @@ select throws_ok(
     insert into public.case_assets (case_id, asset_type, description, registry_ref, status)
     values ((select v_case_id from s4_vars), 'CUENTA_BANCARIA', 'Cuenta BCP Corriente', '12A4', 'IDENTIFICADO')
   $$,
-  'chk_case_assets_bank_account_digits',
+  '23514',
   '3.2 Cuenta bancaria con caracteres no numéricos es rechazada por CHECK'
+);
+
+select throws_ok(
+  $$
+    insert into public.case_assets (case_id, asset_type, description, registry_ref, status)
+    values ((select v_case_id from s4_vars), 'CUENTA_BANCARIA', 'Cuenta BCP Corta', '123', 'IDENTIFICADO')
+  $$,
+  '23514',
+  '3.3 Cuenta bancaria con menos de 4 dígitos (123) es rechazada por CHECK'
 );
 
 select lives_ok(
@@ -182,7 +190,7 @@ select lives_ok(
     insert into public.case_assets (case_id, asset_type, description, registry_ref, status)
     values ((select v_case_id from s4_vars), 'CUENTA_BANCARIA', 'Cuenta BBVA Ahorros', '9876', 'IDENTIFICADO')
   $$,
-  '3.3 Cuenta bancaria con exactamente 4 dígitos (9876) se acepta'
+  '3.4 Cuenta bancaria con exactamente 4 dígitos (9876) se acepta'
 );
 
 select lives_ok(
@@ -190,7 +198,7 @@ select lives_ok(
     insert into public.case_assets (case_id, asset_type, description, registry_ref, status)
     values ((select v_case_id from s4_vars), 'CUENTA_BANCARIA', 'Cuenta sin número aún', null, 'IDENTIFICADO')
   $$,
-  '3.4 Cuenta bancaria con registry_ref null se acepta'
+  '3.5 Cuenta bancaria con registry_ref null se acepta'
 );
 
 select lives_ok(
@@ -198,7 +206,7 @@ select lives_ok(
     insert into public.case_assets (case_id, asset_type, description, registry_ref, status)
     values ((select v_case_id from s4_vars), 'INMUEBLE', 'Predio Urbano', 'P0123456789', 'IDENTIFICADO')
   $$,
-  '3.5 Otros activos (INMUEBLE) sí pueden tener referencias registrales largas'
+  '3.6 Otros activos (INMUEBLE) sí pueden tener referencias registrales largas'
 );
 
 -- ============================================================================
@@ -230,19 +238,21 @@ begin
   select id into v_def1 from public.process_definitions where code = 'APERTURA' limit 1;
   select id into v_def2 from public.process_definitions where code = 'DOC_CAUSANTE' limit 1;
 
-  -- Crear modelo temporal con dependencia
+  -- Crear modelo temporal con versión DRAFT primero, agregar procesos y dependencias, luego PUBLICAR
   insert into public.case_model_versions (case_model_id, version, status)
-  values ((select id from public.case_models limit 1), 999, 'PUBLISHED')
+  values ((select id from public.case_models limit 1), 999, 'DRAFT')
   returning id into v_mv;
 
-  insert into public.case_model_processes (case_model_version_id, process_definition_id, sequence, weight)
-  values (v_mv, v_def1, 1, 50.00) returning id into v_mp1;
+  insert into public.case_model_processes (case_model_version_id, process_definition_id, sequence, weight, is_required)
+  values (v_mv, v_def1, 1, 50.00, true) returning id into v_mp1;
 
-  insert into public.case_model_processes (case_model_version_id, process_definition_id, sequence, weight)
-  values (v_mv, v_def2, 2, 50.00) returning id into v_mp2;
+  insert into public.case_model_processes (case_model_version_id, process_definition_id, sequence, weight, is_required)
+  values (v_mv, v_def2, 2, 50.00, true) returning id into v_mp2;
 
   insert into public.case_model_process_deps (case_model_process_id, depends_on_id)
   values (v_mp2, v_mp1);
+
+  update public.case_model_versions set status = 'PUBLISHED' where id = v_mv;
 
   -- Crear caso para la prueba de dependencias
   insert into public.cases (
@@ -268,7 +278,7 @@ select throws_ok(
        set status_id = (select id from public.workflow_statuses where category = 'IN_PROGRESS' limit 1)
      where id = (select v_p2_id from s4_dep_vars)
   $$,
-  'Compuerta de cierre M1%',
+  'Compuerta de cierre M1',
   '4.1 Proceso 2 se bloquea porque el Proceso 1 está pendiente e is_applicable = true'
 );
 
@@ -297,7 +307,7 @@ insert into public.persons (id, person_type, identity_document_type, identity_do
 values ((select v_id from s4_prospect), 'NATURAL', 'DNI', '91000099', 'Prospecto', 'Sin Caso');
 
 -- Simular identidad Gestor 2
-select set_config('request.jwt.claims', '{"sub":"33333333-4444-3333-3333-333333333333","role":"authenticated"}', true);
+select set_config('request.jwt.claims', '{"sub":"33333333-4444-3333-3333-333333333333","role":"authenticated","aal":"aal1"}', true);
 
 select is(
   (select private.can_access_person((select v_id from s4_prospect))),
@@ -305,7 +315,9 @@ select is(
   '5.1 Persona prospecto sin caso asignado es visible por cualquier gestor (Opción A)'
 );
 
--- Vincular una persona nueva exclusivamente a un caso confidencial donde Gestor 2 NO está asignado
+-- Reset temporal de claims para insertar interviniente confidencial como sistema
+select set_config('request.jwt.claims', '', true);
+
 create temp table s4_conf_person (v_id uuid);
 insert into s4_conf_person (v_id) values (gen_random_uuid());
 
@@ -315,17 +327,22 @@ values ((select v_id from s4_conf_person), 'NATURAL', 'DNI', '91000098', 'Interv
 insert into public.case_parties (case_id, person_id, party_role, is_active)
 values ((select v_confidential_case_id from s4_vars), (select v_id from s4_conf_person), 'HEREDERO', true);
 
+-- Simular nuevamente identidad Gestor 2
+select set_config('request.jwt.claims', '{"sub":"33333333-4444-3333-3333-333333333333","role":"authenticated","aal":"aal1"}', true);
+
 select is(
   (select private.can_access_person((select v_id from s4_conf_person))),
   false,
   '5.2 Interviniente de caso confidencial NO es accesible para gestor no asignado'
 );
 
+select set_config('request.jwt.claims', '', true);
+
 -- ============================================================================
 -- TEST 6: Creación atómica vía create_case_from_model con causante y herederos
 -- ============================================================================
--- Simular identidad Admin
-select set_config('request.jwt.claims', '{"sub":"11111111-4444-1111-1111-111111111111","role":"authenticated"}', true);
+-- Simular identidad Admin (con aal2 para roles que requieren MFA)
+select set_config('request.jwt.claims', '{"sub":"11111111-4444-1111-1111-111111111111","role":"authenticated","aal":"aal2"}', true);
 
 create temp table s4_atomic_res (v_case_id uuid);
 
@@ -382,6 +399,8 @@ select is(
   '6.3 Causante inicial quedó correctamente asignado con rol CAUSANTE'
 );
 
+select set_config('request.jwt.claims', '', true);
+
 -- ============================================================================
 -- TEST 7: Semáforos en base de datos (public.get_case_semaphore_warnings)
 -- ============================================================================
@@ -430,13 +449,18 @@ select is(
 );
 
 -- ============================================================================
--- TEST 8: Aislamiento RLS en case_parties y case_assets
+-- TEST 8: Aislamiento RLS en case_parties, case_assets y case_liabilities
 -- ============================================================================
--- Simular Gestor 2 intentando leer bienes del caso confidencial de Gestor 1
-select set_config('request.jwt.claims', '{"sub":"33333333-4444-3333-3333-333333333333","role":"authenticated"}', true);
-
+-- Insertar activo y pasivo en caso confidencial como sistema
 insert into public.case_assets (case_id, asset_type, description, status)
 values ((select v_confidential_case_id from s4_vars), 'INMUEBLE', 'Predio Confidencial', 'IDENTIFICADO');
+
+insert into public.case_liabilities (case_id, liability_type, creditor_name, status)
+values ((select v_confidential_case_id from s4_vars), 'BANCARIA', 'Banco Confidencial', 'IDENTIFICADA');
+
+-- Simular Gestor 2 (no asignado al caso confidencial) con rol authenticated
+set local role authenticated;
+set local "request.jwt.claims" to '{"sub":"33333333-4444-3333-3333-333333333333","role":"authenticated","aal":"aal1"}';
 
 select is(
   (select count(*)::integer from public.case_assets where case_id = (select v_confidential_case_id from s4_vars)),
@@ -449,5 +473,13 @@ select is(
   0,
   '8.2 Gestor no asignado no puede ver los intervinientes de un caso confidencial'
 );
+
+select is(
+  (select count(*)::integer from public.case_liabilities where case_id = (select v_confidential_case_id from s4_vars)),
+  0,
+  '8.3 Gestor no asignado no puede ver los pasivos de un caso confidencial'
+);
+
+reset role;
 
 rollback;

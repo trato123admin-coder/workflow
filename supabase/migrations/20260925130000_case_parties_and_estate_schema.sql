@@ -99,10 +99,12 @@ create index if not exists idx_case_parties_role_active on public.case_parties (
 
 alter table public.case_parties enable row level security;
 
+drop trigger if exists set_case_parties_updated_at on public.case_parties;
 create trigger set_case_parties_updated_at
   before update on public.case_parties
   for each row execute function private.set_updated_at();
 
+drop trigger if exists trg_audit_case_parties on public.case_parties;
 create trigger trg_audit_case_parties
   after insert or update or delete on public.case_parties
   for each row execute function private.tg_audit_log();
@@ -152,10 +154,12 @@ create index if not exists idx_case_assets_type on public.case_assets (asset_typ
 
 alter table public.case_assets enable row level security;
 
+drop trigger if exists set_case_assets_updated_at on public.case_assets;
 create trigger set_case_assets_updated_at
   before update on public.case_assets
   for each row execute function private.set_updated_at();
 
+drop trigger if exists trg_audit_case_assets on public.case_assets;
 create trigger trg_audit_case_assets
   after insert or update or delete on public.case_assets
   for each row execute function private.tg_audit_log();
@@ -195,10 +199,12 @@ create index if not exists idx_case_liabilities_creditor_id on public.case_liabi
 
 alter table public.case_liabilities enable row level security;
 
+drop trigger if exists set_case_liabilities_updated_at on public.case_liabilities;
 create trigger set_case_liabilities_updated_at
   before update on public.case_liabilities
   for each row execute function private.set_updated_at();
 
+drop trigger if exists trg_audit_case_liabilities on public.case_liabilities;
 create trigger trg_audit_case_liabilities
   after insert or update or delete on public.case_liabilities
   for each row execute function private.tg_audit_log();
@@ -208,6 +214,7 @@ create trigger trg_audit_case_liabilities
 -- ============================================================================
 
 -- 4.1 Políticas RLS para case_parties (requiere flag module.case_parties)
+drop policy if exists case_parties_select_policy on public.case_parties;
 create policy case_parties_select_policy on public.case_parties
   for select
   using (
@@ -216,6 +223,7 @@ create policy case_parties_select_policy on public.case_parties
     and (select private.can_access_case(case_id))
   );
 
+drop policy if exists case_parties_insert_policy on public.case_parties;
 create policy case_parties_insert_policy on public.case_parties
   for insert
   with check (
@@ -224,6 +232,7 @@ create policy case_parties_insert_policy on public.case_parties
     and (select private.can_write_case(case_id))
   );
 
+drop policy if exists case_parties_update_policy on public.case_parties;
 create policy case_parties_update_policy on public.case_parties
   for update
   using (
@@ -237,6 +246,7 @@ create policy case_parties_update_policy on public.case_parties
     and (select private.can_write_case(case_id))
   );
 
+drop policy if exists case_parties_delete_policy on public.case_parties;
 create policy case_parties_delete_policy on public.case_parties
   for delete
   using (
@@ -246,6 +256,7 @@ create policy case_parties_delete_policy on public.case_parties
   );
 
 -- 4.2 Políticas RLS para case_assets (requiere flag module.estate_inventory)
+drop policy if exists case_assets_select_policy on public.case_assets;
 create policy case_assets_select_policy on public.case_assets
   for select
   using (
@@ -254,6 +265,7 @@ create policy case_assets_select_policy on public.case_assets
     and (select private.can_access_case(case_id))
   );
 
+drop policy if exists case_assets_insert_policy on public.case_assets;
 create policy case_assets_insert_policy on public.case_assets
   for insert
   with check (
@@ -262,6 +274,7 @@ create policy case_assets_insert_policy on public.case_assets
     and (select private.can_write_case(case_id))
   );
 
+drop policy if exists case_assets_update_policy on public.case_assets;
 create policy case_assets_update_policy on public.case_assets
   for update
   using (
@@ -275,6 +288,7 @@ create policy case_assets_update_policy on public.case_assets
     and (select private.can_write_case(case_id))
   );
 
+drop policy if exists case_assets_delete_policy on public.case_assets;
 create policy case_assets_delete_policy on public.case_assets
   for delete
   using (
@@ -284,6 +298,7 @@ create policy case_assets_delete_policy on public.case_assets
   );
 
 -- 4.3 Políticas RLS para case_liabilities (requiere flag module.estate_inventory)
+drop policy if exists case_liabilities_select_policy on public.case_liabilities;
 create policy case_liabilities_select_policy on public.case_liabilities
   for select
   using (
@@ -292,6 +307,7 @@ create policy case_liabilities_select_policy on public.case_liabilities
     and (select private.can_access_case(case_id))
   );
 
+drop policy if exists case_liabilities_insert_policy on public.case_liabilities;
 create policy case_liabilities_insert_policy on public.case_liabilities
   for insert
   with check (
@@ -300,6 +316,7 @@ create policy case_liabilities_insert_policy on public.case_liabilities
     and (select private.can_write_case(case_id))
   );
 
+drop policy if exists case_liabilities_update_policy on public.case_liabilities;
 create policy case_liabilities_update_policy on public.case_liabilities
   for update
   using (
@@ -313,6 +330,7 @@ create policy case_liabilities_update_policy on public.case_liabilities
     and (select private.can_write_case(case_id))
   );
 
+drop policy if exists case_liabilities_delete_policy on public.case_liabilities;
 create policy case_liabilities_delete_policy on public.case_liabilities
   for delete
   using (
@@ -372,6 +390,9 @@ grant execute on function private.can_access_person(uuid) to authenticated, serv
 -- en una sola transacción atómica, evitando casos huérfanos o inconsistentes.
 drop function if exists public.create_case_from_model(
   uuid, uuid, text, text, text, boolean, text, boolean, boolean, uuid, uuid, uuid[]
+);
+drop function if exists public.create_case_from_model(
+  uuid, uuid, text, text, text, boolean, text, boolean, boolean, uuid, uuid, uuid[], uuid, jsonb
 );
 
 create or replace function public.create_case_from_model(
@@ -468,21 +489,21 @@ begin
 
   -- Asignaciones de equipo
   if _responsible_id is not null then
-    insert into public.case_assignments (case_id, user_id, assignment_type, assigned_by)
-    values (v_case_id, _responsible_id, 'RESPONSIBLE', v_actor_id);
+    insert into public.case_assignments (case_id, user_id, assignment_type, is_primary)
+    values (v_case_id, _responsible_id, 'RESPONSIBLE', true);
   end if;
 
   if _lawyer_id is not null then
-    insert into public.case_assignments (case_id, user_id, assignment_type, assigned_by)
-    values (v_case_id, _lawyer_id, 'LAWYER', v_actor_id);
+    insert into public.case_assignments (case_id, user_id, assignment_type, is_primary)
+    values (v_case_id, _lawyer_id, 'LAWYER', false);
   end if;
 
   if _collaborator_ids is not null and array_length(_collaborator_ids, 1) > 0 then
     foreach v_collab_id in array _collaborator_ids loop
       if v_collab_id <> coalesce(_responsible_id, '00000000-0000-0000-0000-000000000000'::uuid)
          and v_collab_id <> coalesce(_lawyer_id, '00000000-0000-0000-0000-000000000000'::uuid) then
-        insert into public.case_assignments (case_id, user_id, assignment_type, assigned_by)
-        values (v_case_id, v_collab_id, 'COLLABORATOR', v_actor_id);
+        insert into public.case_assignments (case_id, user_id, assignment_type, is_primary)
+        values (v_case_id, v_collab_id, 'COLLABORATOR', false);
       end if;
     end loop;
   end if;
@@ -519,9 +540,11 @@ begin
   end if;
 
   -- Evento inicial de apertura en historial inmutable
-  insert into public.case_events (case_id, actor_id, action, details)
-  values (
-    v_case_id, v_actor_id, 'CASE_CREATED',
+  insert into public.case_events (
+    case_id, event_type, actor_id, title, description, metadata
+  ) values (
+    v_case_id, 'CASE_CREATED', v_actor_id, 'Caso aperturado',
+    'Expediente creado a partir del modelo publicado con ' || v_case_number,
     jsonb_build_object(
       'case_number', v_case_number,
       'model_version_id', _model_version_id,
