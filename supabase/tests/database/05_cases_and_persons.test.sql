@@ -2,7 +2,7 @@
 -- Archivo: supabase/tests/database/05_cases_and_persons.test.sql
 
 begin;
-select plan(27);
+select plan(28);
 
 -- ============================================================================
 -- 1. SETUP DE USUARIOS Y ROLES DE PRUEBA
@@ -494,6 +494,30 @@ select is(
   (select count(*)::integer from public.cases where id = (select test_case_id from s3_test_vars)),
   1,
   '(h) Superusuario (ADMIN) tiene visibilidad de casos confidenciales'
+);
+
+-- ============================================================================
+-- TEST 11 (i): Gestor puede insertar y consultar personas sin casos asociados (directorio)
+-- ============================================================================
+set local role authenticated;
+set local "request.jwt.claims" to '{"sub": "22222222-2222-2222-2222-222222222222", "role": "authenticated", "aal": "aal1"}';
+
+do $$
+declare
+  v_new_pid uuid;
+begin
+  insert into public.persons (
+    person_type, identity_document_type, identity_document_number,
+    first_name, last_name
+  ) values (
+    'NATURAL', 'DNI', '79887766', 'Nuevo', 'Prospecto'
+  ) returning id into v_new_pid;
+end $$;
+
+select is(
+  (select count(*)::integer from public.persons where identity_document_number = '79887766'),
+  1,
+  '(i) Gestor con permiso clients.read puede consultar persona creada sin casos asociados'
 );
 
 reset role;

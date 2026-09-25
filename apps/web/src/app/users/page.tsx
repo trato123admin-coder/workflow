@@ -137,7 +137,7 @@ export default function UsersManagementPage() {
           last_name,
           is_active,
           last_sign_in_at,
-          user_roles (
+          user_roles!user_id (
             roles (
               id,
               code,
