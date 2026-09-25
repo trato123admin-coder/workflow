@@ -76,3 +76,41 @@ select conname, conrelid::regclass as table_name, pg_get_constraintdef(c.oid) as
 -- case_parties: party_roles, relationship_types, heir_statuses
 -- case_assets: asset_types, currencies, asset_statuses
 -- case_liabilities: liability_types, currencies, liability_statuses
+
+-- 8. Verificar que public.get_case_semaphore_warnings contiene la validación can_access_case
+-- Resultado esperado: has_can_access_case_validation = true
+select p.proname,
+       n.nspname,
+       (pg_get_functiondef(p.oid) ~ 'private\.can_access_case\(_case_id\)') as has_can_access_case_validation
+  from pg_proc p
+  join pg_namespace n on n.oid = p.pronamespace
+ where n.nspname = 'public' and p.proname = 'get_case_semaphore_warnings';
+-- Esperado:
+-- get_case_semaphore_warnings | public | true
+
+-- 9. Verificar que public.create_case_from_model incluye los parámetros _causante_person_id e _initial_parties
+-- Resultado esperado: has_causante_param = true, has_initial_parties_param = true
+select p.proname,
+       (pg_get_function_arguments(p.oid) like '%_causante_person_id uuid%') as has_causante_param,
+       (pg_get_function_arguments(p.oid) like '%_initial_parties jsonb%') as has_initial_parties_param,
+       pg_get_function_arguments(p.oid) as full_signature
+  from pg_proc p
+  join pg_namespace n on n.oid = p.pronamespace
+ where n.nspname = 'public' and p.proname = 'create_case_from_model';
+-- Esperado:
+-- create_case_from_model | true | true | _model_version_id uuid, _client_person_id uuid, _title text, _description text, _route text, _has_dispute boolean, _priority text, _is_confidential boolean, _ai_allowed boolean, _responsible_id uuid, _lawyer_id uuid, _collaborator_ids uuid[], _causante_person_id uuid, _initial_parties jsonb
+
+-- 10. Verificar que private.can_access_person contiene las 4 condiciones (incluyendo case_parties)
+-- Resultado esperado: las 4 columnas en true
+select p.proname,
+       n.nspname,
+       (pg_get_functiondef(p.oid) ~ 'cases\.read\.all') as cond_1_cases_read_all,
+       (pg_get_functiondef(p.oid) ~ 'not exists \(.*public\.cases.*client_person_id.*not exists \(.*public\.case_parties') as cond_2_prospect_no_case_no_parties,
+       (pg_get_functiondef(p.oid) ~ 'exists \(.*public\.cases.*client_person_id.*can_access_case') as cond_3_client_in_accessible_case,
+       (pg_get_functiondef(p.oid) ~ 'exists \(.*public\.case_parties.*join public\.cases.*can_access_case') as cond_4_party_in_accessible_case
+  from pg_proc p
+  join pg_namespace n on n.oid = p.pronamespace
+ where n.nspname = 'private' and p.proname = 'can_access_person';
+-- Esperado:
+-- can_access_person | private | true | true | true | true
+
