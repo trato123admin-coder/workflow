@@ -5,6 +5,56 @@
 begin;
 
 -- ============================================================================
+-- 0. TRIGGER DE AUDITORÍA AUTOMÁTICA (private.tg_audit_log)
+-- ============================================================================
+create or replace function private.tg_audit_log()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_entity_id uuid;
+  v_old jsonb := null;
+  v_new jsonb := null;
+  v_action text;
+begin
+  if tg_op = 'INSERT' then
+    v_action := 'CREATE';
+    v_entity_id := new.id;
+    v_new := to_jsonb(new);
+  elsif tg_op = 'UPDATE' then
+    v_action := 'UPDATE';
+    v_entity_id := new.id;
+    v_old := to_jsonb(old);
+    v_new := to_jsonb(new);
+  elsif tg_op = 'DELETE' then
+    v_action := 'DELETE';
+    v_entity_id := old.id;
+    v_old := to_jsonb(old);
+  end if;
+
+  perform private.log_audit_event(
+    _user_id := (select auth.uid()),
+    _module := 'cases',
+    _entity_type := tg_table_name::text,
+    _entity_id := v_entity_id,
+    _action := v_action,
+    _old_data := v_old,
+    _new_data := v_new
+  );
+
+  if tg_op = 'DELETE' then
+    return old;
+  end if;
+  return new;
+end;
+$$;
+
+revoke execute on function private.tg_audit_log() from public, anon;
+grant execute on function private.tg_audit_log() to authenticated, service_role;
+
+-- ============================================================================
 -- 1. TABLA case_parties (S4-01 - Intervinientes del caso)
 -- ============================================================================
 create table if not exists public.case_parties (

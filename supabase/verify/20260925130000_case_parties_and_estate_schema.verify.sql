@@ -42,15 +42,16 @@ select conname, pg_get_constraintdef(c.oid) as definition
 -- chk_case_assets_bank_account_digits | CHECK (((asset_type <> 'CUENTA_BANCARIA'::text) OR (registry_ref IS NULL) OR (registry_ref ~ '^[0-9]{4}$'::text)))
 
 -- 5. Verificar funciones de seguridad, transacción y semáforo (SECURITY DEFINER)
--- Resultado esperado: 3 filas con prosecdef = true
+-- Resultado esperado: 4 filas con prosecdef = true
 select p.proname, n.nspname, p.prosecdef
   from pg_proc p
   join pg_namespace n on n.oid = p.pronamespace
- where (n.nspname = 'private' and p.proname = 'can_access_person')
+ where (n.nspname = 'private' and p.proname in ('can_access_person', 'tg_audit_log'))
     or (n.nspname = 'public' and p.proname in ('create_case_from_model', 'get_case_semaphore_warnings'))
  order by n.nspname, p.proname;
 -- Esperado:
 -- can_access_person            | private | true
+-- tg_audit_log                 | private | true
 -- create_case_from_model       | public  | true
 -- get_case_semaphore_warnings  | public  | true
 
