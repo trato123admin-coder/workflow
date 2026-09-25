@@ -16,10 +16,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
     - Índice único parcial `one_causante_per_case` en `case_parties` para garantizar máximo un causante activo por expediente.
     - Restricción CHECK `chk_case_assets_bank_account_digits`: regla no negociable que obliga a que cuentas bancarias (`CUENTA_BANCARIA`) solo almacenen hasta 4 dígitos exactos en `registry_ref` (nunca números completos ni CCI).
     - Extensión atómica de `public.create_case_from_model`: instanciación transaccional completa del expediente, equipo asignado, causante e intervinientes iniciales en una sola llamada segura ante concurrencia.
-    - Función de semáforos de base de datos `public.get_case_semaphore_warnings` para detección eficiente de inconsistencias (menores sin tutor, cuotas != 100%, causante sin defunción).
+    - Función de semáforos de base de datos `public.get_case_semaphore_warnings` con verificación obligatoria de acceso (`private.can_access_case`) para detección segura de inconsistencias (menores sin tutor, cuotas != 100%, causante sin defunción).
     - Disparador de auditoría automática `private.tg_audit_log()` conectado a las nuevas entidades.
   - Script de verificación `20260925130000_case_parties_and_estate_schema.verify.sql` (7 comprobaciones de integridad).
-  - Suite de pruebas pgTAP `supabase/tests/database/06_case_parties_and_estate.test.sql` con 24 pruebas automatizadas exitosas.
+  - Suite de pruebas pgTAP `supabase/tests/database/06_case_parties_and_estate.test.sql` con 25 pruebas automatizadas exitosas (incluye rechazo a usuarios no autorizados).
 - **Paquete Compartido (`@workflow/shared`):**
   - Esquemas de dominio y validaciones Zod para intervinientes y cuotas sucesorias (`case-parties.ts`).
   - Esquemas para inventario patrimonial de activos y pasivos con cálculo de balance neto (`case-estate.ts`).
