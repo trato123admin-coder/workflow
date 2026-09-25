@@ -13,7 +13,7 @@ export interface UsageCountResult {
 
 export type UsageResolverFn = (
   catalogCode: string,
-  itemCode: string
+  itemCode: string,
 ) => Promise<UsageCountResult> | UsageCountResult;
 
 class UsageResolverRegistry {

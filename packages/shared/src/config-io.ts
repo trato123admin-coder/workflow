@@ -39,7 +39,7 @@ export function computeConfigDiff(
     system_settings: SystemSetting[];
     custom_fields: CustomFieldDefinition[];
   },
-  incoming: ConfigBundle
+  incoming: ConfigBundle,
 ): ConfigDiff {
   const entries: DiffEntry[] = [];
 
@@ -92,7 +92,7 @@ export function computeConfigDiff(
 
   // 3. Catalog items
   const currentCatItemMap = new Map(
-    current.catalogs.map((ci) => [`${ci.catalog_code}:${ci.code}`, ci])
+    current.catalogs.map((ci) => [`${ci.catalog_code}:${ci.code}`, ci]),
   );
   for (const incomingItem of incoming.catalogs) {
     const key = `${incomingItem.catalog_code}:${incomingItem.code}`;
@@ -120,7 +120,7 @@ export function computeConfigDiff(
 
   // 4. Custom fields
   const currentFieldMap = new Map(
-    current.custom_fields.map((cf) => [`${cf.entity}:${cf.code}`, cf])
+    current.custom_fields.map((cf) => [`${cf.entity}:${cf.code}`, cf]),
   );
   for (const incomingField of incoming.custom_fields) {
     const key = `${incomingField.entity}:${incomingField.code}`;

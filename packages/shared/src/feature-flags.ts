@@ -60,7 +60,7 @@ export interface ToggleValidationResult {
 export function validateFlagToggle(
   flag: FeatureFlag,
   targetEnabled: boolean,
-  allFlags: Record<string, FeatureFlag>
+  allFlags: Record<string, FeatureFlag>,
 ): ToggleValidationResult {
   if (flag.is_locked && flag.is_enabled && !targetEnabled) {
     return {
@@ -84,7 +84,7 @@ export function validateFlagToggle(
   // Si intentamos desactivar y otros flags dependen de este
   if (!targetEnabled) {
     const dependentFlags = Object.values(allFlags).filter(
-      (f) => f.is_enabled && f.depends_on.includes(flag.key)
+      (f) => f.is_enabled && f.depends_on.includes(flag.key),
     );
     if (dependentFlags.length > 0) {
       const names = dependentFlags.map((f) => f.label).join(', ');

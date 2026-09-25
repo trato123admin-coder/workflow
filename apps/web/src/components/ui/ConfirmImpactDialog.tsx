@@ -74,7 +74,9 @@ export const ConfirmImpactDialog: React.FC<ConfirmImpactDialogProps> = ({
             <span className="text-xs text-muted-foreground font-medium">Registros vinculados:</span>
             <span
               className={`px-2 py-0.5 text-xs font-bold rounded-full ${
-                usage.count > 0 ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' : 'bg-muted text-muted-foreground'
+                usage.count > 0
+                  ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                  : 'bg-muted text-muted-foreground'
               }`}
             >
               En uso ({usage.count})
@@ -95,7 +97,8 @@ export const ConfirmImpactDialog: React.FC<ConfirmImpactDialogProps> = ({
               </p>
               {usage.count > 0 && (
                 <p className="font-medium text-foreground">
-                  Los {usage.count} registros existentes que actualmente lo utilizan conservarán su valor histórico intacto (sin pérdida de datos).
+                  Los {usage.count} registros existentes que actualmente lo utilizan conservarán su
+                  valor histórico intacto (sin pérdida de datos).
                 </p>
               )}
             </div>

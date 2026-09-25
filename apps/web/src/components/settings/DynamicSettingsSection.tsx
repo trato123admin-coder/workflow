@@ -85,7 +85,9 @@ export const DynamicSettingsSection: React.FC<DynamicSettingsSectionProps> = ({
             id={id}
             type="number"
             value={val !== undefined && val !== null ? Number(val) : ''}
-            onChange={(e) => handleChange(def.key, e.target.value === '' ? null : Number(e.target.value))}
+            onChange={(e) =>
+              handleChange(def.key, e.target.value === '' ? null : Number(e.target.value))
+            }
             className="w-full max-w-sm px-3 py-2 text-xs rounded-md border border-input bg-background text-foreground"
           />
         );
@@ -141,7 +143,7 @@ export const DynamicSettingsSection: React.FC<DynamicSettingsSectionProps> = ({
                 e.target.value
                   .split(',')
                   .map((s) => s.trim())
-                  .filter(Boolean)
+                  .filter(Boolean),
               )
             }
             placeholder="Valores separados por coma"
@@ -206,7 +208,9 @@ export const DynamicSettingsSection: React.FC<DynamicSettingsSectionProps> = ({
           <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1.5">
             <Check className="w-4 h-4" /> Configuración guardada exitosamente
           </span>
-        ) : <span />}
+        ) : (
+          <span />
+        )}
 
         <button
           type="submit"

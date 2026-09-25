@@ -160,9 +160,7 @@ export const CustomFieldsManager: React.FC<CustomFieldsManagerProps> = ({
                     <td className="py-3 px-4 text-center">
                       <button
                         type="button"
-                        onClick={() =>
-                          field.id && onToggleActive?.(field.id, !field.is_active)
-                        }
+                        onClick={() => field.id && onToggleActive?.(field.id, !field.is_active)}
                         className="inline-flex items-center gap-1 cursor-pointer"
                       >
                         {field.is_active ? (
@@ -170,7 +168,11 @@ export const CustomFieldsManager: React.FC<CustomFieldsManagerProps> = ({
                         ) : (
                           <ToggleLeft className="w-6 h-6 text-muted-foreground" />
                         )}
-                        <span className={field.is_active ? 'text-primary font-semibold' : 'text-muted-foreground'}>
+                        <span
+                          className={
+                            field.is_active ? 'text-primary font-semibold' : 'text-muted-foreground'
+                          }
+                        >
                           {field.is_active ? 'Activo' : 'Inactivo'}
                         </span>
                       </button>
@@ -214,7 +216,9 @@ export const CustomFieldsManager: React.FC<CustomFieldsManagerProps> = ({
               </div>
 
               <div>
-                <label className="block font-semibold text-foreground mb-1">Etiqueta visible *</label>
+                <label className="block font-semibold text-foreground mb-1">
+                  Etiqueta visible *
+                </label>
                 <input
                   type="text"
                   required

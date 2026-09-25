@@ -25,7 +25,7 @@ export const CatalogEditor: React.FC<CatalogEditorProps> = ({
   onCreateItem,
 }) => {
   const [selectedCatalogCode, setSelectedCatalogCode] = useState<string>(
-    catalogs[0]?.code || 'identity_document_types'
+    catalogs[0]?.code || 'identity_document_types',
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newCode, setNewCode] = useState('');
@@ -100,7 +100,8 @@ export const CatalogEditor: React.FC<CatalogEditorProps> = ({
               Catálogo Activo
             </label>
             <p className="text-[11px] text-muted-foreground">
-              {selectedCatalog?.description || 'Seleccione un catálogo para gestionar sus elementos'}
+              {selectedCatalog?.description ||
+                'Seleccione un catálogo para gestionar sus elementos'}
             </p>
           </div>
         </div>
@@ -187,7 +188,11 @@ export const CatalogEditor: React.FC<CatalogEditorProps> = ({
                         ) : (
                           <ToggleLeft className="w-6 h-6 text-muted-foreground" />
                         )}
-                        <span className={item.is_active ? 'text-primary font-semibold' : 'text-muted-foreground'}>
+                        <span
+                          className={
+                            item.is_active ? 'text-primary font-semibold' : 'text-muted-foreground'
+                          }
+                        >
                           {item.is_active ? 'Activo' : 'Inactivo'}
                         </span>
                       </button>

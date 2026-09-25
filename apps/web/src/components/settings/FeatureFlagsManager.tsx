@@ -31,9 +31,7 @@ export const FeatureFlagsManager: React.FC<FeatureFlagsManagerProps> = ({
   const modules = Array.from(new Set(flagsState.map((f) => f.module)));
 
   const filteredFlags =
-    selectedModule === 'ALL'
-      ? flagsState
-      : flagsState.filter((f) => f.module === selectedModule);
+    selectedModule === 'ALL' ? flagsState : flagsState.filter((f) => f.module === selectedModule);
 
   const handleToggle = async (flag: FeatureFlag) => {
     setWarningMsg(null);
@@ -57,7 +55,7 @@ export const FeatureFlagsManager: React.FC<FeatureFlagsManagerProps> = ({
     try {
       await onToggleFlag?.(flag.key, nextEnabled);
       setFlagsState((prev) =>
-        prev.map((f) => (f.key === flag.key ? { ...f, is_enabled: nextEnabled } : f))
+        prev.map((f) => (f.key === flag.key ? { ...f, is_enabled: nextEnabled } : f)),
       );
     } catch (err: unknown) {
       setWarningMsg(err instanceof Error ? err.message : 'Error al cambiar flag');
@@ -78,7 +76,7 @@ export const FeatureFlagsManager: React.FC<FeatureFlagsManagerProps> = ({
     try {
       await onToggleFlag?.(mfaTarget.key, false, mfaReason);
       setFlagsState((prev) =>
-        prev.map((f) => (f.key === mfaTarget.key ? { ...f, is_enabled: false } : f))
+        prev.map((f) => (f.key === mfaTarget.key ? { ...f, is_enabled: false } : f)),
       );
       setMfaTarget(null);
     } catch (err: unknown) {
@@ -206,7 +204,9 @@ export const FeatureFlagsManager: React.FC<FeatureFlagsManagerProps> = ({
             </div>
 
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Desactivar la autenticación de dos factores para este rol sensible reduce drásticamente la seguridad del sistema. Esta acción queda auditada con su usuario y motivo.
+              Desactivar la autenticación de dos factores para este rol sensible reduce
+              drásticamente la seguridad del sistema. Esta acción queda auditada con su usuario y
+              motivo.
             </p>
 
             <div className="space-y-3 text-xs">
@@ -226,7 +226,8 @@ export const FeatureFlagsManager: React.FC<FeatureFlagsManagerProps> = ({
 
               <div>
                 <label className="block font-semibold text-foreground mb-1">
-                  Escriba <span className="font-mono font-bold text-destructive">CONFIRMAR</span> para proceder
+                  Escriba <span className="font-mono font-bold text-destructive">CONFIRMAR</span>{' '}
+                  para proceder
                 </label>
                 <input
                   type="text"
@@ -250,9 +251,7 @@ export const FeatureFlagsManager: React.FC<FeatureFlagsManagerProps> = ({
               <button
                 type="button"
                 onClick={handleConfirmMfaDisable}
-                disabled={
-                  mfaConfirmText.trim().toUpperCase() !== 'CONFIRMAR' || !mfaReason.trim()
-                }
+                disabled={mfaConfirmText.trim().toUpperCase() !== 'CONFIRMAR' || !mfaReason.trim()}
                 className="px-4 py-1.5 rounded-lg bg-destructive text-destructive-foreground font-semibold hover:bg-destructive/90 disabled:opacity-50"
               >
                 Confirmar y Registrar en Auditoría

@@ -92,7 +92,7 @@ export function calculateContrastRatio(hex1: string, hex2: string): number {
 export function isWcagAaCompliant(
   foregroundHex: string,
   backgroundHex: string,
-  isLargeText: boolean = false
+  isLargeText: boolean = false,
 ): { compliant: boolean; ratio: number; minRequired: number } {
   const ratio = calculateContrastRatio(foregroundHex, backgroundHex);
   const minRequired = isLargeText ? 3.0 : 4.5;

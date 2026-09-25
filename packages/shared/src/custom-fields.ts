@@ -54,7 +54,7 @@ export interface CustomDataValidationResult {
  */
 export function validateCustomData(
   definitions: CustomFieldDefinition[],
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
 ): CustomDataValidationResult {
   const errors: Record<string, string> = {};
 

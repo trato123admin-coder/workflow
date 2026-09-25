@@ -130,7 +130,10 @@ export const DynamicCustomField: React.FC<DynamicCustomFieldProps> = ({
             {options?.map((opt) => {
               const isChecked = selectedList.includes(opt);
               return (
-                <label key={opt} className="flex items-center gap-2 text-xs text-foreground cursor-pointer">
+                <label
+                  key={opt}
+                  className="flex items-center gap-2 text-xs text-foreground cursor-pointer"
+                >
                   <input
                     type="checkbox"
                     disabled={disabled}

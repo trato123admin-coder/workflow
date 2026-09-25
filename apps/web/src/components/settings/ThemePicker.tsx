@@ -2,11 +2,7 @@
 
 import React, { useState } from 'react';
 import { Check, AlertCircle, Sparkles, Sun, Moon, Building2, Palette } from 'lucide-react';
-import {
-  PRESET_THEMES,
-  isWcagAaCompliant,
-  type ThemeColors,
-} from '@workflow/shared';
+import { PRESET_THEMES, isWcagAaCompliant, type ThemeColors } from '@workflow/shared';
 
 interface ThemePickerProps {
   initialTheme?: string;
@@ -45,10 +41,7 @@ export const ThemePicker: React.FC<ThemePickerProps> = ({
       return;
     }
     // Aplicar al DOM
-    document.documentElement.setAttribute(
-      'data-theme',
-      currentTheme === 'dark' ? 'dark' : 'light'
-    );
+    document.documentElement.setAttribute('data-theme', currentTheme === 'dark' ? 'dark' : 'light');
     onSave?.(currentTheme, colors);
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 2500);
@@ -240,7 +233,8 @@ export const ThemePicker: React.FC<ThemePickerProps> = ({
               <div className="flex items-start gap-2 pt-2 text-destructive text-xs">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>
-                  La combinación de colores seleccionada no cumple con el ratio de contraste mínimo. Ajuste los tonos para garantizar legibilidad.
+                  La combinación de colores seleccionada no cumple con el ratio de contraste mínimo.
+                  Ajuste los tonos para garantizar legibilidad.
                 </span>
               </div>
             )}
@@ -265,7 +259,10 @@ export const ThemePicker: React.FC<ThemePickerProps> = ({
                   W
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold leading-tight" style={{ color: colors.foreground }}>
+                  <h4
+                    className="text-xs font-bold leading-tight"
+                    style={{ color: colors.foreground }}
+                  >
                     Mi Empresa
                   </h4>
                   <p className="text-[10px] text-muted-foreground">Gestión Sucesoria</p>
@@ -314,7 +311,9 @@ export const ThemePicker: React.FC<ThemePickerProps> = ({
           <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1.5">
             <Check className="w-4 h-4" /> Tema y apariencia guardados con éxito
           </span>
-        ) : <span />}
+        ) : (
+          <span />
+        )}
 
         <button
           type="button"

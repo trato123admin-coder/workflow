@@ -43,39 +43,259 @@ import type {
 
 // Datos de demostración y valores iniciales en memoria para cliente
 const INITIAL_CATALOGS: Catalog[] = [
-  { code: 'identity_document_types', name: 'Tipos de Documento de Identidad', module: 'clients', allow_new_items: true, item_schema: {}, is_system: true },
-  { code: 'person_types', name: 'Tipos de Persona', module: 'clients', allow_new_items: false, item_schema: {}, is_system: true },
-  { code: 'case_priorities', name: 'Prioridades de Caso', module: 'cases', allow_new_items: true, item_schema: {}, is_system: true },
-  { code: 'case_statuses', name: 'Estados de Caso', module: 'cases', allow_new_items: false, item_schema: {}, is_system: true },
-  { code: 'party_roles', name: 'Roles de Intervinientes', module: 'cases', allow_new_items: true, item_schema: {}, is_system: true },
-  { code: 'asset_types', name: 'Tipos de Bienes', module: 'cases', allow_new_items: true, item_schema: {}, is_system: true },
-  { code: 'workflow_statuses', name: 'Estados de Workflow', module: 'workflow', allow_new_items: true, item_schema: {}, is_system: true },
+  {
+    code: 'identity_document_types',
+    name: 'Tipos de Documento de Identidad',
+    module: 'clients',
+    allow_new_items: true,
+    item_schema: {},
+    is_system: true,
+  },
+  {
+    code: 'person_types',
+    name: 'Tipos de Persona',
+    module: 'clients',
+    allow_new_items: false,
+    item_schema: {},
+    is_system: true,
+  },
+  {
+    code: 'case_priorities',
+    name: 'Prioridades de Caso',
+    module: 'cases',
+    allow_new_items: true,
+    item_schema: {},
+    is_system: true,
+  },
+  {
+    code: 'case_statuses',
+    name: 'Estados de Caso',
+    module: 'cases',
+    allow_new_items: false,
+    item_schema: {},
+    is_system: true,
+  },
+  {
+    code: 'party_roles',
+    name: 'Roles de Intervinientes',
+    module: 'cases',
+    allow_new_items: true,
+    item_schema: {},
+    is_system: true,
+  },
+  {
+    code: 'asset_types',
+    name: 'Tipos de Bienes',
+    module: 'cases',
+    allow_new_items: true,
+    item_schema: {},
+    is_system: true,
+  },
+  {
+    code: 'workflow_statuses',
+    name: 'Estados de Workflow',
+    module: 'workflow',
+    allow_new_items: true,
+    item_schema: {},
+    is_system: true,
+  },
 ];
 
 const INITIAL_CATALOG_ITEMS: CatalogItem[] = [
-  { catalog_code: 'identity_document_types', code: 'DNI', label: 'DNI - Documento Nacional de Identidad', is_active: true, is_system: true, sort_order: 1, metadata: {} },
-  { catalog_code: 'identity_document_types', code: 'CE', label: 'Carné de Extranjería', is_active: true, is_system: true, sort_order: 2, metadata: {} },
-  { catalog_code: 'identity_document_types', code: 'RUC', label: 'RUC - Registro Único de Contribuyentes', is_active: true, is_system: true, sort_order: 3, metadata: {} },
-  { catalog_code: 'identity_document_types', code: 'PASAPORTE', label: 'Pasaporte', is_active: false, is_system: true, sort_order: 4, metadata: {} },
-  { catalog_code: 'identity_document_types', code: 'OTRO', label: 'Otro Documento', is_active: false, is_system: true, sort_order: 5, metadata: {} },
-  { catalog_code: 'case_priorities', code: 'LOW', label: 'Baja', is_active: true, is_system: true, sort_order: 1, metadata: {} },
-  { catalog_code: 'case_priorities', code: 'NORMAL', label: 'Normal', is_active: true, is_system: true, sort_order: 2, metadata: {} },
-  { catalog_code: 'case_priorities', code: 'HIGH', label: 'Alta', is_active: true, is_system: true, sort_order: 3, metadata: {} },
-  { catalog_code: 'case_priorities', code: 'URGENT', label: 'Urgente', is_active: true, is_system: true, sort_order: 4, metadata: {} },
+  {
+    catalog_code: 'identity_document_types',
+    code: 'DNI',
+    label: 'DNI - Documento Nacional de Identidad',
+    is_active: true,
+    is_system: true,
+    sort_order: 1,
+    metadata: {},
+  },
+  {
+    catalog_code: 'identity_document_types',
+    code: 'CE',
+    label: 'Carné de Extranjería',
+    is_active: true,
+    is_system: true,
+    sort_order: 2,
+    metadata: {},
+  },
+  {
+    catalog_code: 'identity_document_types',
+    code: 'RUC',
+    label: 'RUC - Registro Único de Contribuyentes',
+    is_active: true,
+    is_system: true,
+    sort_order: 3,
+    metadata: {},
+  },
+  {
+    catalog_code: 'identity_document_types',
+    code: 'PASAPORTE',
+    label: 'Pasaporte',
+    is_active: false,
+    is_system: true,
+    sort_order: 4,
+    metadata: {},
+  },
+  {
+    catalog_code: 'identity_document_types',
+    code: 'OTRO',
+    label: 'Otro Documento',
+    is_active: false,
+    is_system: true,
+    sort_order: 5,
+    metadata: {},
+  },
+  {
+    catalog_code: 'case_priorities',
+    code: 'LOW',
+    label: 'Baja',
+    is_active: true,
+    is_system: true,
+    sort_order: 1,
+    metadata: {},
+  },
+  {
+    catalog_code: 'case_priorities',
+    code: 'NORMAL',
+    label: 'Normal',
+    is_active: true,
+    is_system: true,
+    sort_order: 2,
+    metadata: {},
+  },
+  {
+    catalog_code: 'case_priorities',
+    code: 'HIGH',
+    label: 'Alta',
+    is_active: true,
+    is_system: true,
+    sort_order: 3,
+    metadata: {},
+  },
+  {
+    catalog_code: 'case_priorities',
+    code: 'URGENT',
+    label: 'Urgente',
+    is_active: true,
+    is_system: true,
+    sort_order: 4,
+    metadata: {},
+  },
 ];
 
 const INITIAL_FLAGS: FeatureFlag[] = [
-  { key: 'module.cash', module: 'cash', label: 'Caja Chica', is_enabled: true, is_locked: false, depends_on: [], requires_config: [], config: {} },
-  { key: 'module.quotes', module: 'quotes', label: 'Cotizaciones y Proveedores', is_enabled: true, is_locked: false, depends_on: [], requires_config: [], config: {} },
-  { key: 'module.ai', module: 'ai', label: 'Asistente IA de Documentos', is_enabled: false, is_locked: false, depends_on: [], requires_config: [], config: {} },
-  { key: 'module.knowledge_base', module: 'ai', label: 'Base de Conocimiento', is_enabled: false, is_locked: false, depends_on: ['module.ai'], requires_config: [], config: {} },
-  { key: 'module.telegram', module: 'integrations', label: 'Alertas por Telegram', is_enabled: false, is_locked: false, depends_on: [], requires_config: [], config: {} },
-  { key: 'module.recurring_cases', module: 'cases', label: 'Casos Recurrentes', is_enabled: true, is_locked: false, depends_on: [], requires_config: [], config: {} },
-  { key: 'module.kanban', module: 'cases', label: 'Vista Kanban de Procesos', is_enabled: true, is_locked: false, depends_on: [], requires_config: [], config: {} },
-  { key: 'security.mfa_admin', module: 'security', label: 'MFA Obligatorio para Administrador', is_enabled: true, is_locked: false, depends_on: [], requires_config: [], config: {} },
-  { key: 'security.mfa_cash', module: 'security', label: 'MFA Obligatorio para Caja Chica', is_enabled: true, is_locked: false, depends_on: [], requires_config: [], config: {} },
-  { key: 'audit.enabled', module: 'security', label: 'Pistas de Auditoría', is_enabled: true, is_locked: true, depends_on: [], requires_config: [], config: {} },
-  { key: 'rls.enforced', module: 'security', label: 'Seguridad a Nivel de Fila (RLS)', is_enabled: true, is_locked: true, depends_on: [], requires_config: [], config: {} },
+  {
+    key: 'module.cash',
+    module: 'cash',
+    label: 'Caja Chica',
+    is_enabled: true,
+    is_locked: false,
+    depends_on: [],
+    requires_config: [],
+    config: {},
+  },
+  {
+    key: 'module.quotes',
+    module: 'quotes',
+    label: 'Cotizaciones y Proveedores',
+    is_enabled: true,
+    is_locked: false,
+    depends_on: [],
+    requires_config: [],
+    config: {},
+  },
+  {
+    key: 'module.ai',
+    module: 'ai',
+    label: 'Asistente IA de Documentos',
+    is_enabled: false,
+    is_locked: false,
+    depends_on: [],
+    requires_config: [],
+    config: {},
+  },
+  {
+    key: 'module.knowledge_base',
+    module: 'ai',
+    label: 'Base de Conocimiento',
+    is_enabled: false,
+    is_locked: false,
+    depends_on: ['module.ai'],
+    requires_config: [],
+    config: {},
+  },
+  {
+    key: 'module.telegram',
+    module: 'integrations',
+    label: 'Alertas por Telegram',
+    is_enabled: false,
+    is_locked: false,
+    depends_on: [],
+    requires_config: [],
+    config: {},
+  },
+  {
+    key: 'module.recurring_cases',
+    module: 'cases',
+    label: 'Casos Recurrentes',
+    is_enabled: true,
+    is_locked: false,
+    depends_on: [],
+    requires_config: [],
+    config: {},
+  },
+  {
+    key: 'module.kanban',
+    module: 'cases',
+    label: 'Vista Kanban de Procesos',
+    is_enabled: true,
+    is_locked: false,
+    depends_on: [],
+    requires_config: [],
+    config: {},
+  },
+  {
+    key: 'security.mfa_admin',
+    module: 'security',
+    label: 'MFA Obligatorio para Administrador',
+    is_enabled: true,
+    is_locked: false,
+    depends_on: [],
+    requires_config: [],
+    config: {},
+  },
+  {
+    key: 'security.mfa_cash',
+    module: 'security',
+    label: 'MFA Obligatorio para Caja Chica',
+    is_enabled: true,
+    is_locked: false,
+    depends_on: [],
+    requires_config: [],
+    config: {},
+  },
+  {
+    key: 'audit.enabled',
+    module: 'security',
+    label: 'Pistas de Auditoría',
+    is_enabled: true,
+    is_locked: true,
+    depends_on: [],
+    requires_config: [],
+    config: {},
+  },
+  {
+    key: 'rls.enforced',
+    module: 'security',
+    label: 'Seguridad a Nivel de Fila (RLS)',
+    is_enabled: true,
+    is_locked: true,
+    depends_on: [],
+    requires_config: [],
+    config: {},
+  },
 ];
 
 const INITIAL_CUSTOM_FIELDS: CustomFieldDefinition[] = [
@@ -94,29 +314,155 @@ const INITIAL_CUSTOM_FIELDS: CustomFieldDefinition[] = [
 ];
 
 const GENERAL_DEFINITIONS: SettingDefinition[] = [
-  { key: 'general.company_name', category: 'general', label: 'Nombre de la Empresa', value_type: 'string', default_value: 'WorkFlow Sucesorio', constraints: { min_length: 2 }, edit_permission: 'settings.manage', sort_order: 1 },
-  { key: 'general.language', category: 'general', label: 'Idioma Regional', value_type: 'enum', default_value: 'es-PE', constraints: { options: ['es-PE'] }, edit_permission: 'settings.manage', sort_order: 2 },
-  { key: 'general.timezone', category: 'general', label: 'Zona Horaria', value_type: 'enum', default_value: 'America/Lima', constraints: { options: ['America/Lima'] }, edit_permission: 'settings.manage', sort_order: 3 },
-  { key: 'general.currency_default', category: 'general', label: 'Moneda Predeterminada', value_type: 'enum', default_value: 'PEN', constraints: { options: ['PEN', 'USD'] }, edit_permission: 'settings.manage', sort_order: 4 },
-  { key: 'general.date_format', category: 'general', label: 'Formato de Fechas', value_type: 'string', default_value: 'DD/MM/YYYY', constraints: {}, edit_permission: 'settings.manage', sort_order: 5 },
+  {
+    key: 'general.company_name',
+    category: 'general',
+    label: 'Nombre de la Empresa',
+    value_type: 'string',
+    default_value: 'WorkFlow Sucesorio',
+    constraints: { min_length: 2 },
+    edit_permission: 'settings.manage',
+    sort_order: 1,
+  },
+  {
+    key: 'general.language',
+    category: 'general',
+    label: 'Idioma Regional',
+    value_type: 'enum',
+    default_value: 'es-PE',
+    constraints: { options: ['es-PE'] },
+    edit_permission: 'settings.manage',
+    sort_order: 2,
+  },
+  {
+    key: 'general.timezone',
+    category: 'general',
+    label: 'Zona Horaria',
+    value_type: 'enum',
+    default_value: 'America/Lima',
+    constraints: { options: ['America/Lima'] },
+    edit_permission: 'settings.manage',
+    sort_order: 3,
+  },
+  {
+    key: 'general.currency_default',
+    category: 'general',
+    label: 'Moneda Predeterminada',
+    value_type: 'enum',
+    default_value: 'PEN',
+    constraints: { options: ['PEN', 'USD'] },
+    edit_permission: 'settings.manage',
+    sort_order: 4,
+  },
+  {
+    key: 'general.date_format',
+    category: 'general',
+    label: 'Formato de Fechas',
+    value_type: 'string',
+    default_value: 'DD/MM/YYYY',
+    constraints: {},
+    edit_permission: 'settings.manage',
+    sort_order: 5,
+  },
 ];
 
 const CASES_DEFINITIONS: SettingDefinition[] = [
-  { key: 'cases.number_format', category: 'cases', label: 'Patrón Correlativo de Casos', value_type: 'string', default_value: '{YYYY}-{SEQ:6}', constraints: {}, edit_permission: 'settings.manage', sort_order: 1 },
-  { key: 'cases.default_priority', category: 'cases', label: 'Prioridad Inicial', value_type: 'enum', default_value: 'NORMAL', constraints: { options: ['LOW', 'NORMAL', 'HIGH', 'URGENT'] }, edit_permission: 'settings.manage', sort_order: 2 },
-  { key: 'cases.default_due_days', category: 'cases', label: 'Plazo Estimado General (Días)', value_type: 'number', default_value: 30, constraints: { min: 1, max: 365 }, edit_permission: 'settings.manage', sort_order: 3 },
-  { key: 'cases.allow_reopen', category: 'cases', label: 'Permitir Reapertura de Casos', value_type: 'boolean', default_value: false, constraints: {}, edit_permission: 'settings.manage', sort_order: 4 },
+  {
+    key: 'cases.number_format',
+    category: 'cases',
+    label: 'Patrón Correlativo de Casos',
+    value_type: 'string',
+    default_value: '{YYYY}-{SEQ:6}',
+    constraints: {},
+    edit_permission: 'settings.manage',
+    sort_order: 1,
+  },
+  {
+    key: 'cases.default_priority',
+    category: 'cases',
+    label: 'Prioridad Inicial',
+    value_type: 'enum',
+    default_value: 'NORMAL',
+    constraints: { options: ['LOW', 'NORMAL', 'HIGH', 'URGENT'] },
+    edit_permission: 'settings.manage',
+    sort_order: 2,
+  },
+  {
+    key: 'cases.default_due_days',
+    category: 'cases',
+    label: 'Plazo Estimado General (Días)',
+    value_type: 'number',
+    default_value: 30,
+    constraints: { min: 1, max: 365 },
+    edit_permission: 'settings.manage',
+    sort_order: 3,
+  },
+  {
+    key: 'cases.allow_reopen',
+    category: 'cases',
+    label: 'Permitir Reapertura de Casos',
+    value_type: 'boolean',
+    default_value: false,
+    constraints: {},
+    edit_permission: 'settings.manage',
+    sort_order: 4,
+  },
 ];
 
 const ALERTS_DEFINITIONS: SettingDefinition[] = [
-  { key: 'alerts.stagnation_default_days', category: 'alerts', label: 'Umbral de Estancamiento (Días)', value_type: 'number', default_value: 5, constraints: { min: 1, max: 90 }, edit_permission: 'settings.manage', sort_order: 1 },
-  { key: 'alerts.working_hours', category: 'alerts', label: 'Horario Operativo', value_type: 'string', default_value: '08:00 - 18:00', constraints: {}, edit_permission: 'settings.manage', sort_order: 2 },
-  { key: 'alerts.digest_time', category: 'alerts', label: 'Hora del Resumen Diario', value_type: 'time', default_value: '07:30', constraints: {}, edit_permission: 'settings.manage', sort_order: 3 },
+  {
+    key: 'alerts.stagnation_default_days',
+    category: 'alerts',
+    label: 'Umbral de Estancamiento (Días)',
+    value_type: 'number',
+    default_value: 5,
+    constraints: { min: 1, max: 90 },
+    edit_permission: 'settings.manage',
+    sort_order: 1,
+  },
+  {
+    key: 'alerts.working_hours',
+    category: 'alerts',
+    label: 'Horario Operativo',
+    value_type: 'string',
+    default_value: '08:00 - 18:00',
+    constraints: {},
+    edit_permission: 'settings.manage',
+    sort_order: 2,
+  },
+  {
+    key: 'alerts.digest_time',
+    category: 'alerts',
+    label: 'Hora del Resumen Diario',
+    value_type: 'time',
+    default_value: '07:30',
+    constraints: {},
+    edit_permission: 'settings.manage',
+    sort_order: 3,
+  },
 ];
 
 const SECURITY_DEFINITIONS: SettingDefinition[] = [
-  { key: 'security.session_idle_minutes', category: 'security', label: 'Cierre de Sesión por Inactividad (Minutos)', value_type: 'number', default_value: 30, constraints: { min: 5, max: 240 }, edit_permission: 'settings.manage', sort_order: 1 },
-  { key: 'security.upload_scan', category: 'security', label: 'Escaneo de Archivos', value_type: 'boolean', default_value: true, constraints: {}, edit_permission: 'settings.manage', sort_order: 2 },
+  {
+    key: 'security.session_idle_minutes',
+    category: 'security',
+    label: 'Cierre de Sesión por Inactividad (Minutos)',
+    value_type: 'number',
+    default_value: 30,
+    constraints: { min: 5, max: 240 },
+    edit_permission: 'settings.manage',
+    sort_order: 1,
+  },
+  {
+    key: 'security.upload_scan',
+    category: 'security',
+    label: 'Escaneo de Archivos',
+    value_type: 'boolean',
+    default_value: true,
+    constraints: {},
+    edit_permission: 'settings.manage',
+    sort_order: 2,
+  },
 ];
 
 export default function SettingsPage() {
@@ -137,13 +483,15 @@ export default function SettingsPage() {
   ]);
 
   // Handlers para catálogos
-  const handleToggleCatalogItem = async (catalogCode: string, itemCode: string, nextActive: boolean) => {
+  const handleToggleCatalogItem = async (
+    catalogCode: string,
+    itemCode: string,
+    nextActive: boolean,
+  ) => {
     setCatalogItems((prev) =>
       prev.map((i) =>
-        i.catalog_code === catalogCode && i.code === itemCode
-          ? { ...i, is_active: nextActive }
-          : i
-      )
+        i.catalog_code === catalogCode && i.code === itemCode ? { ...i, is_active: nextActive } : i,
+      ),
     );
     setHistory((prev) => [
       {
@@ -190,9 +538,7 @@ export default function SettingsPage() {
 
   // Handlers para Feature Flags
   const handleToggleFlag = async (key: string, nextEnabled: boolean, reason?: string) => {
-    setFlags((prev) =>
-      prev.map((f) => (f.key === key ? { ...f, is_enabled: nextEnabled } : f))
-    );
+    setFlags((prev) => prev.map((f) => (f.key === key ? { ...f, is_enabled: nextEnabled } : f)));
     setHistory((prev) => [
       {
         id: String(Date.now()),
@@ -238,9 +584,7 @@ export default function SettingsPage() {
   };
 
   const handleToggleCustomField = async (id: string, nextActive: boolean) => {
-    setCustomFields((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, is_active: nextActive } : f))
-    );
+    setCustomFields((prev) => prev.map((f) => (f.id === id ? { ...f, is_active: nextActive } : f)));
   };
 
   const navigationTabs = [
@@ -263,12 +607,7 @@ export default function SettingsPage() {
   ];
 
   return (
-    <AppShell
-      breadcrumbs={[
-        { label: 'Inicio', href: '/dashboard' },
-        { label: 'Configuración' },
-      ]}
-    >
+    <AppShell breadcrumbs={[{ label: 'Inicio', href: '/dashboard' }, { label: 'Configuración' }]}>
       <div className="space-y-6">
         {/* Encabezado */}
         <div>
@@ -276,7 +615,8 @@ export default function SettingsPage() {
             Configuración del Sistema (Settings)
           </h1>
           <p className="text-xs text-muted-foreground">
-            Administre parámetros, catálogos, módulos y variables del sistema sin necesidad de desplegar código.
+            Administre parámetros, catálogos, módulos y variables del sistema sin necesidad de
+            desplegar código.
           </p>
         </div>
 
@@ -337,7 +677,10 @@ export default function SettingsPage() {
                 title="Configuración General"
                 description="Información básica de la empresa, zona horaria y formatos regionales."
                 definitions={GENERAL_DEFINITIONS}
-                values={{ 'general.company_name': 'WorkFlow Sucesorio', 'general.language': 'es-PE' }}
+                values={{
+                  'general.company_name': 'WorkFlow Sucesorio',
+                  'general.language': 'es-PE',
+                }}
               />
             )}
 
@@ -355,7 +698,8 @@ export default function SettingsPage() {
                 <div className="border-b border-border pb-3">
                   <h3 className="text-sm font-bold text-foreground">Configuración de Clientes</h3>
                   <p className="text-muted-foreground">
-                    Los tipos de persona y documentos admisibles provienen de los catálogos correspondientes.
+                    Los tipos de persona y documentos admisibles provienen de los catálogos
+                    correspondientes.
                   </p>
                 </div>
                 <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-2">
@@ -386,7 +730,10 @@ export default function SettingsPage() {
                 title="Configuración de Casos"
                 description="Patrón de numeración correlativa, prioridades y reglas de cierre."
                 definitions={CASES_DEFINITIONS}
-                values={{ 'cases.number_format': '{YYYY}-{SEQ:6}', 'cases.default_priority': 'NORMAL' }}
+                values={{
+                  'cases.number_format': '{YYYY}-{SEQ:6}',
+                  'cases.default_priority': 'NORMAL',
+                }}
               />
             )}
 
@@ -394,16 +741,20 @@ export default function SettingsPage() {
             {activeTab === 'workflow' && (
               <div className="space-y-4">
                 <div className="border-b border-border pb-3">
-                  <h3 className="text-sm font-bold text-foreground">Workflow y Modelos de Trámite</h3>
+                  <h3 className="text-sm font-bold text-foreground">
+                    Workflow y Modelos de Trámite
+                  </h3>
                   <p className="text-xs text-muted-foreground">
-                    Estados de workflow con categoría semántica (Sprint 2) y modelos versionados de casos (Sprint 3).
+                    Estados de workflow con categoría semántica (Sprint 2) y modelos versionados de
+                    casos (Sprint 3).
                   </p>
                 </div>
                 <div className="p-6 rounded-xl border border-dashed border-border bg-muted/20 text-center space-y-2">
                   <Clock className="w-8 h-8 text-primary mx-auto" />
                   <h4 className="text-xs font-bold text-foreground">Modelos de Casos y Procesos</h4>
                   <p className="text-xs text-muted-foreground max-w-md mx-auto">
-                    Los 5 modelos de caso versionados (Sucesión Notarial, Judicial, Testada, etc.) y compuertas de avance se implementarán en el Sprint 3.
+                    Los 5 modelos de caso versionados (Sucesión Notarial, Judicial, Testada, etc.) y
+                    compuertas de avance se implementarán en el Sprint 3.
                   </p>
                 </div>
               </div>
@@ -419,10 +770,15 @@ export default function SettingsPage() {
                   </p>
                 </div>
                 <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-2 text-xs">
-                  <p>Tamaño máximo por archivo: <strong>10 MB</strong></p>
-                  <p>Marca de agua por defecto: <strong>BORRADOR - SIN VALIDEZ LEGAL</strong></p>
+                  <p>
+                    Tamaño máximo por archivo: <strong>10 MB</strong>
+                  </p>
+                  <p>
+                    Marca de agua por defecto: <strong>BORRADOR - SIN VALIDEZ LEGAL</strong>
+                  </p>
                   <p className="text-muted-foreground pt-2">
-                    La generación de plantillas DOCX y motor documental completo se integran en el Sprint 5.
+                    La generación de plantillas DOCX y motor documental completo se integran en el
+                    Sprint 5.
                   </p>
                 </div>
               </div>
@@ -448,9 +804,15 @@ export default function SettingsPage() {
                   </p>
                 </div>
                 <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-2 text-xs">
-                  <p>Exigir soporte con comprobante desde: <strong>S/ 50.00</strong></p>
-                  <p>Aprobación previa del administrador desde: <strong>S/ 300.00</strong></p>
-                  <p>Saldo mínimo para alerta de reposición: <strong>S/ 200.00</strong></p>
+                  <p>
+                    Exigir soporte con comprobante desde: <strong>S/ 50.00</strong>
+                  </p>
+                  <p>
+                    Aprobación previa del administrador desde: <strong>S/ 300.00</strong>
+                  </p>
+                  <p>
+                    Saldo mínimo para alerta de reposición: <strong>S/ 200.00</strong>
+                  </p>
                   <p className="text-muted-foreground pt-2">
                     El libro de caja y arqueos completos se habilitan en el Sprint 8.
                   </p>
@@ -462,9 +824,12 @@ export default function SettingsPage() {
             {activeTab === 'integrations' && (
               <div className="space-y-6 text-xs">
                 <div className="border-b border-border pb-3">
-                  <h3 className="text-sm font-bold text-foreground">Estado de Integraciones Externas</h3>
+                  <h3 className="text-sm font-bold text-foreground">
+                    Estado de Integraciones Externas
+                  </h3>
                   <p className="text-muted-foreground">
-                    Verificación de servicios conectados. Los secretos y claves de API se mantienen estrictamente en variables de entorno seguras.
+                    Verificación de servicios conectados. Los secretos y claves de API se mantienen
+                    estrictamente en variables de entorno seguras.
                   </p>
                 </div>
 
@@ -498,7 +863,9 @@ export default function SettingsPage() {
                   <div className="p-4 rounded-xl border border-border bg-card space-y-2">
                     <div className="flex items-center justify-between">
                       <h4 className="font-bold text-foreground">Asistente IA</h4>
-                      <span className="text-[10px] text-muted-foreground font-semibold">Apagado</span>
+                      <span className="text-[10px] text-muted-foreground font-semibold">
+                        Apagado
+                      </span>
                     </div>
                     <p className="text-muted-foreground">
                       Módulo documental inteligente (D3). Nace apagado por decisión.
@@ -550,11 +917,18 @@ export default function SettingsPage() {
                   </p>
                 </div>
                 <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-2 text-xs">
-                  <p>Almacén Primario: <strong>Supabase Storage (Privado)</strong></p>
-                  <p>Bucket de Logotipos: <strong>logos (Público)</strong></p>
-                  <p>Respaldo a Google Drive: <strong>Desactivado (Fase 5)</strong></p>
+                  <p>
+                    Almacén Primario: <strong>Supabase Storage (Privado)</strong>
+                  </p>
+                  <p>
+                    Bucket de Logotipos: <strong>logos (Público)</strong>
+                  </p>
+                  <p>
+                    Respaldo a Google Drive: <strong>Desactivado (Fase 5)</strong>
+                  </p>
                   <p className="text-muted-foreground pt-2">
-                    Todo acceso pasa por URLs firmadas de 60 segundos emitidas por el engine y auditadas.
+                    Todo acceso pasa por URLs firmadas de 60 segundos emitidas por el engine y
+                    auditadas.
                   </p>
                 </div>
               </div>
@@ -576,7 +950,9 @@ export default function SettingsPage() {
                   if (bundle.custom_fields) setCustomFields(bundle.custom_fields);
                 }}
                 onRestoreDefaults={async (category) => {
-                  alert(`Valores de la pestaña '${category}' restaurados a sus valores por defecto.`);
+                  alert(
+                    `Valores de la pestaña '${category}' restaurados a sus valores por defecto.`,
+                  );
                 }}
               />
             )}

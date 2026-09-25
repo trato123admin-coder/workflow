@@ -144,7 +144,8 @@ export const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
               <h4 className="text-xs font-bold text-foreground">Exportar Configuración</h4>
             </div>
             <p className="text-xs text-muted-foreground">
-              Descarga un archivo JSON versionado con todos los catálogos, banderas de módulos, parámetros tipados y definiciones de campos personalizados para promover a producción.
+              Descarga un archivo JSON versionado con todos los catálogos, banderas de módulos,
+              parámetros tipados y definiciones de campos personalizados para promover a producción.
             </p>
             <button
               type="button"
@@ -163,7 +164,8 @@ export const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
               <h4 className="text-xs font-bold text-foreground">Restaurar Valores por Defecto</h4>
             </div>
             <p className="text-xs text-muted-foreground">
-              Restablece los parámetros de configuración a sus valores recomendados iniciales del sistema.
+              Restablece los parámetros de configuración a sus valores recomendados iniciales del
+              sistema.
             </p>
             <div className="flex items-center gap-2">
               <select
@@ -194,10 +196,13 @@ export const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
           <div className="md:col-span-2 p-5 rounded-xl border border-border bg-card space-y-4">
             <div className="flex items-center gap-2">
               <Upload className="w-5 h-5 text-primary" />
-              <h4 className="text-xs font-bold text-foreground">Importar Configuración con Diff Previo</h4>
+              <h4 className="text-xs font-bold text-foreground">
+                Importar Configuración con Diff Previo
+              </h4>
             </div>
             <p className="text-xs text-muted-foreground">
-              Pegue el contenido JSON o cargue un paquete exportado. El sistema calculará el impacto y mostrará los cambios antes de aplicarlos.
+              Pegue el contenido JSON o cargue un paquete exportado. El sistema calculará el impacto
+              y mostrará los cambios antes de aplicarlos.
             </p>
 
             <textarea
@@ -304,9 +309,7 @@ export const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
                       <td className="py-3 px-4 text-muted-foreground whitespace-nowrap">
                         {new Date(h.changed_at).toLocaleString('es-PE')}
                       </td>
-                      <td className="py-3 px-4 font-mono font-semibold text-foreground">
-                        {h.key}
-                      </td>
+                      <td className="py-3 px-4 font-mono font-semibold text-foreground">{h.key}</td>
                       <td className="py-3 px-4 font-mono text-muted-foreground max-w-xs truncate">
                         {h.old_value !== null ? JSON.stringify(h.old_value) : '—'}
                       </td>

@@ -15,7 +15,7 @@ export const moduleRoutes: FastifyPluginAsync = async (fastify) => {
         balance: 9300.0,
         currency: 'PEN',
       };
-    }
+    },
   );
 
   // Ruta de demostración de Cotizaciones, protegida por el flag module.quotes
@@ -30,7 +30,7 @@ export const moduleRoutes: FastifyPluginAsync = async (fastify) => {
         status: 'active',
         activeQuotes: 12,
       };
-    }
+    },
   );
 
   // Ruta de demostración de IA, protegida por el flag module.ai
@@ -45,6 +45,6 @@ export const moduleRoutes: FastifyPluginAsync = async (fastify) => {
         status: 'active',
         recommendations: [],
       };
-    }
+    },
   );
 };

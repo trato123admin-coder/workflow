@@ -38,7 +38,10 @@ export const CreateCatalogItemSchema = z.object({
     .string()
     .min(1)
     .max(50)
-    .regex(/^[A-Z0-9_-]+$/, 'El código debe contener solo mayúsculas, números, guiones y guiones bajos'),
+    .regex(
+      /^[A-Z0-9_-]+$/,
+      'El código debe contener solo mayúsculas, números, guiones y guiones bajos',
+    ),
   label: z.string().min(1, 'La etiqueta es requerida').max(100),
   description: z.string().optional(),
   sort_order: z.number().int().default(0),
@@ -63,7 +66,10 @@ export type UpdateCatalogItemInput = z.infer<typeof UpdateCatalogItemSchema>;
 /**
  * Valida los metadatos de un elemento según los requisitos de identity_document_types si corresponde.
  */
-export function validateDocumentTypeMetadata(metadata: Record<string, unknown>): { valid: boolean; error?: string } {
+export function validateDocumentTypeMetadata(metadata: Record<string, unknown>): {
+  valid: boolean;
+  error?: string;
+} {
   if (typeof metadata !== 'object' || metadata === null) {
     return { valid: false, error: 'Metadata debe ser un objeto' };
   }

@@ -57,7 +57,7 @@ export type SettingsHistoryItem = z.infer<typeof SettingsHistoryItemSchema>;
  */
 export function validateSettingValue(
   definition: SettingDefinition,
-  value: unknown
+  value: unknown,
 ): { valid: boolean; error?: string } {
   if (value === undefined || value === null) {
     return { valid: false, error: 'El valor no puede ser nulo' };
@@ -101,7 +101,10 @@ export function validateSettingValue(
 
     case 'enum':
       if (Array.isArray(constraints.options) && !constraints.options.includes(value)) {
-        return { valid: false, error: `Debe ser una de las opciones permitidas: ${constraints.options.join(', ')}` };
+        return {
+          valid: false,
+          error: `Debe ser una de las opciones permitidas: ${constraints.options.join(', ')}`,
+        };
       }
       break;
 

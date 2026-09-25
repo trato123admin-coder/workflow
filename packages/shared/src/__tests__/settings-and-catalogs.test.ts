@@ -26,7 +26,9 @@ describe('Sprint 2: Catálogos y Metadatos', () => {
       pattern: 12345, // debe ser string
       min_length: '8', // debe ser number
     };
-    expect(validateDocumentTypeMetadata(invalidMeta as unknown as Record<string, unknown>).valid).toBe(false);
+    expect(
+      validateDocumentTypeMetadata(invalidMeta as unknown as Record<string, unknown>).valid,
+    ).toBe(false);
   });
 });
 

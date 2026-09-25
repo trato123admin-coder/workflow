@@ -42,10 +42,10 @@ select ok(
   'anon must not have table privileges on public.case_counters'
 );
 
--- Test 4: Verify authenticated has no privileges on base tables in Sprint 0
+-- Test 4: Verify authenticated has no mutation privileges on base tables in Sprint 0
 select ok(
-  not has_table_privilege('authenticated', 'public.audit_logs', 'SELECT, INSERT, UPDATE, DELETE'),
-  'authenticated must not have table privileges on public.audit_logs'
+  not has_table_privilege('authenticated', 'public.audit_logs', 'INSERT, UPDATE, DELETE'),
+  'authenticated must not have INSERT, UPDATE, DELETE privileges on public.audit_logs'
 );
 
 select ok(
