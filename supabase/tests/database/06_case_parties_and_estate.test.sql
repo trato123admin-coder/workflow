@@ -6,7 +6,7 @@ create extension if not exists pgtap with schema extensions;
 begin;
 set local search_path = public, extensions;
 
-select plan(24);
+select plan(25);
 
 -- ============================================================================
 -- 1. SETUP DE USUARIOS Y ROLES DE PRUEBA
@@ -447,6 +447,19 @@ select is(
   false,
   '7.4 Semáforo retira advertencia de menor cuando se le asigna representante'
 );
+
+-- Simular Gestor 2 intentando consultar semáforos de un caso confidencial ajeno (DEBE FALLAR)
+select set_config('request.jwt.claims', '{"sub":"33333333-4444-3333-3333-333333333333","role":"authenticated","aal":"aal1"}', true);
+
+select throws_ok(
+  $$
+    select public.get_case_semaphore_warnings((select v_confidential_case_id from s4_vars))
+  $$,
+  'No tiene acceso a este expediente',
+  '7.5 Gestor no asignado no puede consultar semáforos de un caso confidencial'
+);
+
+select set_config('request.jwt.claims', '', true);
 
 -- ============================================================================
 -- TEST 8: Aislamiento RLS en case_parties, case_assets y case_liabilities

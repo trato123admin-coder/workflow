@@ -528,6 +528,28 @@ begin
       v_party_rep       := (v_party->>'represented_by')::uuid;
 
       if v_party_person_id is not null then
+        -- Validar que los códigos correspondan a catálogos oficiales y estén ACTIVOS
+        if not exists (
+          select 1 from public.catalog_items
+           where catalog_code = 'party_roles' and code = v_party_role and is_active = true
+        ) then
+          raise exception 'El rol de interviniente "%" no existe o no está activo en el catálogo', v_party_role;
+        end if;
+
+        if v_party_rel is not null and not exists (
+          select 1 from public.catalog_items
+           where catalog_code = 'relationship_types' and code = v_party_rel and is_active = true
+        ) then
+          raise exception 'El parentesco "%" no existe o no está activo en el catálogo', v_party_rel;
+        end if;
+
+        if v_party_heir_status is not null and not exists (
+          select 1 from public.catalog_items
+           where catalog_code = 'heir_statuses' and code = v_party_heir_status and is_active = true
+        ) then
+          raise exception 'El estado de heredero "%" no existe o no está activo en el catálogo', v_party_heir_status;
+        end if;
+
         insert into public.case_parties (
           case_id, person_id, party_role, relationship_to_deceased,
           heir_status, share_percent, represented_by, is_active
@@ -584,6 +606,11 @@ declare
   v_total_share           numeric(7,4) := 0;
   v_warnings              text[] := '{}';
 begin
+  -- Validación estricta de seguridad: impide a usuarios no autorizados leer advertencias de casos confidenciales
+  if not private.can_access_case(_case_id) then
+    raise exception 'No tiene acceso a este expediente';
+  end if;
+
   -- 1. Heredero menor de edad sin representante legal
   -- Considera mayoría de edad cumplida a los 18 años
   select exists (
