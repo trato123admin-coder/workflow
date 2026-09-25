@@ -58,7 +58,10 @@ begin
     end if;
 
     -- Test B: Vincular persona a caso confidencial de Gestor 1
-    reset role;
+    -- Establecer explícitamente la sesión e identidad del Gestor 1 para la creación del caso
+    set local role authenticated;
+    set local "request.jwt.claims" to '{"sub": "22222222-2222-2222-2222-222222222222", "role": "authenticated", "aal": "aal2"}';
+
     select v.id into v_vid
       from public.case_model_versions v
       join public.case_models m on m.id = v.case_model_id
@@ -89,6 +92,7 @@ begin
   exception
     when others then
       reset role;
+      set local "request.jwt.claims" to '';
       if sqlerrm = 'ROLLBACK_VERIFY_SUCCESS' then
         raise notice 'Verificación exitosa: Opción A de RLS probada correctamente (visible antes = 1, visible después = 0). Datos temporales revertidos.';
       else
