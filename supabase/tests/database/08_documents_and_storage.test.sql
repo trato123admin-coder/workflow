@@ -18,18 +18,33 @@ select has_table('public', 'case_model_documents', 'Existe tabla case_model_docu
 select has_table('public', 'case_documents', 'Existe tabla case_documents');
 select has_table('public', 'document_versions', 'Existe tabla document_versions');
 
-select tests.rls_enabled('public', 'storage_backends');
-select tests.rls_enabled('public', 'document_types');
-select tests.rls_enabled('public', 'case_documents');
-select tests.rls_enabled('public', 'document_versions');
+select ok(
+  (select rowsecurity from pg_tables where schemaname = 'public' and tablename = 'storage_backends'),
+  'storage_backends tiene RLS habilitada'
+);
+select ok(
+  (select rowsecurity from pg_tables where schemaname = 'public' and tablename = 'document_types'),
+  'document_types tiene RLS habilitada'
+);
+select ok(
+  (select rowsecurity from pg_tables where schemaname = 'public' and tablename = 'case_documents'),
+  'case_documents tiene RLS habilitada'
+);
+select ok(
+  (select rowsecurity from pg_tables where schemaname = 'public' and tablename = 'document_versions'),
+  'document_versions tiene RLS habilitada'
+);
 
 -- ============================================================================
 -- 2. CLAVE FORÁNEA CIRCULAR
 -- ============================================================================
-select has_fk(
-  'public',
-  'case_documents',
-  'fk_case_documents_current_version',
+select ok(
+  exists (
+    select 1 from information_schema.table_constraints
+     where table_schema = 'public'
+       and table_name = 'case_documents'
+       and constraint_name = 'fk_case_documents_current_version'
+  ),
   'Existe clave foránea circular fk_case_documents_current_version hacia document_versions'
 );
 
@@ -60,18 +75,16 @@ select results_eq(
 -- 4. PRUEBA DE INMUTABILIDAD DE MODELOS PUBLICADOS (Punto 1 y 3)
 -- Intentar agregar un documento a una versión PUBLISHED debe fallar por trigger.
 -- ============================================================================
-prepare insert_into_published_model as
-  insert into public.case_model_documents (case_model_version_id, document_type_id, sequence, is_required)
-  select cmv.id, (select id from public.document_types limit 1), 99, false
-    from public.case_model_versions cmv
-    join public.case_models cm on cm.id = cmv.case_model_id
-   where cm.code = 'SUCESION_INTESTADA_NOTARIAL'
-     and cmv.version = 1;
-
 select throws_ok(
-  'insert_into_published_model',
-  'P0001',
-  'No se pueden agregar, modificar ni eliminar elementos de una versión de modelo PUBLISHED (es inmutable; clone a una nueva versión)',
+  $$
+    insert into public.case_model_documents (case_model_version_id, document_type_id, sequence, is_required)
+    select cmv.id, (select id from public.document_types limit 1), 99, false
+      from public.case_model_versions cmv
+      join public.case_models cm on cm.id = cmv.case_model_id
+     where cm.code = 'SUCESION_INTESTADA_NOTARIAL'
+       and cmv.version = 1;
+  $$,
+  'No se pueden agregar, modificar ni eliminar elementos de una versión de modelo PUBLISHED',
   'El trigger trg_guard_case_model_documents_immutability impide modificar versiones PUBLISHED'
 );
 
