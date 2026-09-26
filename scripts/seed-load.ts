@@ -134,6 +134,7 @@ export async function loadSyntheticSeed() {
   const createdCaseIds: { id: string; isBench: boolean }[] = [];
   const caseBatches = chunkArray(allCasesPayload, 500);
   for (let b = 0; b < caseBatches.length; b++) {
+    const t0 = performance.now();
     const { data, error } = await supabase
       .from('cases')
       .insert(caseBatches[b])
@@ -142,7 +143,8 @@ export async function loadSyntheticSeed() {
     for (const r of data) {
       createdCaseIds.push({ id: r.id, isBench: !!r.custom_data?.is_benchmark });
     }
-    process.stdout.write(`  Lote casos ${b + 1}/${caseBatches.length} insertado (${createdCaseIds.length}/10000)\n`);
+    const dt = (performance.now() - t0).toFixed(0);
+    process.stdout.write(`  Lote casos ${b + 1}/${caseBatches.length} insertado (${createdCaseIds.length}/10000) en ${dt} ms\n`);
   }
 
   const benchCaseId = createdCaseIds.find((c) => c.isBench)!.id;
@@ -150,7 +152,7 @@ export async function loadSyntheticSeed() {
   // 4. Intervinientes: 11 en Benchmark + 2 en cada caso de volumen (1 causante + 1 heredero) = 20 009
   process.stdout.write('Generando intervinientes en lotes de 1000...\n');
   const partiesPayload = [
-    { case_id: benchCaseId, person_id: benchCausanteId, party_role: 'CAUSANTE', is_active: true },
+    { case_id: benchCaseId, person_id: benchCausanteId, party_role: 'CAUSANTE', is_active: true, custom_data: { is_synthetic: true } },
     ...benchHeirIds.map((hId) => ({
       case_id: benchCaseId,
       person_id: hId,
@@ -159,6 +161,7 @@ export async function loadSyntheticSeed() {
       heir_status: 'CONFIRMADO',
       share_percent: 10.0,
       is_active: true,
+      custom_data: { is_synthetic: true },
     })),
   ];
 
@@ -167,7 +170,7 @@ export async function loadSyntheticSeed() {
     const causanteId = volumePool[(i * 2) % volumePool.length];
     const heirId = volumePool[(i * 2 + 1) % volumePool.length];
     partiesPayload.push(
-      { case_id: cId, person_id: causanteId, party_role: 'CAUSANTE', is_active: true },
+      { case_id: cId, person_id: causanteId, party_role: 'CAUSANTE', is_active: true, custom_data: { is_synthetic: true } },
       {
         case_id: cId,
         person_id: heirId,
@@ -176,14 +179,18 @@ export async function loadSyntheticSeed() {
         heir_status: 'CONFIRMADO',
         share_percent: 100.0,
         is_active: true,
+        custom_data: { is_synthetic: true },
       }
     );
   }
 
   const partyBatches = chunkArray(partiesPayload, 1000);
   for (let b = 0; b < partyBatches.length; b++) {
+    const t0 = performance.now();
     const { error } = await supabase.from('case_parties').insert(partyBatches[b]);
     if (error) throw error;
+    const dt = (performance.now() - t0).toFixed(0);
+    process.stdout.write(`  Lote partes ${b + 1}/${partyBatches.length} insertado (${(b + 1) * 1000 > partiesPayload.length ? partiesPayload.length : (b + 1) * 1000}/${partiesPayload.length}) en ${dt} ms\n`);
   }
   process.stdout.write(`✓ Intervinientes insertados: ${partiesPayload.length}\n`);
 
@@ -247,10 +254,12 @@ export async function loadSyntheticSeed() {
 
   const procBatches = chunkArray(allProcesses, 2000);
   for (let b = 0; b < procBatches.length; b++) {
+    const t0 = performance.now();
     const { error } = await supabase.from('case_processes').insert(procBatches[b]);
     if (error) throw error;
-    if ((b + 1) % 10 === 0 || b === procBatches.length - 1) {
-      process.stdout.write(`  Procesos lote ${b + 1}/${procBatches.length} insertado (${(b + 1) * 2000 > 110000 ? 110000 : (b + 1) * 2000}/110000)\n`);
+    const dt = (performance.now() - t0).toFixed(0);
+    if ((b + 1) % 5 === 0 || b === procBatches.length - 1) {
+      process.stdout.write(`  Procesos lote ${b + 1}/${procBatches.length} insertado (${(b + 1) * 2000 > 110000 ? 110000 : (b + 1) * 2000}/110000) en ${dt} ms\n`);
     }
   }
 
