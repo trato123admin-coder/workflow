@@ -102,3 +102,8 @@ jobs:
           echo '```text' >> $GITHUB_STEP_SUMMARY
           tail -n 120 pgtap_output.log >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
+          if [ -f pgtap_output.log ]; then
+            grep -E "not ok|FAIL|Error|failed|# Looks like" pgtap_output.log | tail -n 25 | while IFS= read -r line; do
+              echo "::error title=pgTAP::$line"
+            done
+          fi
