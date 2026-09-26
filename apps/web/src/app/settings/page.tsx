@@ -31,6 +31,7 @@ import { CustomFieldsManager } from '../../components/settings/CustomFieldsManag
 import { AdvancedSettings } from '../../components/settings/AdvancedSettings';
 import { DynamicSettingsSection } from '../../components/settings/DynamicSettingsSection';
 import { WorkflowModelsManager } from '../../components/settings/WorkflowModelsManager';
+import { StorageSettingsTab } from '../../components/settings/StorageSettingsTab';
 
 import type {
   Catalog,
@@ -603,7 +604,7 @@ export default function SettingsPage() {
     { id: 'security', label: 'Seguridad', icon: Shield },
     { id: 'catalogs', label: 'Catálogos', icon: Database },
     { id: 'custom_fields', label: 'Campos Personalizados', icon: FileCode },
-    { id: 'storage', label: 'Almacenamiento', icon: HardDrive, isSkeleton: true },
+    { id: 'storage', label: 'Almacenamiento', icon: HardDrive },
     { id: 'advanced', label: 'Avanzado', icon: SettingsIcon },
   ];
 
@@ -900,32 +901,8 @@ export default function SettingsPage() {
               />
             )}
 
-            {/* Almacenamiento (Esqueleto Sprint 2) */}
-            {activeTab === 'storage' && (
-              <div className="space-y-4">
-                <div className="border-b border-border pb-3">
-                  <h3 className="text-sm font-bold text-foreground">Almacenamiento de Archivos</h3>
-                  <p className="text-xs text-muted-foreground">
-                    Capa StorageProvider y políticas de retención.
-                  </p>
-                </div>
-                <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-2 text-xs">
-                  <p>
-                    Almacén Primario: <strong>Supabase Storage (Privado)</strong>
-                  </p>
-                  <p>
-                    Bucket de Logotipos: <strong>logos (Público)</strong>
-                  </p>
-                  <p>
-                    Respaldo a Google Drive: <strong>Desactivado (Fase 5)</strong>
-                  </p>
-                  <p className="text-muted-foreground pt-2">
-                    Todo acceso pasa por URLs firmadas de 60 segundos emitidas por el engine y
-                    auditadas.
-                  </p>
-                </div>
-              </div>
-            )}
+            {/* Almacenamiento (Sprint 5 - S5-09) */}
+            {activeTab === 'storage' && <StorageSettingsTab />}
 
             {/* Avanzado */}
             {activeTab === 'advanced' && (
