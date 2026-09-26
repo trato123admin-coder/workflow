@@ -294,6 +294,9 @@ importers:
       fastify:
         specifier: ^5.2.1
         version: 5.12.5
+      pizzip:
+        specifier: ^3.3.0
+        version: 3.3.0
       zod:
         specifier: ^3.24.2
         version: 3.25.76
@@ -301,6 +304,9 @@ importers:
       '@types/node':
         specifier: ^22.13.4
         version: 22.20.4
+      '@types/pizzip':
+        specifier: ^3.1.2
+        version: 3.1.2
       eslint:
         specifier: ^9.20.1
         version: 9.39.5(jiti@1.21.7)(supports-color@7.2.0)
@@ -1032,6 +1038,10 @@ packages:
 
   '@types/node@22.20.4':
     resolution: {integrity: sha512-zJRE40jpHtKqE/C4fgHrAKQLJuSpzEnP9ff9Y7YtoR3Wd2pwqzlekDeEuUQXjRd+QCYnVnNwuJYmhdk9XV8gvA==}
+
+  '@types/pizzip@3.1.2':
+    resolution: {integrity: sha512-ii/53SEJROmMeBjutNSgvmbFi5WQJX7rl80SmEPY4EJU/WfGM9EX7UB8S9YVnGavLwp1em/3SxKOiUUtiAsQ5w==}
+    deprecated: This is a stub types definition. pizzip provides its own type definitions, so you do not need this installed.
 
   '@types/react-dom@19.3.0':
     resolution: {integrity: sha512-ZI7bU42mZXXKHn/qNLEw2IrbiINU7X5+vfgdixBHkCNpYWXjKgfQ/P+uyGb5CjOLB9UcnTeg3rylQtV2hym44Q==}
@@ -2300,6 +2310,9 @@ packages:
     resolution: {integrity: sha512-LaNjtRWUBY++zB5nE/NwcaoMylSPk+S+ZHNB1TzdbMJMny6dynpAGt7X/tl/QYq3TIeE6nxHppbo2LGymrG5Pw==}
     engines: {node: '>=10'}
 
+  pako@2.2.0:
+    resolution: {integrity: sha512-zJq6RP/5q+TO2OpFV3FHzlPnFjmkb7Nc99a5SNjJE+uu/PkpChs+NIZSSzbBoD+6kjiISXjfYdwj1ZRQ81dz/w==}
+
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
     engines: {node: '>=6'}
@@ -2346,6 +2359,9 @@ packages:
   pirates@4.0.7:
     resolution: {integrity: sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA==}
     engines: {node: '>= 6'}
+
+  pizzip@3.3.0:
+    resolution: {integrity: sha512-seR2ALUYS4Z0GCs0sVwXWImhBsoCImXpHr+ExNfIZ9G0czvHqpUxlJgwHCl1BBHFyU3nUFmZJPFEEWbpY8cKRg==}
 
   playwright-core@1.63.0:
     resolution: {integrity: sha512-rYCsBF/M5HjUch52bbtVONEFjv6Xu8sm8h72dNlR5bzIE1fvC/bxgspzkjSfU+MweEMmPM8KJebG6nnyxo5mCg==}
@@ -3456,6 +3472,10 @@ snapshots:
   '@types/node@22.20.4':
     dependencies:
       undici-types: 6.21.0
+
+  '@types/pizzip@3.1.2':
+    dependencies:
+      pizzip: 3.3.0
 
   '@types/react-dom@19.3.0(@types/react@19.3.0)':
     dependencies:
@@ -4947,6 +4967,8 @@ snapshots:
     dependencies:
       p-limit: 3.1.0
 
+  pako@2.2.0: {}
+
   parent-module@1.0.1:
     dependencies:
       callsites: 3.1.0
@@ -4988,6 +5010,10 @@ snapshots:
       thread-stream: 4.2.0
 
   pirates@4.0.7: {}
+
+  pizzip@3.3.0:
+    dependencies:
+      pako: 2.2.0
 
   playwright-core@1.63.0: {}
 

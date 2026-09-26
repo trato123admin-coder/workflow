@@ -41,6 +41,11 @@ export function getStorageProvider(): StorageProvider {
   return activeProvider;
 }
 
+export function getTemplatesStorageProvider(): StorageProvider {
+  const client = getSupabaseServiceClient();
+  return new SupabaseStorageProvider(client, 'templates');
+}
+
 export function setStorageProvider(provider: StorageProvider | null): void {
   activeProvider = provider;
 }
