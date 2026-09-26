@@ -10,6 +10,7 @@ import { CasePartiesTab } from '../../../components/cases/CasePartiesTab';
 import { CaseEstateTab } from '../../../components/cases/CaseEstateTab';
 import { CaseActivityTab } from '../../../components/cases/CaseActivityTab';
 import { CaseDocumentsTab } from '../../../components/cases/CaseDocumentsTab';
+import { CaseFilingsTab } from '../../../components/cases/filings/CaseFilingsTab';
 import { CaseHeader } from '../../../components/cases/CaseHeader';
 import { useCaseDetail } from './useCaseDetail';
 import {
@@ -24,9 +25,10 @@ import {
   List,
   MessageSquare,
   FileText,
+  ExternalLink,
 } from 'lucide-react';
 
-type DetailTab = 'processes' | 'parties' | 'estate' | 'documents' | 'activity';
+type DetailTab = 'processes' | 'parties' | 'estate' | 'documents' | 'filings' | 'activity';
 type ProcessView = 'table' | 'kanban';
 
 export default function CaseDetailPage() {
@@ -167,6 +169,18 @@ export default function CaseDetailPage() {
             </button>
             <button
               type="button"
+              onClick={() => setActiveTab('filings')}
+              className={`pb-3 flex items-center gap-1.5 border-b-2 transition-all ${
+                activeTab === 'filings'
+                  ? 'border-primary text-primary font-bold'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <ExternalLink className="w-4 h-4" />
+              <span>Trámites externos</span>
+            </button>
+            <button
+              type="button"
               onClick={() => setActiveTab('activity')}
               className={`pb-3 flex items-center gap-1.5 border-b-2 transition-all ${
                 activeTab === 'activity'
@@ -239,6 +253,8 @@ export default function CaseDetailPage() {
         {activeTab === 'estate' && <CaseEstateTab caseId={caseId} />}
 
         {activeTab === 'documents' && <CaseDocumentsTab caseId={caseId} />}
+
+        {activeTab === 'filings' && <CaseFilingsTab caseId={caseId} />}
 
         {activeTab === 'activity' && <CaseActivityTab caseId={caseId} />}
       </div>

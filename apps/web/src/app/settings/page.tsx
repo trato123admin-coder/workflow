@@ -21,6 +21,7 @@ import {
   Settings as SettingsIcon,
   CheckCircle2,
   Clock,
+  CalendarDays,
 } from 'lucide-react';
 
 import { AppShell } from '../../components/layout/AppShell';
@@ -32,6 +33,7 @@ import { AdvancedSettings } from '../../components/settings/AdvancedSettings';
 import { DynamicSettingsSection } from '../../components/settings/DynamicSettingsSection';
 import { WorkflowModelsManager } from '../../components/settings/WorkflowModelsManager';
 import { StorageSettingsTab } from '../../components/settings/StorageSettingsTab';
+import { HolidaysTab } from '../../components/settings/HolidaysTab';
 
 import type {
   Catalog,
@@ -604,6 +606,7 @@ export default function SettingsPage() {
     { id: 'security', label: 'Seguridad', icon: Shield },
     { id: 'catalogs', label: 'Catálogos', icon: Database },
     { id: 'custom_fields', label: 'Campos Personalizados', icon: FileCode },
+    { id: 'holidays', label: 'Feriados y Días Útiles', icon: CalendarDays },
     { id: 'storage', label: 'Almacenamiento', icon: HardDrive },
     { id: 'advanced', label: 'Avanzado', icon: SettingsIcon },
   ];
@@ -900,6 +903,9 @@ export default function SettingsPage() {
                 onToggleActive={handleToggleCustomField}
               />
             )}
+
+            {/* Feriados y Días Útiles (Sprint 6 - S6-03) */}
+            {activeTab === 'holidays' && <HolidaysTab />}
 
             {/* Almacenamiento (Sprint 5 - S5-09) */}
             {activeTab === 'storage' && <StorageSettingsTab />}
