@@ -8,6 +8,7 @@ import { CaseProcessesTable } from '../../../components/cases/CaseProcessesTable
 import { CaseKanbanBoard } from '../../../components/cases/CaseKanbanBoard';
 import { CasePartiesTab } from '../../../components/cases/CasePartiesTab';
 import { CaseEstateTab } from '../../../components/cases/CaseEstateTab';
+import { CaseActivityTab } from '../../../components/cases/CaseActivityTab';
 import { CaseHeader } from '../../../components/cases/CaseHeader';
 import { useCaseDetail } from './useCaseDetail';
 import {
@@ -20,9 +21,10 @@ import {
   Building,
   LayoutGrid,
   List,
+  MessageSquare,
 } from 'lucide-react';
 
-type DetailTab = 'processes' | 'parties' | 'estate';
+type DetailTab = 'processes' | 'parties' | 'estate' | 'activity';
 type ProcessView = 'table' | 'kanban';
 
 export default function CaseDetailPage() {
@@ -149,6 +151,18 @@ export default function CaseDetailPage() {
               <Building className="w-4 h-4" />
               <span>Patrimonio</span>
             </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('activity')}
+              className={`pb-3 flex items-center gap-1.5 border-b-2 transition-all ${
+                activeTab === 'activity'
+                  ? 'border-primary text-primary font-bold'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <MessageSquare className="w-4 h-4" />
+              <span>Actividad</span>
+            </button>
           </div>
 
           {activeTab === 'processes' && (
@@ -209,6 +223,8 @@ export default function CaseDetailPage() {
         )}
 
         {activeTab === 'estate' && <CaseEstateTab caseId={caseId} />}
+
+        {activeTab === 'activity' && <CaseActivityTab caseId={caseId} />}
       </div>
     </AppShell>
   );
