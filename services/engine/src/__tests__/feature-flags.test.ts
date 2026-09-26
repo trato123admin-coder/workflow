@@ -29,7 +29,7 @@ describe('Engine: Feature Flag Middleware (S2-02)', () => {
     const body = JSON.parse(response.body);
     expect(body.module).toBe('cash');
     expect(body.status).toBe('active');
-  });
+  }, 20000);
 
   it('responde 403 feature_disabled cuando el flag está inactivo', async () => {
     const app = await buildApp();

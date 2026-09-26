@@ -1,187 +1,48 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { AppShell } from '../../../components/layout/AppShell';
 import { CaseProcessesTable } from '../../../components/cases/CaseProcessesTable';
+import { CaseKanbanBoard } from '../../../components/cases/CaseKanbanBoard';
+import { CasePartiesTab } from '../../../components/cases/CasePartiesTab';
+import { CaseEstateTab } from '../../../components/cases/CaseEstateTab';
 import { CaseHeader } from '../../../components/cases/CaseHeader';
-import { createClient } from '../../../lib/supabase/client';
-import { Lock, Clock, XCircle, CheckCircle2, ArrowLeft } from 'lucide-react';
-import type { CaseItem, CaseProcessItem } from '@workflow/shared';
+import { useCaseDetail } from './useCaseDetail';
+import {
+  Lock,
+  Clock,
+  XCircle,
+  CheckCircle2,
+  ArrowLeft,
+  Users,
+  Building,
+  LayoutGrid,
+  List,
+} from 'lucide-react';
+
+type DetailTab = 'processes' | 'parties' | 'estate';
+type ProcessView = 'table' | 'kanban';
 
 export default function CaseDetailPage() {
   const params = useParams();
   const caseId = params.id as string;
 
-  const [caseData, setCaseData] = useState<CaseItem | null>(null);
-  const [processes, setProcesses] = useState<CaseProcessItem[]>([]);
-  const [statuses, setStatuses] = useState<
-    { id: string; code: string; name: string; category: string }[]
-  >([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [unauthorized, setUnauthorized] = useState(false);
+  const [activeTab, setActiveTab] = useState<DetailTab>('processes');
+  const [processView, setProcessView] = useState<ProcessView>('kanban');
 
-  const loadCaseData = useCallback(async () => {
-    if (!caseId) return;
-    setIsLoading(true);
-    setUnauthorized(false);
-    try {
-      const supabase = createClient();
-
-      const { data: cData, error: cErr } = await supabase
-        .from('cases')
-        .select(
-          `
-          *,
-          client_person:persons!cases_client_person_id_fkey (
-            id,
-            person_type,
-            identity_document_type,
-            identity_document_number,
-            first_name,
-            last_name,
-            legal_name
-          ),
-          case_assignments (
-            assignment_type,
-            user_id,
-            profiles (
-              email,
-              first_name,
-              last_name
-            )
-          )
-        `,
-        )
-        .eq('id', caseId)
-        .single();
-
-      if (cErr || !cData) {
-        setUnauthorized(true);
-        return;
-      }
-
-      const assignments = cData.case_assignments as unknown as {
-        assignment_type: string;
-        user_id: string;
-        profiles?: { email: string; first_name: string | null; last_name: string | null };
-      }[];
-      const resp = assignments?.find((a) => a.assignment_type === 'RESPONSIBLE');
-      setCaseData({
-        ...cData,
-        current_progress: Number(cData.current_progress || 0),
-        responsible: resp?.profiles
-          ? {
-              id: resp.user_id,
-              email: resp.profiles.email,
-              first_name: resp.profiles.first_name,
-              last_name: resp.profiles.last_name,
-            }
-          : undefined,
-      });
-
-      const { data: sData } = await supabase
-        .from('workflow_statuses')
-        .select('id, code, name, category, keeps_previous_progress')
-        .order('sort_order');
-      if (sData) setStatuses(sData);
-
-      const { data: pData, error: pErr } = await supabase
-        .from('case_processes')
-        .select(
-          `
-          id,
-          case_id,
-          case_model_process_id,
-          sequence,
-          weight,
-          status_id,
-          progress,
-          manual_progress,
-          is_applicable,
-          definition:process_definitions (
-            code,
-            name,
-            description
-          ),
-          status:workflow_statuses (
-            id,
-            code,
-            name,
-            semantic_category:category,
-            color
-          )
-        `,
-        )
-        .eq('case_id', caseId)
-        .order('sequence');
-
-      if (pErr) throw pErr;
-      setProcesses((pData as unknown as CaseProcessItem[]) || []);
-    } catch (err: unknown) {
-      setErrorMessage((err as Error).message || 'Error al cargar expediente');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [caseId]);
-
-  useEffect(() => {
-    loadCaseData();
-  }, [loadCaseData]);
-
-  const handleAdvanceProcess = async (
-    processId: string,
-    statusId: string,
-    manualProgress?: number,
-  ) => {
-    setIsUpdating(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
-    try {
-      const supabase = createClient();
-      const updatePayload: { status_id: string; manual_progress?: number } = {
-        status_id: statusId,
-      };
-      if (manualProgress !== undefined) {
-        updatePayload.manual_progress = manualProgress;
-      }
-
-      const { error } = await supabase
-        .from('case_processes')
-        .update(updatePayload)
-        .eq('id', processId);
-
-      if (error) throw error;
-
-      setSuccessMessage('Proceso actualizado exitosamente.');
-      await loadCaseData();
-    } catch (err: unknown) {
-      setErrorMessage((err as Error).message || 'Error al actualizar proceso');
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  const handleCloseCase = async () => {
-    setIsUpdating(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
-    try {
-      const supabase = createClient();
-      const { error } = await supabase.rpc('close_case', { _case_id: caseId });
-      if (error) throw error;
-      setSuccessMessage('Expediente cerrado con éxito.');
-      await loadCaseData();
-    } catch (err: unknown) {
-      setErrorMessage((err as Error).message || 'No se pudo cerrar el caso');
-    } finally {
-      setIsUpdating(false);
-    }
-  };
+  const {
+    caseData,
+    processes,
+    statuses,
+    isUpdating,
+    errorMessage,
+    successMessage,
+    unauthorized,
+    handleAdvanceProcess,
+    handleCloseCase,
+  } = useCaseDetail(caseId);
 
   if (unauthorized) {
     return (
@@ -195,7 +56,7 @@ export default function CaseDetailPage() {
           </h2>
           <p className="text-xs text-muted-foreground">
             No tiene permisos para visualizar este caso por política de seguridad a nivel de fila
-            (RLS). Solo los gestores y participantes asignados pueden acceder al expediente.
+            (RLS).
           </p>
           <Link
             href="/cases"
@@ -249,24 +110,105 @@ export default function CaseDetailPage() {
           </div>
         )}
 
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
-              <Clock className="w-4 h-4 text-primary" />
-              Procesos del Expediente ({processes.length})
-            </h2>
-            <span className="text-xs text-muted-foreground">
-              Compuertas y dependencias activas (M1)
-            </span>
+        {/* Barra de Pestañas de Detalle de Caso */}
+        <div className="flex items-center justify-between border-b border-border pb-px">
+          <div className="flex gap-6 text-xs font-semibold">
+            <button
+              type="button"
+              onClick={() => setActiveTab('processes')}
+              className={`pb-3 flex items-center gap-1.5 border-b-2 transition-all ${
+                activeTab === 'processes'
+                  ? 'border-primary text-primary font-bold'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Clock className="w-4 h-4" />
+              <span>Procesos ({processes.length})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('parties')}
+              className={`pb-3 flex items-center gap-1.5 border-b-2 transition-all ${
+                activeTab === 'parties'
+                  ? 'border-primary text-primary font-bold'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              <span>Personas</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('estate')}
+              className={`pb-3 flex items-center gap-1.5 border-b-2 transition-all ${
+                activeTab === 'estate'
+                  ? 'border-primary text-primary font-bold'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Building className="w-4 h-4" />
+              <span>Patrimonio</span>
+            </button>
           </div>
 
-          <CaseProcessesTable
-            processes={processes}
-            workflowStatuses={statuses}
-            onAdvanceProcess={handleAdvanceProcess}
-            isUpdating={isUpdating}
-          />
+          {activeTab === 'processes' && (
+            <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-lg border border-border">
+              <button
+                type="button"
+                onClick={() => setProcessView('kanban')}
+                className={`p-1.5 rounded text-xs flex items-center gap-1 ${
+                  processView === 'kanban'
+                    ? 'bg-card text-foreground shadow-sm font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Vista Kanban"
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Kanban</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setProcessView('table')}
+                className={`p-1.5 rounded text-xs flex items-center gap-1 ${
+                  processView === 'table'
+                    ? 'bg-card text-foreground shadow-sm font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Vista Tabla"
+              >
+                <List className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Tabla</span>
+              </button>
+            </div>
+          )}
         </div>
+
+        {/* Contenido según pestaña activa */}
+        {activeTab === 'processes' && (
+          <div>
+            {processView === 'kanban' ? (
+              <CaseKanbanBoard
+                processes={processes}
+                workflowStatuses={statuses}
+                onAdvanceProcess={handleAdvanceProcess}
+                isUpdating={isUpdating}
+              />
+            ) : (
+              <CaseProcessesTable
+                processes={processes}
+                workflowStatuses={statuses}
+                onAdvanceProcess={handleAdvanceProcess}
+                isUpdating={isUpdating}
+              />
+            )}
+          </div>
+        )}
+
+        {activeTab === 'parties' && (
+          <CasePartiesTab caseId={caseId} isConfidential={caseData?.is_confidential} />
+        )}
+
+        {activeTab === 'estate' && <CaseEstateTab caseId={caseId} />}
       </div>
     </AppShell>
   );

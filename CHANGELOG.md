@@ -6,6 +6,34 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Sprint 4a — Intervinientes, patrimonio, semáforos y asistente de 5 pasos
+
+#### Agregado
+
+- **Base de Datos & Seguridad (Supabase):**
+  - Migración `20260925130000_case_parties_and_estate_schema.sql`:
+    - Tablas `case_parties`, `case_assets` y `case_liabilities` con RLS habilitada y políticas gobernadas por permisos (`parties.read`, `parties.write`, `estate.read`, `estate.write`) y feature flags (`module.case_parties`, `module.estate_inventory`).
+    - Índice único parcial `one_causante_per_case` en `case_parties` para garantizar máximo un causante activo por expediente.
+    - Restricción CHECK `chk_case_assets_bank_account_digits`: regla no negociable que obliga a que cuentas bancarias (`CUENTA_BANCARIA`) solo almacenen hasta 4 dígitos exactos en `registry_ref` (nunca números completos ni CCI).
+    - Extensión atómica de `public.create_case_from_model`: instanciación transaccional completa del expediente, equipo asignado, causante e intervinientes iniciales en una sola llamada segura ante concurrencia.
+    - Función de semáforos de base de datos `public.get_case_semaphore_warnings` con verificación obligatoria de acceso (`private.can_access_case`) para detección segura de inconsistencias (menores sin tutor, cuotas != 100%, causante sin defunción).
+    - Disparador de auditoría automática `private.tg_audit_log()` conectado a las nuevas entidades.
+  - Script de verificación `20260925130000_case_parties_and_estate_schema.verify.sql` (7 comprobaciones de integridad).
+  - Suite de pruebas pgTAP `supabase/tests/database/06_case_parties_and_estate.test.sql` con 25 pruebas automatizadas exitosas (incluye rechazo a usuarios no autorizados).
+- **Paquete Compartido (`@workflow/shared`):**
+  - Esquemas de dominio y validaciones Zod para intervinientes y cuotas sucesorias (`case-parties.ts`).
+  - Esquemas para inventario patrimonial de activos y pasivos con cálculo de balance neto (`case-estate.ts`).
+  - Lógica pura de semáforos y validaciones de negocio: `validateHeirSharesSum`, `validateMinorRepresentation`, `validateCausanteDeathDate`, `validateBankAccountDigits`.
+  - 13 pruebas unitarias adicionales en Vitest cubriendo herederos, patrimonio y semáforos (48 pruebas totales en `@workflow/shared`).
+- **Aplicación Web (`apps/web`):**
+  - Asistente de creación de expedientes en 5 pasos (`CaseWizardModal.tsx`): datos generales, causante, modelo versionado, intervinientes iniciales y confirmación atómica.
+  - Pestaña "Intervinientes" en detalle de caso (`CasePartiesTab.tsx`): tarjeta de causante, listado de herederos, barra de distribución de cuotas (100%) y modales de edición con asignación de representantes legales a menores.
+  - Pestaña "Patrimonio" en detalle de caso (`CaseEstateTab.tsx`): resumen financiero (activo bruto, pasivo total, patrimonio neto), listados de bienes y deudas, y modales con validación estricta de 4 dígitos bancarios.
+  - Badges visuales de semáforo reactivo en la cabecera del expediente (`/cases/[id]`) y en las tarjetas del tablero.
+  - Componentes modulares de tablero Kanban (`CaseKanbanBoard.tsx`, `CaseCard.tsx`, `CasesTable.tsx`).
+- **Documentación:**
+  - Actualización de `docs/db-migrations-log.md` tras confirmación de ejecución exitosa en staging.
+
 ### Sprint 3 — Casos, modelos versionados, avance ponderado y compuertas
 
 #### Agregado

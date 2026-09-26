@@ -1,19 +1,28 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Modal } from '../ui/Modal';
 import { Stepper, StepItem } from '../ui/Stepper';
-import { PersonPicker } from '../persons/PersonPicker';
+import { CaseWizardStepClient } from './CaseWizardStepClient';
+import { CaseWizardStepCausante } from './CaseWizardStepCausante';
 import { CaseWizardStepParams } from './CaseWizardStepParams';
+import { CaseWizardStepHeirs } from './CaseWizardStepHeirs';
 import { CaseWizardStepAssign } from './CaseWizardStepAssign';
+import { useCaseWizardData } from './useCaseWizardData';
 import { createClient } from '../../lib/supabase/client';
 import {
-  CreateCaseWizardSchema,
   type PersonItem,
   type CaseRoute,
   type CasePriority,
+  type InitialPartyInput,
 } from '@workflow/shared';
 import { Briefcase, ChevronRight, ChevronLeft, AlertCircle } from 'lucide-react';
+
+interface HeirEntry extends InitialPartyInput {
+  personName: string;
+  docNumber: string;
+  birthDate?: string | null;
+}
 
 interface CaseWizardModalProps {
   isOpen: boolean;
@@ -21,99 +30,56 @@ interface CaseWizardModalProps {
   onCaseCreated: (caseId: string) => void;
 }
 
+const STEP_ITEMS: StepItem[] = [
+  { id: 'client', title: 'Cliente', description: 'Contratante' },
+  { id: 'causante', title: 'Causante', description: 'Fallecido' },
+  { id: 'model', title: 'Modelo', description: 'Trámite' },
+  { id: 'heirs', title: 'Herederos', description: 'Opcional' },
+  { id: 'assign', title: 'Asignación', description: 'Responsable' },
+];
+
 export const CaseWizardModal: React.FC<CaseWizardModalProps> = ({
   isOpen,
   onClose,
   onCaseCreated,
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [selectedPerson, setSelectedPerson] = useState<PersonItem | null>(null);
-  const [models, setModels] = useState<
-    { version_id: string; code: string; name: string; version: number }[]
-  >([]);
-  const [selectedModelVersionId, setSelectedModelVersionId] = useState('');
+
+  // Wizard data hook
+  const {
+    models,
+    selectedModelVersionId,
+    setSelectedModelVersionId,
+    users,
+    responsibleId,
+    setResponsibleId,
+  } = useCaseWizardData(isOpen);
+
+  // Step 1: Contratante
+  const [selectedClient, setSelectedClient] = useState<PersonItem | null>(null);
+
+  // Step 2: Causante
+  const [selectedCausante, setSelectedCausante] = useState<PersonItem | null>(null);
+  const [deathDate, setDeathDate] = useState('');
+
+  // Step 3: Modelo y Parámetros
   const [title, setTitle] = useState('');
   const [route, setRoute] = useState<CaseRoute>('POR_DEFINIR');
   const [priority, setPriority] = useState<CasePriority>('NORMAL');
   const [isConfidential, setIsConfidential] = useState(false);
-  const [users, setUsers] = useState<{ id: string; email: string; name: string; role: string }[]>(
-    [],
-  );
-  const [responsibleId, setResponsibleId] = useState('');
+
+  // Step 4: Herederos
+  const [heirs, setHeirs] = useState<HeirEntry[]>([]);
+
+  // Step 5: Asignación
   const [lawyerId, setLawyerId] = useState('');
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [generalError, setGeneralError] = useState('');
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const loadWizardData = async () => {
-      try {
-        const supabase = createClient();
-        const { data: vData } = await supabase
-          .from('case_model_versions')
-          .select(`id, version, case_models ( code, name )`)
-          .eq('status', 'PUBLISHED');
-
-        if (vData) {
-          const formatted = (
-            vData as unknown as {
-              id: string;
-              version: number;
-              case_models: { code: string; name: string } | null;
-            }[]
-          ).map((v) => ({
-            version_id: v.id,
-            code: v.case_models?.code || '',
-            name: v.case_models?.name || '',
-            version: v.version,
-          }));
-          setModels(formatted);
-          const notarial =
-            formatted.find((m) => m.code === 'SUCESION_INTESTADA_NOTARIAL') || formatted[0];
-          if (notarial) setSelectedModelVersionId(notarial.version_id);
-        }
-
-        const { data: uData } = await supabase
-          .from('profiles')
-          .select(`id, email, first_name, last_name, user_roles!user_id ( roles ( code, name ) )`)
-          .eq('is_active', true);
-
-        if (uData) {
-          const formattedUsers = (
-            uData as unknown as {
-              id: string;
-              email: string;
-              first_name: string | null;
-              last_name: string | null;
-              user_roles: { roles: { code: string; name: string } | null }[] | null;
-            }[]
-          ).map((u) => ({
-            id: u.id,
-            email: u.email,
-            name: `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email,
-            role: u.user_roles?.[0]?.roles?.name || 'Usuario',
-          }));
-          setUsers(formattedUsers);
-
-          const { data: sessionData } = await supabase.auth.getSession();
-          const currentUserId = sessionData.session?.user?.id;
-          if (currentUserId) {
-            setResponsibleId(currentUserId);
-          } else if (formattedUsers.length > 0 && formattedUsers[0]) {
-            setResponsibleId(formattedUsers[0].id);
-          }
-        }
-      } catch (err) {
-        // Fallback
-      }
-    };
-
-    loadWizardData();
-  }, [isOpen]);
-
-  const handleSelectPerson = (p: PersonItem) => {
-    setSelectedPerson(p);
+  const handleSelectClient = (p: PersonItem) => {
+    setSelectedClient(p);
     const clientName =
       p.person_type === 'JURIDICA'
         ? p.legal_name || ''
@@ -126,12 +92,18 @@ export const CaseWizardModal: React.FC<CaseWizardModalProps> = ({
   const handleNext = () => {
     setErrors({});
     if (currentStep === 0) {
-      if (!selectedPerson) {
-        setErrors({ client: 'Debe seleccionar un cliente antes de continuar' });
+      if (!selectedClient) {
+        setErrors({ client: 'Debe seleccionar un contratante antes de continuar' });
         return;
       }
       setCurrentStep(1);
     } else if (currentStep === 1) {
+      if (!selectedCausante) {
+        setErrors({ causante: 'Debe seleccionar al causante del proceso sucesorio' });
+        return;
+      }
+      setCurrentStep(2);
+    } else if (currentStep === 2) {
       if (!title.trim() || title.trim().length < 3) {
         setErrors({ title: 'El título debe tener al menos 3 caracteres' });
         return;
@@ -140,74 +112,76 @@ export const CaseWizardModal: React.FC<CaseWizardModalProps> = ({
         setErrors({ model: 'Debe seleccionar un modelo de caso' });
         return;
       }
-      setCurrentStep(2);
+      setCurrentStep(3);
+    } else if (currentStep === 3) {
+      setCurrentStep(4);
     }
   };
 
-  const handleCreateCase = async () => {
-    setErrors({});
-    setGeneralError('');
-    if (!responsibleId) {
-      setErrors({ responsible: 'Debe seleccionar un gestor responsable' });
-      return;
-    }
-
-    const payload = {
-      client_person_id: selectedPerson?.id,
-      case_model_version_id: selectedModelVersionId,
-      title: title.trim(),
-      route,
-      priority,
-      is_confidential: isConfidential,
-      responsible_id: responsibleId,
-      lawyer_id: lawyerId || null,
-      collaborator_ids: [],
-    };
-
-    const validation = CreateCaseWizardSchema.safeParse(payload);
-    if (!validation.success) {
-      const fieldErrors: Record<string, string> = {};
-      validation.error.errors.forEach((err) => {
-        if (err.path[0]) fieldErrors[String(err.path[0])] = err.message;
-      });
-      setErrors(fieldErrors);
+  const handleSubmit = async () => {
+    if (!selectedClient || !selectedModelVersionId || !title.trim()) {
+      setGeneralError('Faltan datos obligatorios para crear el expediente');
       return;
     }
 
     setIsSubmitting(true);
+    setGeneralError('');
+
     try {
       const supabase = createClient();
-      const { data: newCaseId, error } = await supabase.rpc('create_case_from_model', {
-        _model_version_id: payload.case_model_version_id,
-        _client_person_id: payload.client_person_id,
-        _title: payload.title,
-        _route: payload.route,
-        _priority: payload.priority,
-        _is_confidential: payload.is_confidential,
-        _responsible_id: payload.responsible_id,
-        _lawyer_id: payload.lawyer_id || null,
+
+      if (selectedCausante && deathDate) {
+        await supabase
+          .from('persons')
+          .update({ death_date: deathDate, is_deceased: true })
+          .eq('id', selectedCausante.id);
+      }
+
+      const initialPartiesPayload = heirs.map((h) => ({
+        person_id: h.person_id,
+        party_role: h.party_role,
+        relationship_to_deceased: h.relationship_to_deceased,
+        heir_status: h.heir_status,
+        share_percent: h.share_percent,
+        represented_by: h.represented_by,
+      }));
+
+      const { data: newCaseId, error: rpcError } = await supabase.rpc('create_case_from_model', {
+        _model_version_id: selectedModelVersionId,
+        _client_person_id: selectedClient.id,
+        _title: title.trim(),
+        _description: null,
+        _route: route,
+        _has_dispute: false,
+        _priority: priority,
+        _is_confidential: isConfidential,
+        _ai_allowed: true,
+        _responsible_id: responsibleId || null,
+        _lawyer_id: lawyerId || null,
+        _collaborator_ids: [],
+        _causante_person_id: selectedCausante?.id || null,
+        _initial_parties: initialPartiesPayload,
       });
 
-      if (error) throw error;
-      onCaseCreated(newCaseId);
-      onClose();
+      if (rpcError) throw rpcError;
+      if (!newCaseId) throw new Error('No se recibió el identificador del caso creado');
+
+      onCaseCreated(newCaseId as string);
     } catch (err: unknown) {
-      setGeneralError((err as Error).message || 'Error al crear el caso desde el modelo');
+      setGeneralError((err as Error).message || 'Error al crear expediente');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const steps: StepItem[] = [
-    { id: 'step-1', title: 'Contratante', description: 'Selección de cliente' },
-    { id: 'step-2', title: 'Modelo y Caso', description: 'Parámetros del trámite' },
-    { id: 'step-3', title: 'Asignación', description: 'Equipo y confirmación' },
-  ];
-
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Asistente de Creación de Caso" maxWidth="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title="Nuevo Expediente Sucesorio" maxWidth="xl">
       <div className="space-y-6">
-        <Stepper steps={steps} currentStep={currentStep} onStepClick={setCurrentStep} />
+        <Stepper
+          steps={STEP_ITEMS}
+          currentStep={currentStep}
+          onStepClick={(s) => s < currentStep && setCurrentStep(s)}
+        />
 
         {generalError && (
           <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-2">
@@ -216,24 +190,28 @@ export const CaseWizardModal: React.FC<CaseWizardModalProps> = ({
           </div>
         )}
 
+        {/* Paso 1: Contratante */}
         {currentStep === 0 && (
-          <div className="space-y-4">
-            <div className="border-b border-border pb-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
-                Paso 1: Seleccione al cliente contratante
-              </h3>
-            </div>
-            {errors.client && (
-              <p className="text-xs text-destructive font-medium">{errors.client}</p>
-            )}
-            <PersonPicker
-              selectedPersonId={selectedPerson?.id || null}
-              onSelectPerson={handleSelectPerson}
-            />
-          </div>
+          <CaseWizardStepClient
+            selectedClient={selectedClient}
+            onSelectClient={handleSelectClient}
+            error={errors.client}
+          />
         )}
 
+        {/* Paso 2: Causante */}
         {currentStep === 1 && (
+          <CaseWizardStepCausante
+            selectedCausante={selectedCausante}
+            onSelectCausante={(c) => setSelectedCausante(c)}
+            deathDate={deathDate}
+            onDeathDateChange={(d) => setDeathDate(d)}
+            error={errors.causante}
+          />
+        )}
+
+        {/* Paso 3: Modelo y Parámetros */}
+        {currentStep === 2 && (
           <CaseWizardStepParams
             models={models}
             selectedModelVersionId={selectedModelVersionId}
@@ -250,25 +228,38 @@ export const CaseWizardModal: React.FC<CaseWizardModalProps> = ({
           />
         )}
 
-        {currentStep === 2 && (
+        {/* Paso 4: Herederos Opcionales */}
+        {currentStep === 3 && (
+          <CaseWizardStepHeirs
+            heirs={heirs}
+            onAddHeir={(h) => setHeirs((prev) => [...prev, h])}
+            onRemoveHeir={(id) => setHeirs((prev) => prev.filter((h) => h.person_id !== id))}
+            availablePersons={[]}
+          />
+        )}
+
+        {/* Paso 5: Asignación */}
+        {currentStep === 4 && (
           <CaseWizardStepAssign
             users={users}
             responsibleId={responsibleId}
             onResponsibleChange={setResponsibleId}
             lawyerId={lawyerId}
             onLawyerChange={setLawyerId}
-            selectedPerson={selectedPerson}
+            selectedPerson={selectedClient}
             title={title}
             errors={errors}
           />
         )}
 
-        <div className="flex justify-between pt-4 border-t border-border">
+        {/* Botones de navegación */}
+        <div className="flex items-center justify-between pt-4 border-t border-border">
           {currentStep > 0 ? (
             <button
               type="button"
+              disabled={isSubmitting}
               onClick={() => setCurrentStep((prev) => prev - 1)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-card text-foreground text-xs hover:bg-muted"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-semibold hover:bg-muted text-foreground"
             >
               <ChevronLeft className="w-4 h-4" />
               <span>Anterior</span>
@@ -277,21 +268,21 @@ export const CaseWizardModal: React.FC<CaseWizardModalProps> = ({
             <div />
           )}
 
-          {currentStep < 2 ? (
+          {currentStep < 4 ? (
             <button
               type="button"
               onClick={handleNext}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90"
             >
-              <span>Siguiente</span>
+              <span>{currentStep === 3 ? 'Continuar a Asignación' : 'Siguiente'}</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           ) : (
             <button
-              type="button"
+              type="submit"
               disabled={isSubmitting}
-              onClick={handleCreateCase}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 disabled:opacity-50"
+              onClick={handleSubmit}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 disabled:opacity-50"
             >
               <Briefcase className="w-4 h-4" />
               <span>{isSubmitting ? 'Creando expediente...' : 'Crear Expediente'}</span>
