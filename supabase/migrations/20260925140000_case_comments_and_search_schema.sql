@@ -176,7 +176,7 @@ begin
   -- 3. Generar nuevo número de caso correlativo y seguro ante concurrencia
   v_new_case_number := private.next_case_number();
 
-  -- 4. Obtener estado inicial del flujo (categoría NOT_STARTED)
+  -- 4. Obtener estado inicial del flujo para los procesos (categoría NOT_STARTED)
   select id into v_initial_status_id
     from public.workflow_statuses
    where category = 'NOT_STARTED'
@@ -185,12 +185,14 @@ begin
    limit 1;
 
   if v_initial_status_id is null then
-    select status_id into v_initial_status_id
-      from public.cases
-     where id = _source_case_id;
+    select id into v_initial_status_id
+      from public.workflow_statuses
+     where is_active = true
+     order by sort_order asc
+     limit 1;
   end if;
 
-  -- 5. Insertar nuevo caso (reinicio en estado inicial, 0.00% de avance)
+  -- 5. Insertar nuevo caso (reinicio en estado OPEN, 0.00% de avance)
   insert into public.cases (
     case_number,
     title,
@@ -198,13 +200,13 @@ begin
     case_model_version_id,
     client_person_id,
     parent_case_id,
-    status_id,
+    status,
     route,
     priority,
     has_dispute,
     ai_allowed,
     is_confidential,
-    progress,
+    current_progress,
     created_by
   ) values (
     v_new_case_number,
@@ -213,7 +215,7 @@ begin
     v_source_case.case_model_version_id,
     v_source_case.client_person_id,
     v_source_case.id,
-    v_initial_status_id,
+    'OPEN',
     v_source_case.route,
     v_source_case.priority,
     v_source_case.has_dispute,
@@ -412,12 +414,12 @@ begin
         when client.person_type = 'JURIDICA' then coalesce(client.legal_name, 'Persona Jurídica')
         else trim(coalesce(client.first_name, '') || ' ' || coalesce(client.last_name, ''))
       end as subtitle,
-      coalesce(ws.name, 'Pendiente') as badge,
+      coalesce(ci.name, c.status) as badge,
       '/cases/' || c.id::text as route_url,
       jsonb_build_object(
         'case_number', c.case_number,
         'is_confidential', c.is_confidential,
-        'status_category', ws.category,
+        'status', c.status,
         'created_at', c.created_at
       ) as metadata,
       case
@@ -426,7 +428,7 @@ begin
         else extensions.similarity(c.title, v_cleaned_query)
       end as score
     from public.cases c
-    left join public.workflow_statuses ws on ws.id = c.status_id
+    left join public.catalog_items ci on ci.catalog_code = 'case_statuses' and ci.code = c.status
     left join public.persons client on client.id = c.client_person_id
     where private.can_access_case(c.id)
       and (

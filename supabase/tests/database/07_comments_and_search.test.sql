@@ -48,6 +48,7 @@ create temp table s4b_vars (
   v_dup_case_1_id uuid,
   v_dup_case_2_id uuid
 );
+grant all on s4b_vars to public;
 
 insert into s4b_vars (
   v_model_version_id,
@@ -134,8 +135,9 @@ select is(
 -- TEST 2 a 10: RLS, Triggers y Operaciones en case_comments
 -- ============================================================================
 
--- Simular Gestor 1 (asignado al Caso A)
-select set_config('request.jwt.claims', '{"sub":"22222222-4444-2222-2222-222222222222","role":"authenticated","aal":"aal1"}', true);
+-- Simular Gestor 1 (asignado al Caso A) bajo rol authenticated
+set local role authenticated;
+set local "request.jwt.claims" to '{"sub":"22222222-4444-2222-2222-222222222222","role":"authenticated","aal":"aal1"}';
 
 -- 2. Insertar comentario como Gestor 1
 insert into public.case_comments (id, case_id, user_id, comment_text, mentions)
@@ -175,7 +177,7 @@ select is(
 );
 
 -- Simular Gestor 2 (NO asignado al Caso B confidencial)
-select set_config('request.jwt.claims', '{"sub":"33333333-4444-3333-3333-333333333333","role":"authenticated","aal":"aal1"}', true);
+set local "request.jwt.claims" to '{"sub":"33333333-4444-3333-3333-333333333333","role":"authenticated","aal":"aal1"}';
 
 -- 6. Gestor 2 no puede leer comentarios de un caso confidencial ajeno
 select is(
@@ -200,7 +202,7 @@ select throws_ok(
 );
 
 -- 8. Gestor 1 puede actualizar su propio comentario
-select set_config('request.jwt.claims', '{"sub":"22222222-4444-2222-2222-222222222222","role":"authenticated","aal":"aal1"}', true);
+set local "request.jwt.claims" to '{"sub":"22222222-4444-2222-2222-222222222222","role":"authenticated","aal":"aal1"}';
 
 update public.case_comments
    set comment_text = 'Comentario Alpha editado por su autor'
@@ -213,11 +215,14 @@ select is(
 );
 
 -- 9. Gestor 2 no puede actualizar el comentario de Gestor 1
-select set_config('request.jwt.claims', '{"sub":"33333333-4444-3333-3333-333333333333","role":"authenticated","aal":"aal1"}', true);
+set local "request.jwt.claims" to '{"sub":"33333333-4444-3333-3333-333333333333","role":"authenticated","aal":"aal1"}';
 
 update public.case_comments
    set comment_text = 'Intento de edicion ajena'
  where id = (select v_comment_id from s4b_vars);
+
+-- Verificar como Gestor 1 (autor con acceso al caso) que el comentario no fue modificado
+set local "request.jwt.claims" to '{"sub":"22222222-4444-2222-2222-222222222222","role":"authenticated","aal":"aal1"}';
 
 select is(
   (select comment_text from public.case_comments where id = (select v_comment_id from s4b_vars)),
@@ -226,7 +231,7 @@ select is(
 );
 
 -- 10. Superusuario (Admin) puede eliminar cualquier comentario con private.is_superuser()
-select set_config('request.jwt.claims', '{"sub":"11111111-4444-1111-1111-111111111111","role":"authenticated","aal":"aal2"}', true);
+set local "request.jwt.claims" to '{"sub":"11111111-4444-1111-1111-111111111111","role":"authenticated","aal":"aal2"}';
 
 delete from public.case_comments where id = (select v_comment_id from s4b_vars);
 
@@ -241,7 +246,7 @@ select is(
 -- ============================================================================
 
 -- 11. Gestor 2 intenta duplicar caso confidencial ajeno (debe arrojar excepción)
-select set_config('request.jwt.claims', '{"sub":"33333333-4444-3333-3333-333333333333","role":"authenticated","aal":"aal1"}', true);
+set local "request.jwt.claims" to '{"sub":"33333333-4444-3333-3333-333333333333","role":"authenticated","aal":"aal1"}';
 
 select throws_ok(
   $$
@@ -252,7 +257,7 @@ select throws_ok(
 );
 
 -- 12. Gestor 1 duplica Caso A (con partes, sin activos)
-select set_config('request.jwt.claims', '{"sub":"22222222-4444-2222-2222-222222222222","role":"authenticated","aal":"aal1"}', true);
+set local "request.jwt.claims" to '{"sub":"22222222-4444-2222-2222-222222222222","role":"authenticated","aal":"aal1"}';
 
 update s4b_vars
    set v_dup_case_1_id = public.duplicate_case(
@@ -270,7 +275,7 @@ select is(
 
 -- 13. Nuevo caso tiene nuevo case_number correlativo y progreso 0.00
 select is(
-  (select progress from public.cases where id = (select v_dup_case_1_id from s4b_vars)),
+  (select current_progress from public.cases where id = (select v_dup_case_1_id from s4b_vars)),
   0.00,
   '13. Caso duplicado inicia en progreso 0.00% y estado inicial'
 );
@@ -330,6 +335,8 @@ select is(
 -- ============================================================================
 
 -- 20. Gestor 1 (asignado al caso confidencial B) busca a Persona Secreta por DNI
+set local "request.jwt.claims" to '{"sub":"22222222-4444-2222-2222-222222222222","role":"authenticated","aal":"aal1"}';
+
 select is(
   (select count(*)::integer from public.global_search('77889900') where entity_type = 'PERSON'),
   1,
@@ -337,7 +344,7 @@ select is(
 );
 
 -- 21. Gestor 2 (NO asignado al caso confidencial B) busca por DNI '77889900' (DEBE DAR 0)
-select set_config('request.jwt.claims', '{"sub":"33333333-4444-3333-3333-333333333333","role":"authenticated","aal":"aal1"}', true);
+set local "request.jwt.claims" to '{"sub":"33333333-4444-3333-3333-333333333333","role":"authenticated","aal":"aal1"}';
 
 select is(
   (select count(*)::integer from public.global_search('77889900')),
@@ -353,7 +360,7 @@ select is(
 );
 
 -- 23. Gestor 1 busca caso accesible Alpha
-select set_config('request.jwt.claims', '{"sub":"22222222-4444-2222-2222-222222222222","role":"authenticated","aal":"aal1"}', true);
+set local "request.jwt.claims" to '{"sub":"22222222-4444-2222-2222-222222222222","role":"authenticated","aal":"aal1"}';
 
 select is(
   (select count(*)::integer from public.global_search('Alpha') where entity_type = 'CASE'),
@@ -367,6 +374,8 @@ select is(
   0,
   '24. Búsqueda con menos de 2 caracteres retorna 0 resultados sin ejecutar consulta'
 );
+
+reset role;
 
 select * from finish();
 rollback;
