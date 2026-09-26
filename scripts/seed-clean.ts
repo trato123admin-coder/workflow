@@ -19,32 +19,51 @@ const supabase = createClient(supabaseUrl, serviceKey, {
   auth: { persistSession: false },
 });
 
-export async function cleanSyntheticSeed() {
-  process.stdout.write('Iniciando limpieza de datos sintéticos (S4-10)...\n');
+async function deleteSyntheticCasesBatch(): Promise<number> {
+  let totalDeleted = 0;
+  while (true) {
+    const { data, error: fErr } = await supabase
+      .from('cases')
+      .select('id')
+      .filter('custom_data->>is_synthetic', 'eq', 'true')
+      .limit(250);
 
-  // 1. Eliminar expedientes sintéticos (sus dependencias se eliminan en cascada)
-  const { data: deletedCases, error: cErr } = await supabase
-    .from('cases')
-    .delete()
-    .filter('custom_data->>is_synthetic', 'eq', 'true')
-    .select('id');
+    if (fErr) throw new Error(`Error buscando casos sintéticos: ${fErr.message}`);
+    if (!data || data.length === 0) break;
 
-  if (cErr) {
-    throw new Error(`Error eliminando casos sintéticos: ${cErr.message}`);
+    const ids = data.map((d) => d.id);
+    const { error: dErr } = await supabase.from('cases').delete().in('id', ids);
+    if (dErr) throw new Error(`Error eliminando casos sintéticos: ${dErr.message}`);
+
+    totalDeleted += ids.length;
+    process.stdout.write(`  Casos sintéticos eliminados: ${totalDeleted}...\n`);
   }
+  return totalDeleted;
+}
 
-  // 2. Eliminar personas sintéticas
-  const { data: deletedPersons, error: pErr } = await supabase
-    .from('persons')
-    .delete()
-    .filter('custom_data->>is_synthetic', 'eq', 'true')
-    .select('id');
+async function deleteSyntheticPersonsBatch(): Promise<number> {
+  let totalDeleted = 0;
+  while (true) {
+    const { data, error: fErr } = await supabase
+      .from('persons')
+      .select('id')
+      .filter('custom_data->>is_synthetic', 'eq', 'true')
+      .limit(250);
 
-  if (pErr) {
-    throw new Error(`Error eliminando personas sintéticas: ${pErr.message}`);
+    if (fErr) throw new Error(`Error buscando personas sintéticas: ${fErr.message}`);
+    if (!data || data.length === 0) break;
+
+    const ids = data.map((d) => d.id);
+    const { error: dErr } = await supabase.from('persons').delete().in('id', ids);
+    if (dErr) throw new Error(`Error eliminando personas sintéticas: ${dErr.message}`);
+
+    totalDeleted += ids.length;
+    process.stdout.write(`  Personas sintéticas eliminadas: ${totalDeleted}...\n`);
   }
+  return totalDeleted;
+}
 
-  // 3. Confirmación y verificación de estado limpio (cero registros sintéticos restantes)
+async function verifyCleanZero(): Promise<void> {
   const [{ count: remainingCases }, { count: remainingPersons }] = await Promise.all([
     supabase
       .from('cases')
@@ -61,10 +80,18 @@ export async function cleanSyntheticSeed() {
       `Error de limpieza: Aún quedan ${remainingCases || 0} casos y ${remainingPersons || 0} personas sintéticas.`,
     );
   }
+}
+
+export async function cleanSyntheticSeed() {
+  process.stdout.write('Iniciando limpieza de datos sintéticos (S4-10)...\n');
+
+  const deletedCases = await deleteSyntheticCasesBatch();
+  const deletedPersons = await deleteSyntheticPersonsBatch();
+  await verifyCleanZero();
 
   process.stdout.write('Limpieza de datos sintéticos completada con éxito.\n');
-  process.stdout.write(`- Casos eliminados: ${deletedCases?.length || 0}\n`);
-  process.stdout.write(`- Personas eliminadas: ${deletedPersons?.length || 0}\n`);
+  process.stdout.write(`- Casos eliminados: ${deletedCases}\n`);
+  process.stdout.write(`- Personas eliminadas: ${deletedPersons}\n`);
   process.stdout.write(
     '✓ Verificación: 0 casos sintéticos y 0 personas sintéticas restantes en la base de datos.\n',
   );
