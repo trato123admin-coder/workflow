@@ -75,7 +75,7 @@ export async function loadSyntheticSeed() {
 
   // 2. Inserción de 100 personas (12 de benchmark + 88 para rotación en casos de volumen)
   const personsPayload = [
-    { first_name: 'Carlos', last_name: 'Contratante Bench', person_type: 'NATURAL', identity_document_type: 'DNI', identity_document_number: 'SYN90000001', custom_data: { is_synthetic: true } },
+    { first_name: 'Carlos', last_name: 'Contratante Bench', person_type: 'NATURAL', identity_document_type: 'DNI', identity_document_number: 'SYN90000001', is_deceased: false, custom_data: { is_synthetic: true } },
     { first_name: 'Alberto', last_name: 'Causante Bench', person_type: 'NATURAL', identity_document_type: 'DNI', identity_document_number: 'SYN90000002', is_deceased: true, death_date: '2025-01-15', custom_data: { is_synthetic: true } },
     ...Array.from({ length: 10 }, (_, i) => ({
       first_name: `Heredero ${i + 1}`,
@@ -84,6 +84,7 @@ export async function loadSyntheticSeed() {
       identity_document_type: 'DNI',
       identity_document_number: `SYN900010${String(i).padStart(2, '0')}`,
       birth_date: '1990-05-20',
+      is_deceased: false,
       custom_data: { is_synthetic: true },
     })),
     ...Array.from({ length: 88 }, (_, i) => ({
@@ -93,6 +94,7 @@ export async function loadSyntheticSeed() {
       identity_document_type: 'DNI',
       identity_document_number: `SYN900020${String(i).padStart(2, '0')}`,
       birth_date: '1985-03-15',
+      is_deceased: false,
       custom_data: { is_synthetic: true },
     })),
   ];
