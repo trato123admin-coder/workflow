@@ -84,11 +84,16 @@ export async function authenticateUser(
     throw createDocumentError('Error al consultar roles de usuario', 500, 'ROLES_QUERY_ERROR');
   }
 
-  const activeRoles = (userRolesData ?? [])
-    .map(
-      (ur) => (ur as unknown as { roles?: { is_active?: boolean; requires_mfa?: boolean } }).roles,
-    )
-    .filter((r) => r?.is_active);
+  interface RoleDetail {
+    is_superuser?: boolean;
+    is_active?: boolean;
+    requires_mfa?: boolean;
+    role_permissions?: Array<{ permissions?: { code?: string } | null }>;
+  }
+
+  const activeRoles: RoleDetail[] = (userRolesData ?? [])
+    .map((ur) => (ur as unknown as { roles?: RoleDetail | null }).roles)
+    .filter((r): r is RoleDetail => Boolean(r?.is_active));
   const aal = decodeJwtAal(userJwt);
 
   if (activeRoles.some((r) => r.requires_mfa) && aal !== 'aal2') {

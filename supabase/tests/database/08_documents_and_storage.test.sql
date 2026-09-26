@@ -120,8 +120,8 @@ begin
    where cm.code = 'SUCESION_INTESTADA_NOTARIAL' and cmv.version = 1;
 
   -- Crear persona cliente
-  insert into public.persons (id, person_type, document_type, id_number, full_name)
-  values ('bbbbbbbb-5555-bbbb-bbbb-bbbbbbbbbb01', 'NATURAL', 'DNI', '55550001', 'Cliente Test S5')
+  insert into public.persons (id, person_type, identity_document_type, identity_document_number, first_name, last_name, is_active)
+  values ('bbbbbbbb-5555-bbbb-bbbb-bbbbbbbbbb01', 'NATURAL', 'DNI', '55550001', 'Cliente', 'Test S5', true)
   on conflict (id) do nothing;
 
   -- Crear caso
@@ -133,8 +133,8 @@ begin
   ) on conflict (id) do nothing;
 
   -- Crear persona heredero
-  insert into public.persons (id, person_type, document_type, id_number, full_name)
-  values ('bbbbbbbb-5555-bbbb-bbbb-bbbbbbbbbb02', 'NATURAL', 'DNI', '55550002', 'Heredero Test S5')
+  insert into public.persons (id, person_type, identity_document_type, identity_document_number, first_name, last_name, is_active)
+  values ('bbbbbbbb-5555-bbbb-bbbb-bbbbbbbbbb02', 'NATURAL', 'DNI', '55550002', 'Heredero', 'Test S5', true)
   on conflict (id) do nothing;
 
   -- Agregar heredero
@@ -196,7 +196,11 @@ declare
   v_doc_id uuid;
   v_test_user_id uuid := '11111111-5555-1111-1111-111111111111';
 begin
-  -- Registrar perfil para el usuario revisor
+  -- Registrar usuario en auth.users y perfil para el usuario revisor
+  insert into auth.users (id, email)
+  values (v_test_user_id, 'reviewer.audit.test@local.dev')
+  on conflict (id) do nothing;
+
   insert into public.profiles (id, email, first_name, last_name, is_active)
   values (v_test_user_id, 'reviewer.audit.test@local.dev', 'Revisor', 'Audit', true)
   on conflict (id) do nothing;
