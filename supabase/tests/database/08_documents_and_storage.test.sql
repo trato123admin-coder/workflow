@@ -53,9 +53,9 @@ select ok(
 -- Verifica que existen exactamente 2 documentos para HEREDERO y que DNI_COPIA
 -- no fue descartado por colisión de secuencia.
 -- ============================================================================
-select results_eq(
-  $$
-    select dt.code
+select is(
+  (
+    select string_agg(dt.code, ',' order by dt.code)
       from public.case_model_documents cmd
       join public.case_model_versions cmv on cmv.id = cmd.case_model_version_id
       join public.case_models cm on cm.id = cmv.case_model_id
@@ -63,11 +63,8 @@ select results_eq(
      where cm.code = 'SUCESION_INTESTADA_NOTARIAL'
        and cmv.version = 1
        and cmd.party_role = 'HEREDERO'
-     order by dt.code
-  $$,
-  $$
-    values ('DNI_COPIA'), ('PARTIDA_NACIMIENTO')
-  $$,
+  ),
+  'DNI_COPIA,PARTIDA_NACIMIENTO',
   'Existen exactamente 2 documentos para HEREDERO en Sucesión Intestada Notarial v1 (DNI_COPIA y PARTIDA_NACIMIENTO)'
 );
 
@@ -84,7 +81,7 @@ select throws_ok(
      where cm.code = 'SUCESION_INTESTADA_NOTARIAL'
        and cmv.version = 1;
   $$,
-  'No se pueden agregar, modificar ni eliminar elementos de una versión de modelo PUBLISHED',
+  'No se pueden agregar, modificar ni eliminar elementos de una versión de modelo PUBLISHED (es inmutable; clone a una nueva versión)',
   'El trigger trg_guard_case_model_documents_immutability impide modificar versiones PUBLISHED'
 );
 
@@ -204,43 +201,43 @@ select ok(
 -- Verifica que al actualizar status a VALIDATED y OBSERVED se registre en audit_logs
 -- con user_id, old_data.status y new_data.status.
 -- ============================================================================
-do $$
-declare
-  v_doc_id uuid;
-  v_test_user_id uuid := '11111111-5555-1111-1111-111111111111';
-begin
-  -- Registrar usuario en auth.users y perfil para el usuario revisor
-  insert into auth.users (id, email)
-  values (v_test_user_id, 'reviewer.audit.test@local.dev')
-  on conflict (id) do nothing;
+insert into auth.users (id, email)
+values ('11111111-5555-1111-1111-111111111111', 'reviewer.audit.test@local.dev')
+on conflict (id) do nothing;
 
-  insert into public.profiles (id, email, first_name, last_name, is_active)
-  values (v_test_user_id, 'reviewer.audit.test@local.dev', 'Revisor', 'Audit', true)
-  on conflict (id) do nothing;
+insert into public.profiles (id, email, first_name, last_name, is_active)
+values ('11111111-5555-1111-1111-111111111111', 'reviewer.audit.test@local.dev', 'Revisor', 'Audit', true)
+on conflict (id) do nothing;
 
-  -- Seleccionar un slot del caso de prueba
-  select id into v_doc_id
-    from public.case_documents
-   where case_id = 'cccccccc-5555-cccc-cccc-cccccccccc01'
-   limit 1;
+insert into public.user_roles (user_id, role_id)
+select '11111111-5555-1111-1111-111111111111', id from public.roles where code = 'ADMIN'
+on conflict do nothing;
 
-  -- Simular sesión de usuario autenticado
-  perform set_config('request.jwt.claims', json_build_object('sub', v_test_user_id, 'role', 'authenticated')::text, true);
+-- Simular sesión de usuario autenticado
+set local "request.jwt.claims" to '{"sub": "11111111-5555-1111-1111-111111111111", "role": "authenticated", "aal": "aal2"}';
+select set_config('request.jwt.claim.sub', '11111111-5555-1111-1111-111111111111', true);
 
-  -- 1. Actualizar a VALIDATED
-  update public.case_documents
-     set status = 'VALIDATED', notes = 'Aprobado conforme'
-   where id = v_doc_id;
+-- 1. Actualizar a VALIDATED
+update public.case_documents
+   set status = 'VALIDATED', notes = 'Aprobado conforme'
+ where id = (
+   select id from public.case_documents
+    where case_id = 'cccccccc-5555-cccc-cccc-cccccccccc01'
+    limit 1
+ );
 
-  -- 2. Actualizar a OBSERVED
-  update public.case_documents
-     set status = 'OBSERVED', notes = 'Falta firma notarial'
-   where id = v_doc_id;
+-- 2. Actualizar a OBSERVED
+update public.case_documents
+   set status = 'OBSERVED', notes = 'Falta firma notarial'
+ where id = (
+   select id from public.case_documents
+    where case_id = 'cccccccc-5555-cccc-cccc-cccccccccc01'
+    limit 1
+ );
 
-  -- Limpiar sesión
-  perform set_config('request.jwt.claims', '', true);
-end;
-$$;
+-- Limpiar sesión
+set local "request.jwt.claims" to '';
+select set_config('request.jwt.claim.sub', '', true);
 
 select ok(
   exists (
