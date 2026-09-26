@@ -16,3 +16,4 @@ export * from './case-parties.js';
 export * from './case-estate.js';
 export * from './validations.js';
 export * from './kpis.js';
+export * from './documents.js';
