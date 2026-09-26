@@ -217,23 +217,19 @@ on conflict do nothing;
 set local "request.jwt.claims" to '{"sub": "11111111-5555-1111-1111-111111111111", "role": "authenticated", "aal": "aal2"}';
 select set_config('request.jwt.claim.sub', '11111111-5555-1111-1111-111111111111', true);
 
+create temp table s5_test_doc (id uuid);
+insert into s5_test_doc (id)
+select id from public.case_documents where case_id = 'cccccccc-5555-cccc-cccc-cccccccccc01' limit 1;
+
 -- 1. Actualizar a VALIDATED
 update public.case_documents
    set status = 'VALIDATED', notes = 'Aprobado conforme'
- where id = (
-   select id from public.case_documents
-    where case_id = 'cccccccc-5555-cccc-cccc-cccccccccc01'
-    limit 1
- );
+ where id = (select id from s5_test_doc);
 
 -- 2. Actualizar a OBSERVED
 update public.case_documents
    set status = 'OBSERVED', notes = 'Falta firma notarial'
- where id = (
-   select id from public.case_documents
-    where case_id = 'cccccccc-5555-cccc-cccc-cccccccccc01'
-    limit 1
- );
+ where id = (select id from s5_test_doc);
 
 -- Limpiar sesión
 set local "request.jwt.claims" to '';
