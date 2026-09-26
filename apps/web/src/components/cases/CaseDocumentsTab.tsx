@@ -74,8 +74,8 @@ export const CaseDocumentsTab: React.FC<CaseDocumentsTabProps> = ({ caseId }) =>
           id, case_id, status, is_required, notes, current_version_id, is_active,
           document_types!inner (code, name, category, scope, party_role, asset_type),
           persons (id, first_name, last_name, legal_name),
-          case_assets (id, asset_type, identifier, description),
-          current_version:document_versions!case_documents_current_version_id_fkey (id, version, file_name, size_bytes, mime_type)
+          case_assets (id, asset_type, registry_ref, description),
+          current_version:document_versions!fk_case_documents_current_version (id, version, file_name, size_bytes, mime_type)
         `)
         .eq('case_id', caseId)
         .eq('is_active', true)

@@ -39,7 +39,7 @@ export interface EnrichedCaseDocument {
   asset?: {
     id: string;
     asset_type: string;
-    identifier?: string | null;
+    registry_ref?: string | null;
     description?: string | null;
   } | null;
   current_version?: {
@@ -151,7 +151,7 @@ export const CaseDocumentItemRow: React.FC<CaseDocumentItemRowProps> = ({
           )}
           {doc.asset && (
             <span className="bg-muted/70 px-2 py-0.5 rounded text-foreground font-medium">
-              Bien: {doc.asset.identifier || doc.asset.description || doc.asset.asset_type}
+              Bien: {doc.asset.registry_ref || doc.asset.description || doc.asset.asset_type}
             </span>
           )}
           {doc.current_version && (

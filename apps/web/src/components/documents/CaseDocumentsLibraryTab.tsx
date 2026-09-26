@@ -21,7 +21,7 @@ interface RawDocLibraryRow {
   cases?: { id: string; case_number: string; title: string } | null;
   document_types?: { code: string; name: string; scope: 'CASO' | 'PERSONA' | 'BIEN'; nature: string } | null;
   persons?: { first_name?: string | null; last_name?: string | null; legal_name?: string | null } | null;
-  case_assets?: { asset_type: string; identifier?: string | null; description?: string | null } | null;
+  case_assets?: { asset_type: string; registry_ref?: string | null; description?: string | null } | null;
   current_version?: { id: string; version: number; file_name: string; size_bytes: number } | null;
 }
 
@@ -49,8 +49,8 @@ export const CaseDocumentsLibraryTab: React.FC = () => {
           cases!inner ( id, case_number, title ),
           document_types!inner ( code, name, scope, nature ),
           persons ( first_name, last_name, legal_name ),
-          case_assets ( asset_type, identifier, description ),
-          current_version:document_versions!case_documents_current_version_id_fkey (
+          case_assets ( asset_type, registry_ref, description ),
+          current_version:document_versions!fk_case_documents_current_version (
             id, version, file_name, size_bytes
           )
         `)
@@ -68,7 +68,7 @@ export const CaseDocumentsLibraryTab: React.FC = () => {
             `${row.persons.first_name || ''} ${row.persons.last_name || ''}`.trim();
         } else if (row.case_assets) {
           assignedTo =
-            row.case_assets.identifier ||
+            row.case_assets.registry_ref ||
             row.case_assets.description ||
             row.case_assets.asset_type;
         }
