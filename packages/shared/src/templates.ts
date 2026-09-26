@@ -183,24 +183,27 @@ export function lintDocxXml(documentXml: string, validPlaceholders: string[] = [
     }
   }
 
-  // 2. Verificar marcadores desconocidos contra la lista blanca
+  // 2. Verificar marcadores desconocidos contra la lista blanca (Decisión de Política: BLOQUEANTE)
   if (validSet.size > 0) {
     for (const ph of result.placeholders) {
       if (!validSet.has(ph.toLowerCase())) {
         result.unknownPlaceholders.push(ph);
-        result.warnings.push(
-          `El marcador '{{${ph}}}' no coincide con ningún campo registrado en el catálogo de campos.`
+        result.errors.push(
+          `El marcador '{{${ph}}}' no coincide con ningún campo autorizado en el catálogo blanco de document_fields.`
         );
       }
     }
   }
 
-  // 3. Evaluar validez
+  // 3. Evaluar validez: tanto marcadores rotos como campos desconocidos invalidan la plantilla
   if (result.brokenMarkers.length > 0) {
-    result.isValid = false;
     for (const bm of result.brokenMarkers) {
       result.errors.push(bm);
     }
+  }
+
+  if (result.errors.length > 0) {
+    result.isValid = false;
   }
 
   return result;

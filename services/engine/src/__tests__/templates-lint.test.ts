@@ -91,7 +91,7 @@ describe('Engine: Templates Lint Service y Endpoints (S6-05)', () => {
       expect(result.errors.some((e) => e.includes('vbaProject.bin'))).toBe(true);
     });
 
-    it('emite advertencias para marcadores que no están en el catálogo', () => {
+    it('rechaza y marca inválido si contiene marcadores que no están en el catálogo', () => {
       const xml = `
         <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
           <w:body>
@@ -106,9 +106,11 @@ describe('Engine: Templates Lint Service y Endpoints (S6-05)', () => {
       const buffer = createTestDocxBuffer(xml);
       const result = lintDocxBuffer(buffer, validFields, 'plantilla.docx');
 
-      expect(result.isValid).toBe(true);
+      // Decisión de política: bloquea la subida
+      expect(result.isValid).toBe(false);
       expect(result.unknownPlaceholders).toContain('marcador_fantasma');
-      expect(result.warnings.length).toBeGreaterThan(0);
+      expect(result.errors.length).toBeGreaterThan(0);
+      expect(result.errors.some((e) => e.includes('marcador_fantasma'))).toBe(true);
     });
   });
 

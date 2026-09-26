@@ -26,15 +26,7 @@ export async function verifyTemplateManageAccess(
   supabase: SupabaseClient,
   userJwt: string
 ): Promise<UserContext> {
-  const userContext = await authenticateUser(supabase, userJwt);
-  if (!userContext.isSuperuser && !userContext.permissionCodes.has('templates.manage')) {
-    throw createDocumentError(
-      'Se requiere permiso templates.manage para gestionar plantillas',
-      403,
-      'FORBIDDEN'
-    );
-  }
-  return userContext;
+  return authenticateUser(supabase, userJwt, 'templates.manage');
 }
 
 /**
@@ -101,7 +93,7 @@ export function lintDocxBuffer(
 
   const xmlContent = documentFile.asText();
 
-  // También podemos concatenar encabezados y pies si existen
+  // Concatenar encabezados y pies si existen
   let fullXml = xmlContent;
   for (const entry of fileEntries) {
     if (
@@ -126,14 +118,14 @@ export async function uploadTemplate(
   supabase: SupabaseClient,
   options: UploadTemplateOptions
 ): Promise<{ template: Template; lintResult: DocxLintResult }> {
-  // 1. Validar autenticación y permisos del usuario
+  // 1. Validar autenticación, identidad, is_active, MFA y permiso templates.manage reutilizando authenticateUser
   const user = await verifyTemplateManageAccess(supabase, options.userJwt);
 
-  // 2. Validar tamaño contra system_settings y límite físico de 10 MB
+  // 2. Validar tamaño contra system_settings ('storage.max_file_mb') y límite físico de 10 MB
   const { data: settingData } = await supabase
     .from('system_settings')
     .select('value')
-    .eq('key', 'storage.max_file_size_mb')
+    .eq('key', 'storage.max_file_mb')
     .maybeSingle();
 
   const maxMb = typeof settingData?.value === 'number' ? settingData.value : 10;
@@ -142,7 +134,7 @@ export async function uploadTemplate(
   if (options.fileBuffer.length > maxBytes) {
     throw createDocumentError(
       `El archivo excede el tamaño máximo permitido de ${(maxBytes / (1024 * 1024)).toFixed(0)} MB`,
-      400,
+      413,
       'FILE_TOO_LARGE'
     );
   }
@@ -163,11 +155,12 @@ export async function uploadTemplate(
     options.filename
   );
 
+  // Decisión de Política: Cualquier error o marcador desconocido bloquea la subida con 422
   if (!lintResult.isValid) {
     throw createDocumentError(
-      `Plantilla rechazada por errores de formato: ${lintResult.errors.join('; ')}`,
-      400,
-      'TEMPLATE_LINT_FAILED'
+      `Plantilla rechazada por errores de formato o campos no autorizados: ${lintResult.errors.join('; ')}`,
+      422,
+      'TEMPLATE_LINT_ERROR'
     );
   }
 
@@ -216,6 +209,13 @@ export async function uploadTemplate(
     .single();
 
   if (templateError || !templateRow) {
+    if (templateError?.code === '23P01') {
+      throw createDocumentError(
+        'El rango de vigencia de la plantilla colisiona con otra versión activa para el mismo tipo de documento',
+        409,
+        'TEMPLATE_VALIDITY_OVERLAP'
+      );
+    }
     throw createDocumentError(
       `Error al registrar plantilla en la base de datos: ${templateError?.message}`,
       500,

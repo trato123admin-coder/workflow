@@ -72,7 +72,7 @@ describe('Motor de Lint para Plantillas DOCX (templates)', () => {
       expect(result.brokenMarkers.some((m) => m.includes('desbalanceado'))).toBe(true);
     });
 
-    it('emite advertencias para marcadores no registrados en el catálogo de campos', () => {
+    it('rechaza y marca inválida la plantilla ante marcadores no registrados en el catálogo de campos', () => {
       const xml = `
         <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
           <w:body>
@@ -85,11 +85,11 @@ describe('Motor de Lint para Plantillas DOCX (templates)', () => {
       `;
 
       const result = lintDocxXml(xml, whitelist);
-      // Es sintácticamente válido pero emite advertencia de campo desconocido
-      expect(result.isValid).toBe(true);
+      // Decisión de política: bloquea la subida (isValid = false)
+      expect(result.isValid).toBe(false);
       expect(result.unknownPlaceholders).toContain('campo_inexistente_arbitrario');
-      expect(result.warnings.length).toBeGreaterThan(0);
-      expect(result.warnings[0]).toContain('campo_inexistente_arbitrario');
+      expect(result.errors.length).toBeGreaterThan(0);
+      expect(result.errors.some((e) => e.includes('campo_inexistente_arbitrario'))).toBe(true);
     });
 
     it('falla limpiamente si el XML está vacío', () => {
