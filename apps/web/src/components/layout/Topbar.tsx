@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Bell, Sun, Moon, LogOut, User } from 'lucide-react';
 import { createClient } from '../../lib/supabase/client';
+import { GlobalSearchDialog } from './GlobalSearchDialog';
 
 interface TopbarProps {
   userEmail?: string;
@@ -19,6 +20,19 @@ export const Topbar: React.FC<TopbarProps> = ({
   const router = useRouter();
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   useEffect(() => {
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
@@ -42,17 +56,23 @@ export const Topbar: React.FC<TopbarProps> = ({
   return (
     <header className="h-16 border-b border-border bg-card px-4 sm:px-6 flex items-center justify-between gap-4 sticky top-0 z-30">
       {/* Global Search Bar (DocuAI mockup style) */}
-      <div className="relative flex-1 max-w-md hidden sm:block">
-        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+      <div
+        onClick={() => setIsSearchOpen(true)}
+        className="relative flex-1 max-w-md hidden sm:block cursor-pointer group"
+      >
+        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-hover:text-primary transition-colors" />
         <input
           type="text"
+          readOnly
           placeholder="Buscar expedientes, personas, documentos... (Ctrl + K)"
-          className="w-full pl-9 pr-12 py-2 text-xs rounded-xl border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+          className="w-full pl-9 pr-12 py-2 text-xs rounded-xl border border-input bg-background text-foreground placeholder:text-muted-foreground cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
         />
         <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded border border-border font-mono">
           ⌘K
         </kbd>
       </div>
+
+      <GlobalSearchDialog isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
       {/* Right Controls */}
       <div className="flex items-center gap-2 ml-auto">
