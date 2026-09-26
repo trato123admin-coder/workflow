@@ -22,12 +22,12 @@ const supabase = createClient(supabaseUrl, serviceKey, {
 export async function cleanSyntheticSeed() {
   process.stdout.write('Iniciando limpieza de datos sintéticos (S4-10)...\n');
 
-  // 1. Eliminar expedientes sintéticos (sus hijos en cascada: parties, assets, processes, events)
+  // 1. Eliminar expedientes sintéticos (sus dependencias se eliminan en cascada)
   const { data: deletedCases, error: cErr } = await supabase
     .from('cases')
     .delete()
     .filter('custom_data->>is_synthetic', 'eq', 'true')
-    .select('id, case_number');
+    .select('id');
 
   if (cErr) {
     throw new Error(`Error eliminando casos sintéticos: ${cErr.message}`);
@@ -38,15 +38,34 @@ export async function cleanSyntheticSeed() {
     .from('persons')
     .delete()
     .filter('custom_data->>is_synthetic', 'eq', 'true')
-    .select('id, identity_document_number');
+    .select('id');
 
   if (pErr) {
     throw new Error(`Error eliminando personas sintéticas: ${pErr.message}`);
   }
 
+  // 3. Confirmación y verificación de estado limpio (cero registros sintéticos restantes)
+  const [{ count: remainingCases }, { count: remainingPersons }] = await Promise.all([
+    supabase
+      .from('cases')
+      .select('id', { count: 'exact', head: true })
+      .filter('custom_data->>is_synthetic', 'eq', 'true'),
+    supabase
+      .from('persons')
+      .select('id', { count: 'exact', head: true })
+      .filter('custom_data->>is_synthetic', 'eq', 'true'),
+  ]);
+
+  if ((remainingCases || 0) > 0 || (remainingPersons || 0) > 0) {
+    throw new Error(
+      `Error de limpieza: Aún quedan ${remainingCases || 0} casos y ${remainingPersons || 0} personas sintéticas.`
+    );
+  }
+
   process.stdout.write('Limpieza de datos sintéticos completada con éxito.\n');
   process.stdout.write(`- Casos eliminados: ${deletedCases?.length || 0}\n`);
   process.stdout.write(`- Personas eliminadas: ${deletedPersons?.length || 0}\n`);
+  process.stdout.write('✓ Verificación: 0 casos sintéticos y 0 personas sintéticas restantes en la base de datos.\n');
 }
 
 // Ejecutar si se invoca directamente
