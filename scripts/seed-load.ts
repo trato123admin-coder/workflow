@@ -58,7 +58,15 @@ export async function loadSyntheticSeed() {
   const initialStatus = statuses?.find((s) => s.category === 'NOT_STARTED') || statuses?.[0];
   const inProgressStatus = statuses?.find((s) => s.category === 'IN_PROGRESS') || initialStatus;
 
-  if (!modelVer || !initialStatus) throw new Error('Modelo o estados no encontrados');
+  const { data: modelProcs } = await supabase
+    .from('case_model_processes')
+    .select('id, process_definition_id, sequence, weight')
+    .eq('case_model_version_id', modelVer.id)
+    .order('sequence', { ascending: true });
+
+  if (!modelVer || !initialStatus || !modelProcs || modelProcs.length === 0) {
+    throw new Error('Modelo, estados o procesos de modelo no encontrados');
+  }
 
   // b) Generación correlativa oficial vía case_counters (mismo algoritmo que private.next_case_number)
   const vYear = new Date().getFullYear();
@@ -159,7 +167,7 @@ export async function loadSyntheticSeed() {
       case_id: benchCaseId,
       person_id: hId,
       party_role: 'HEREDERO',
-      relationship_type: 'HIJO',
+      relationship_to_deceased: 'HIJO',
       heir_status: 'CONFIRMADO',
       share_percent: 10.0,
       is_active: true,
@@ -177,7 +185,7 @@ export async function loadSyntheticSeed() {
         case_id: cId,
         person_id: heirId,
         party_role: 'HEREDERO',
-        relationship_type: 'HIJO',
+        relationship_to_deceased: 'HIJO',
         heir_status: 'CONFIRMADO',
         share_percent: 100.0,
         is_active: true,
@@ -201,8 +209,8 @@ export async function loadSyntheticSeed() {
     ...Array.from({ length: 10 }, (_, i) => ({
       case_id: benchCaseId,
       asset_type: 'INMUEBLE',
-      name: `Inmueble Urbano Lote ${i + 1}`,
-      registry_number: `PARTIDA-REG-${1000 + i}`,
+      description: `Inmueble Urbano Lote ${i + 1}`,
+      registry_ref: `PARTIDA-${1000 + i}`,
       status: 'IDENTIFICADO',
       currency: 'PEN',
       estimated_value: 250000,
@@ -212,7 +220,8 @@ export async function loadSyntheticSeed() {
     ...Array.from({ length: 5 }, (_, i) => ({
       case_id: benchCaseId,
       asset_type: 'VEHICULO',
-      name: `Vehículo Sedán Placa SYN-${200 + i}`,
+      description: `Vehículo Sedán Placa SYN-${200 + i}`,
+      registry_ref: `SYN-${200 + i}`,
       status: 'IDENTIFICADO',
       currency: 'USD',
       estimated_value: 12000,
@@ -222,7 +231,8 @@ export async function loadSyntheticSeed() {
     ...Array.from({ length: 5 }, (_, i) => ({
       case_id: benchCaseId,
       asset_type: 'CUENTA_BANCARIA',
-      name: `Cuenta de Ahorros BCP *${1000 + i}`,
+      description: `Cuenta de Ahorros BCP *${1000 + i}`,
+      registry_ref: `${1000 + i}`,
       status: 'IDENTIFICADO',
       currency: 'PEN',
       estimated_value: 15000,
@@ -236,21 +246,16 @@ export async function loadSyntheticSeed() {
 
   // 6. Procesos Sucesorios (11 procesos × 10 000 casos = 110 000 filas en lotes de 2000)
   process.stdout.write('Generando 110 000 procesos en lotes de 2000...\n');
-  const processNames = [
-    'Apertura y contrato', 'Documentos del causante', 'Identificación de herederos',
-    'Inventario de bienes y deudas', 'Búsqueda registral', 'Evaluación legal',
-    'Solicitud notarial', 'Presentación y publicación', 'Seguimiento notarial',
-    'Inscripción SUNARP', 'Cierre y entrega',
-  ];
-
   const allProcesses = createdCaseIds.flatMap((c) =>
-    processNames.map((name, seq) => ({
+    modelProcs.map((mp) => ({
       case_id: c.id,
-      sequence: seq + 1,
-      name,
-      status_id: seq === 0 ? inProgressStatus.id : initialStatus.id,
-      weight: 10,
+      case_model_process_id: mp.id,
+      process_definition_id: mp.process_definition_id,
+      sequence: mp.sequence,
+      weight: mp.weight,
+      status_id: mp.sequence === 1 ? inProgressStatus.id : initialStatus.id,
       is_applicable: true,
+      custom_data: { is_synthetic: true },
     }))
   );
 
