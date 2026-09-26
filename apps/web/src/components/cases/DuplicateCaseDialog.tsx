@@ -130,7 +130,9 @@ export const DuplicateCaseDialog: React.FC<DuplicateCaseDialogProps> = ({
         <div className="p-3 rounded-xl bg-muted/40 border border-border text-[11px] text-muted-foreground space-y-1">
           <p className="font-semibold text-foreground">Reglas de negocio aplicadas:</p>
           <ul className="list-disc list-inside space-y-0.5">
-            <li>Las deudas y pasivos <strong>nunca se arrastran</strong> a casos derivados.</li>
+            <li>
+              Las deudas y pasivos <strong>nunca se arrastran</strong> a casos derivados.
+            </li>
             <li>No se copian documentos ni expedientes notariales previos.</li>
             <li>Se asigna automáticamente un nuevo número correlativo.</li>
           </ul>

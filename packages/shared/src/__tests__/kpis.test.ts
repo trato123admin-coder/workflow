@@ -16,7 +16,13 @@ describe('Diccionario de KPIs Único (S4-06 / A.7 #4)', () => {
   const statuses: KPIStatusInput[] = [
     { id: 'st-1', code: 'APERTURA', name: 'Apertura', category: 'NOT_STARTED', sort_order: 1 },
     { id: 'st-2', code: 'EN_TRAMITE', name: 'En Trámite', category: 'IN_PROGRESS', sort_order: 2 },
-    { id: 'st-3', code: 'ESPERA_NOTARIA', name: 'Espera Notaría', category: 'WAITING', sort_order: 3 },
+    {
+      id: 'st-3',
+      code: 'ESPERA_NOTARIA',
+      name: 'Espera Notaría',
+      category: 'WAITING',
+      sort_order: 3,
+    },
     { id: 'st-4', code: 'OBSERVADO', name: 'Observado', category: 'REWORK', sort_order: 4 },
     { id: 'st-5', code: 'INSCRITO', name: 'Inscrito', category: 'DONE', sort_order: 5 },
   ];
@@ -78,8 +84,20 @@ describe('Diccionario de KPIs Único (S4-06 / A.7 #4)', () => {
   it('3. computeDashboardKPIs calcula métricas globales consistentes para Admin', () => {
     const cases: KPICaseInput[] = [
       { id: 'c1', status_id: 'st-1', progress: 0, created_at: '2026-09-01T00:00:00Z' },
-      { id: 'c2', status_id: 'st-2', progress: 50, due_date: pastDate, created_at: '2026-09-02T00:00:00Z' },
-      { id: 'c3', status_id: 'st-5', progress: 100, due_date: pastDate, created_at: '2026-08-15T00:00:00Z' },
+      {
+        id: 'c2',
+        status_id: 'st-2',
+        progress: 50,
+        due_date: pastDate,
+        created_at: '2026-09-02T00:00:00Z',
+      },
+      {
+        id: 'c3',
+        status_id: 'st-5',
+        progress: 100,
+        due_date: pastDate,
+        created_at: '2026-08-15T00:00:00Z',
+      },
     ];
 
     const assignments: KPIAssignmentInput[] = [

@@ -41,7 +41,9 @@ export const GestorDashboard: React.FC = () => {
       setIsLoading(true);
       const supabase = createClient();
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         setIsLoading(false);
         return;
@@ -55,9 +57,18 @@ export const GestorDashboard: React.FC = () => {
           client_person_id, case_model_version_id, status_id, due_date,
           client_person:persons(id, person_type, identity_document_type, identity_document_number, first_name, last_name, legal_name)
         `),
-        supabase.from('workflow_statuses').select('id, code, name, category, sort_order').eq('is_active', true),
-        supabase.from('case_assignments').select('case_id, user_id, assignment_type, is_primary, ended_at'),
-        supabase.from('user_preferences').select('value').eq('key', 'gestor_view_mode').maybeSingle(),
+        supabase
+          .from('workflow_statuses')
+          .select('id, code, name, category, sort_order')
+          .eq('is_active', true),
+        supabase
+          .from('case_assignments')
+          .select('case_id, user_id, assignment_type, is_primary, ended_at'),
+        supabase
+          .from('user_preferences')
+          .select('value')
+          .eq('key', 'gestor_view_mode')
+          .maybeSingle(),
       ]);
 
       if (profRes.data) {
@@ -75,7 +86,7 @@ export const GestorDashboard: React.FC = () => {
 
       // Filtrar expedientes asignados al gestor actual
       const assignedIds = new Set(
-        assignments.filter((a) => a.user_id === user.id && !a.ended_at).map((a) => a.case_id)
+        assignments.filter((a) => a.user_id === user.id && !a.ended_at).map((a) => a.case_id),
       );
       const assignedCases = allCases.filter((c) => assignedIds.has(c.id));
       setMyCases(assignedCases);
@@ -93,7 +104,9 @@ export const GestorDashboard: React.FC = () => {
   const handleChangeViewMode = async (mode: 'cards' | 'list') => {
     setViewMode(mode);
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (user) {
       await supabase.from('user_preferences').upsert({
         user_id: user.id,
@@ -171,13 +184,17 @@ export const GestorDashboard: React.FC = () => {
       </div>
 
       {/* Bandeja de Tareas Prioritarias: ¿Qué Hago Hoy? */}
-      <TodayTasksWidget cases={myCases as unknown as (KPICaseInput & { title: string; case_number: string })[]} />
+      <TodayTasksWidget
+        cases={myCases as unknown as (KPICaseInput & { title: string; case_number: string })[]}
+      />
 
       {/* Sección Mis Casos Asignados */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-2">
-            <h2 className="text-sm font-bold text-foreground">Mis Expedientes ({myCases.length})</h2>
+            <h2 className="text-sm font-bold text-foreground">
+              Mis Expedientes ({myCases.length})
+            </h2>
           </div>
 
           <div className="flex items-center gap-2">
@@ -258,14 +275,20 @@ export const GestorDashboard: React.FC = () => {
                     <tr key={c.id} className="hover:bg-muted/20 transition-colors">
                       <td className="p-3">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono font-bold text-foreground">{c.case_number}</span>
+                          <span className="font-mono font-bold text-foreground">
+                            {c.case_number}
+                          </span>
                           {c.is_confidential && <Lock className="w-3 h-3 text-destructive" />}
                         </div>
-                        <span className="text-[11px] text-muted-foreground line-clamp-1">{c.title}</span>
+                        <span className="text-[11px] text-muted-foreground line-clamp-1">
+                          {c.title}
+                        </span>
                       </td>
                       <td className="p-3 text-muted-foreground">{client}</td>
                       <td className="p-3 font-semibold text-primary">{c.route}</td>
-                      <td className="p-3 font-mono">{Number(c.current_progress || 0).toFixed(1)}%</td>
+                      <td className="p-3 font-mono">
+                        {Number(c.current_progress || 0).toFixed(1)}%
+                      </td>
                       <td className="p-3 text-right">
                         <Link
                           href={`/cases/${c.id}`}

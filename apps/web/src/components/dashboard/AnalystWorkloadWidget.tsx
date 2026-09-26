@@ -32,7 +32,10 @@ export const AnalystWorkloadWidget: React.FC<AnalystWorkloadWidgetProps> = ({ wo
           {workloads.map((w) => {
             const loadPercent = (w.activeCases / maxActive) * 100;
             return (
-              <div key={w.userId} className="p-3 space-y-2 hover:bg-muted/30 rounded-xl transition-colors">
+              <div
+                key={w.userId}
+                className="p-3 space-y-2 hover:bg-muted/30 rounded-xl transition-colors"
+              >
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-bold text-foreground">{w.name}</p>
@@ -42,12 +45,18 @@ export const AnalystWorkloadWidget: React.FC<AnalystWorkloadWidgetProps> = ({ wo
                     <span className="text-foreground" title="Casos activos">
                       <strong>{w.activeCases}</strong> act.
                     </span>
-                    <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1" title="Finalizados">
+                    <span
+                      className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1"
+                      title="Finalizados"
+                    >
                       <CheckCircle className="w-3 h-3" />
                       {w.completedCases}
                     </span>
                     {w.overdueCases > 0 && (
-                      <span className="text-destructive font-bold flex items-center gap-1" title="Vencidos">
+                      <span
+                        className="text-destructive font-bold flex items-center gap-1"
+                        title="Vencidos"
+                      >
                         <AlertCircle className="w-3 h-3" />
                         {w.overdueCases}
                       </span>

@@ -47,7 +47,9 @@ export const AdminDashboard: React.FC = () => {
   const [kpis, setKpis] = useState<DashboardKPIs | null>(null);
   const [workloads, setWorkloads] = useState<AnalystWorkload[]>([]);
   const [funnelStages, setFunnelStages] = useState<FunnelStage[]>([]);
-  const [rawCases, setRawCases] = useState<(KPICaseInput & { title: string; case_number: string })[]>([]);
+  const [rawCases, setRawCases] = useState<
+    (KPICaseInput & { title: string; case_number: string })[]
+  >([]);
   const [prefs, setPrefs] = useState<AdminDashboardLayoutPrefs>(DEFAULT_PREFS);
   const [showConfig, setShowConfig] = useState(false);
 
@@ -57,23 +59,48 @@ export const AdminDashboard: React.FC = () => {
       const supabase = createClient();
 
       const [casesRes, statusesRes, asgRes, profRes, procRes, prefsRes] = await Promise.all([
-        supabase.from('cases').select('id, case_number, title, created_at, due_date, current_progress, status_id, is_confidential'),
-        supabase.from('workflow_statuses').select('id, code, name, category, sort_order').eq('is_active', true).order('sort_order', { ascending: true }),
-        supabase.from('case_assignments').select('case_id, user_id, assignment_type, is_primary, ended_at'),
+        supabase
+          .from('cases')
+          .select(
+            'id, case_number, title, created_at, due_date, current_progress, status_id, is_confidential',
+          ),
+        supabase
+          .from('workflow_statuses')
+          .select('id, code, name, category, sort_order')
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true }),
+        supabase
+          .from('case_assignments')
+          .select('case_id, user_id, assignment_type, is_primary, ended_at'),
         supabase.from('profiles').select('id, first_name, last_name, email').eq('is_active', true),
         supabase.from('case_processes').select('sequence, name, definition_id, status_id'),
-        supabase.from('user_preferences').select('value').eq('key', 'admin_dashboard_layout').maybeSingle(),
+        supabase
+          .from('user_preferences')
+          .select('value')
+          .eq('key', 'admin_dashboard_layout')
+          .maybeSingle(),
       ]);
 
       if (prefsRes.data?.value) {
-        setPrefs({ ...DEFAULT_PREFS, ...(prefsRes.data.value as Partial<AdminDashboardLayoutPrefs>) });
+        setPrefs({
+          ...DEFAULT_PREFS,
+          ...(prefsRes.data.value as Partial<AdminDashboardLayoutPrefs>),
+        });
       }
 
-      const cases = (casesRes.data || []) as unknown as (KPICaseInput & { title: string; case_number: string })[];
+      const cases = (casesRes.data || []) as unknown as (KPICaseInput & {
+        title: string;
+        case_number: string;
+      })[];
       const statuses = (statusesRes.data || []) as unknown as KPIStatusInput[];
       const assignments = (asgRes.data || []) as unknown as KPIAssignmentInput[];
       const profiles = (profRes.data || []) as unknown as KPIProfileInput[];
-      const processes = (procRes.data || []) as { sequence: number; name: string; definition_id: string; status_id: string }[];
+      const processes = (procRes.data || []) as {
+        sequence: number;
+        name: string;
+        definition_id: string;
+        status_id: string;
+      }[];
 
       setRawCases(cases);
 
@@ -94,7 +121,12 @@ export const AdminDashboard: React.FC = () => {
         stageCountMap.set(key, current);
       }
       const stages: FunnelStage[] = Array.from(stageCountMap.entries())
-        .map(([code, data]) => ({ code, sequence: data.sequence, name: data.name, count: data.count }))
+        .map(([code, data]) => ({
+          code,
+          sequence: data.sequence,
+          name: data.name,
+          count: data.count,
+        }))
         .sort((a, b) => a.sequence - b.sequence);
       setFunnelStages(stages);
 
@@ -108,7 +140,9 @@ export const AdminDashboard: React.FC = () => {
     const updated = { ...prefs, [key]: !prefs[key] };
     setPrefs(updated);
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (user) {
       await supabase.from('user_preferences').upsert({
         user_id: user.id,
@@ -153,19 +187,39 @@ export const AdminDashboard: React.FC = () => {
               <p className="font-bold text-foreground mb-1">Widgets Visibles</p>
               <label className="flex items-center justify-between cursor-pointer">
                 <span>Dona de Estados</span>
-                <input type="checkbox" checked={prefs.showDonut} onChange={() => savePrefToggle('showDonut')} className="rounded text-primary" />
+                <input
+                  type="checkbox"
+                  checked={prefs.showDonut}
+                  onChange={() => savePrefToggle('showDonut')}
+                  className="rounded text-primary"
+                />
               </label>
               <label className="flex items-center justify-between cursor-pointer">
                 <span>Embudo de Procesos</span>
-                <input type="checkbox" checked={prefs.showFunnel} onChange={() => savePrefToggle('showFunnel')} className="rounded text-primary" />
+                <input
+                  type="checkbox"
+                  checked={prefs.showFunnel}
+                  onChange={() => savePrefToggle('showFunnel')}
+                  className="rounded text-primary"
+                />
               </label>
               <label className="flex items-center justify-between cursor-pointer">
                 <span>Carga de Analistas</span>
-                <input type="checkbox" checked={prefs.showWorkload} onChange={() => savePrefToggle('showWorkload')} className="rounded text-primary" />
+                <input
+                  type="checkbox"
+                  checked={prefs.showWorkload}
+                  onChange={() => savePrefToggle('showWorkload')}
+                  className="rounded text-primary"
+                />
               </label>
               <label className="flex items-center justify-between cursor-pointer">
                 <span>Bandeja &quot;Qué Hago Hoy&quot;</span>
-                <input type="checkbox" checked={prefs.showTodayTasks} onChange={() => savePrefToggle('showTodayTasks')} className="rounded text-primary" />
+                <input
+                  type="checkbox"
+                  checked={prefs.showTodayTasks}
+                  onChange={() => savePrefToggle('showTodayTasks')}
+                  className="rounded text-primary"
+                />
               </label>
             </div>
           )}
@@ -224,7 +278,9 @@ export const AdminDashboard: React.FC = () => {
       {/* Widgets Inferiores */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {prefs.showDonut && <StatusDonutChart distribution={kpis.distribution} />}
-        {prefs.showFunnel && <ProcessFunnelWidget stages={funnelStages} totalActiveCases={kpis.activeCases} />}
+        {prefs.showFunnel && (
+          <ProcessFunnelWidget stages={funnelStages} totalActiveCases={kpis.activeCases} />
+        )}
       </div>
 
       {prefs.showWorkload && (

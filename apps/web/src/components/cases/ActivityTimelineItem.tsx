@@ -1,14 +1,7 @@
 'use client';
 
 import React from 'react';
-import {
-  MessageSquare,
-  Trash2,
-  Copy,
-  Users,
-  CheckCircle2,
-  History,
-} from 'lucide-react';
+import { MessageSquare, Trash2, Copy, Users, CheckCircle2, History } from 'lucide-react';
 
 export interface TimelineEntry {
   id: string;
@@ -69,9 +62,7 @@ export const ActivityTimelineItem: React.FC<ActivityTimelineItemProps> = ({
 
       <div
         className={`p-4 rounded-2xl border transition-all ${
-          item.isComment
-            ? 'border-blue-500/20 bg-blue-500/5'
-            : 'border-border bg-card'
+          item.isComment ? 'border-blue-500/20 bg-blue-500/5' : 'border-border bg-card'
         }`}
       >
         <div className="flex items-center justify-between gap-2 mb-1.5">

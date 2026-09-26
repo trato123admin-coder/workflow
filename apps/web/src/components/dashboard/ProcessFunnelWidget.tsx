@@ -42,9 +42,7 @@ export const ProcessFunnelWidget: React.FC<ProcessFunnelWidgetProps> = ({
                 <span className="text-muted-foreground truncate pr-2 font-medium">
                   {stage.sequence}. {stage.name}
                 </span>
-                <span className="font-mono font-bold text-foreground shrink-0">
-                  {stage.count}
-                </span>
+                <span className="font-mono font-bold text-foreground shrink-0">{stage.count}</span>
               </div>
               <div className="w-full h-2 rounded-full bg-muted/60 overflow-hidden">
                 <div

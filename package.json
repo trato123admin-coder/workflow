@@ -10,6 +10,9 @@
     "typecheck": "pnpm --filter @workflow/shared build && pnpm --recursive --filter \"@workflow/*\" typecheck",
     "test": "pnpm --recursive --filter \"@workflow/*\" test",
     "e2e": "pnpm --filter @workflow/web e2e",
+    "seed:load": "tsx scripts/seed-load.ts",
+    "seed:clean": "tsx scripts/seed-clean.ts",
+    "benchmark:perf": "tsx scripts/benchmark-perf.ts",
     "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md}\""
   },
@@ -17,6 +20,7 @@
     "@eslint/js": "^9.20.0",
     "eslint": "^9.20.1",
     "prettier": "^3.5.0",
+    "tsx": "^4.23.15",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.70.1"
   }

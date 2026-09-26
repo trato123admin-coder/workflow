@@ -51,7 +51,7 @@ export const GlobalSearchDialog: React.FC<GlobalSearchDialogProps> = ({ isOpen, 
       onClose();
       router.push(item.route_url);
     },
-    [onClose, router]
+    [onClose, router],
   );
 
   // Debounced search
@@ -96,7 +96,9 @@ export const GlobalSearchDialog: React.FC<GlobalSearchDialogProps> = ({ isOpen, 
         setSelectedIndex((prev) => (results.length > 0 ? (prev + 1) % results.length : 0));
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setSelectedIndex((prev) => (results.length > 0 ? (prev - 1 + results.length) % results.length : 0));
+        setSelectedIndex((prev) =>
+          results.length > 0 ? (prev - 1 + results.length) % results.length : 0,
+        );
       } else if (e.key === 'Enter' && results[selectedIndex]) {
         e.preventDefault();
         handleSelect(results[selectedIndex]);
@@ -217,7 +219,8 @@ export const GlobalSearchDialog: React.FC<GlobalSearchDialogProps> = ({ isOpen, 
             <kbd className="font-mono bg-card px-1 rounded border border-border">↓</kbd>
           </span>
           <span>
-            Selecciona con <kbd className="font-mono bg-card px-1.5 rounded border border-border">Enter</kbd>
+            Selecciona con{' '}
+            <kbd className="font-mono bg-card px-1.5 rounded border border-border">Enter</kbd>
           </span>
         </div>
       </div>

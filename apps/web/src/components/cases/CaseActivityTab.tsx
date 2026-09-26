@@ -58,13 +58,17 @@ export const CaseActivityTab: React.FC<CaseActivityTabProps> = ({ caseId }) => {
 
     const { data: commentsData } = await supabase
       .from('case_comments')
-      .select('id, case_id, user_id, comment_text, mentions, created_at, user:profiles(first_name, last_name, email)')
+      .select(
+        'id, case_id, user_id, comment_text, mentions, created_at, user:profiles(first_name, last_name, email)',
+      )
       .eq('case_id', caseId)
       .order('created_at', { ascending: false });
 
     const { data: eventsData } = await supabase
       .from('case_events')
-      .select('id, event_type, actor_id, title, description, metadata, created_at, actor:profiles(first_name, last_name, email)')
+      .select(
+        'id, event_type, actor_id, title, description, metadata, created_at, actor:profiles(first_name, last_name, email)',
+      )
       .eq('case_id', caseId)
       .order('created_at', { ascending: false });
 
@@ -115,7 +119,11 @@ export const CaseActivityTab: React.FC<CaseActivityTabProps> = ({ caseId }) => {
     }
   };
 
-  const formatAuthor = (userObj?: { first_name?: string | null; last_name?: string | null; email?: string | null }) => {
+  const formatAuthor = (userObj?: {
+    first_name?: string | null;
+    last_name?: string | null;
+    email?: string | null;
+  }) => {
     if (!userObj) return 'Sistema';
     const fullName = `${userObj.first_name || ''} ${userObj.last_name || ''}`.trim();
     return fullName || userObj.email || 'Usuario';
@@ -145,7 +153,10 @@ export const CaseActivityTab: React.FC<CaseActivityTabProps> = ({ caseId }) => {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={handleAddComment} className="p-4 rounded-2xl border border-border bg-card shadow-sm space-y-3">
+      <form
+        onSubmit={handleAddComment}
+        className="p-4 rounded-2xl border border-border bg-card shadow-sm space-y-3"
+      >
         <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
           <MessageSquare className="w-4 h-4 text-primary" />
           <span>Agregar nota o comentario al expediente</span>

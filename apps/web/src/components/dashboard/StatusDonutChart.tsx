@@ -7,7 +7,10 @@ interface StatusDonutChartProps {
   distribution: StatusDistribution;
 }
 
-const CATEGORY_COLORS: Record<WorkflowStatusCategory, { stroke: string; bg: string; text: string }> = {
+const CATEGORY_COLORS: Record<
+  WorkflowStatusCategory,
+  { stroke: string; bg: string; text: string }
+> = {
   NOT_STARTED: {
     stroke: '#94a3b8',
     bg: 'bg-slate-400 dark:bg-slate-500',

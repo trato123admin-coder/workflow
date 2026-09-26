@@ -4,12 +4,7 @@
 // embudos de proceso y cargas de trabajo en Dashboards Admin y Gestor.
 // ============================================================================
 
-export type WorkflowStatusCategory =
-  | 'NOT_STARTED'
-  | 'IN_PROGRESS'
-  | 'WAITING'
-  | 'REWORK'
-  | 'DONE';
+export type WorkflowStatusCategory = 'NOT_STARTED' | 'IN_PROGRESS' | 'WAITING' | 'REWORK' | 'DONE';
 
 export interface KPICaseInput {
   id: string;
@@ -109,7 +104,7 @@ const CATEGORY_LABELS: Record<WorkflowStatusCategory, string> = {
 // 1. Distribución porcentual y conteo por categoría semántica (Consistencia A.7 #4)
 export function computeStatusDistribution(
   cases: KPICaseInput[],
-  statuses: KPIStatusInput[]
+  statuses: KPIStatusInput[],
 ): StatusDistribution {
   const statusMap = new Map(statuses.map((s) => [s.id, s.category]));
   const counts: Record<WorkflowStatusCategory, number> = {
@@ -126,23 +121,20 @@ export function computeStatusDistribution(
   }
 
   const total = cases.length;
-  const categories: CategoryCount[] = (
-    Object.keys(counts) as WorkflowStatusCategory[]
-  ).map((cat) => ({
-    category: cat,
-    label: CATEGORY_LABELS[cat] || cat,
-    count: counts[cat],
-    percentage: total > 0 ? Number(((counts[cat] / total) * 100).toFixed(2)) : 0,
-  }));
+  const categories: CategoryCount[] = (Object.keys(counts) as WorkflowStatusCategory[]).map(
+    (cat) => ({
+      category: cat,
+      label: CATEGORY_LABELS[cat] || cat,
+      count: counts[cat],
+      percentage: total > 0 ? Number(((counts[cat] / total) * 100).toFixed(2)) : 0,
+    }),
+  );
 
   return { byCategory: counts, categories, total };
 }
 
 // 2. Cálculo de variación mes actual vs mes anterior
-export function computeMonthlyVariation(
-  cases: KPICaseInput[],
-  now = new Date()
-): MonthlyVariation {
+export function computeMonthlyVariation(cases: KPICaseInput[], now = new Date()): MonthlyVariation {
   const currentYear = now.getUTCFullYear();
   const currentMonth = now.getUTCMonth();
 
@@ -181,7 +173,7 @@ export function computeMonthlyVariation(
 export function isCaseOverdue(
   c: KPICaseInput,
   category: WorkflowStatusCategory,
-  now = new Date()
+  now = new Date(),
 ): boolean {
   if (category === 'DONE' || !c.due_date) return false;
   return new Date(c.due_date).getTime() < now.getTime();
@@ -192,7 +184,7 @@ export function computeDashboardKPIs(
   cases: KPICaseInput[],
   assignments: KPIAssignmentInput[],
   statuses: KPIStatusInput[],
-  now = new Date()
+  now = new Date(),
 ): DashboardKPIs {
   const statusMap = new Map(statuses.map((s) => [s.id, s.category]));
   const distribution = computeStatusDistribution(cases, statuses);
@@ -216,9 +208,7 @@ export function computeDashboardKPIs(
 
   // Casos activos que no tienen ningún abogado asignado
   const activeCasesWithLawyer = new Set(
-    assignments
-      .filter((a) => a.assignment_type === 'LAWYER' && !a.ended_at)
-      .map((a) => a.case_id)
+    assignments.filter((a) => a.assignment_type === 'LAWYER' && !a.ended_at).map((a) => a.case_id),
   );
 
   let withoutLawyerCount = 0;
@@ -246,12 +236,10 @@ export function computeGestorKPIs(
   assignments: KPIAssignmentInput[],
   userId: string,
   statuses: KPIStatusInput[],
-  now = new Date()
+  now = new Date(),
 ): GestorKPIs {
   const assignedCaseIds = new Set(
-    assignments
-      .filter((a) => a.user_id === userId && !a.ended_at)
-      .map((a) => a.case_id)
+    assignments.filter((a) => a.user_id === userId && !a.ended_at).map((a) => a.case_id),
   );
 
   const myCases = cases.filter((c) => assignedCaseIds.has(c.id));
@@ -289,14 +277,17 @@ export function computeWorkloadByAnalyst(
   assignments: KPIAssignmentInput[],
   profiles: KPIProfileInput[],
   statuses: KPIStatusInput[],
-  now = new Date()
+  now = new Date(),
 ): AnalystWorkload[] {
   const statusMap = new Map(statuses.map((s) => [s.id, s.category]));
   const casesMap = new Map(cases.map((c) => [c.id, c]));
 
   const userAssignments = new Map<string, KPIAssignmentInput[]>();
   for (const a of assignments) {
-    if (!a.ended_at && (a.assignment_type === 'RESPONSIBLE' || a.assignment_type === 'COLLABORATOR')) {
+    if (
+      !a.ended_at &&
+      (a.assignment_type === 'RESPONSIBLE' || a.assignment_type === 'COLLABORATOR')
+    ) {
       const list = userAssignments.get(a.user_id) || [];
       list.push(a);
       userAssignments.set(a.user_id, list);

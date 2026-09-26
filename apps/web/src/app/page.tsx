@@ -34,16 +34,29 @@ export default function HomePage() {
 
       // Consultar perfil y roles del usuario
       const [profileRes, rolesRes] = await Promise.all([
-        supabase.from('profiles').select('first_name, last_name, email, is_active').eq('id', user.id).single(),
-        supabase.from('user_roles').select('role:roles(code, name, is_superuser)').eq('user_id', user.id),
+        supabase
+          .from('profiles')
+          .select('first_name, last_name, email, is_active')
+          .eq('id', user.id)
+          .single(),
+        supabase
+          .from('user_roles')
+          .select('role:roles(code, name, is_superuser)')
+          .eq('user_id', user.id),
       ]);
 
       const fullName = profileRes.data
-        ? `${profileRes.data.first_name || ''} ${profileRes.data.last_name || ''}`.trim() || profileRes.data.email
+        ? `${profileRes.data.first_name || ''} ${profileRes.data.last_name || ''}`.trim() ||
+          profileRes.data.email
         : user.email || 'Usuario';
 
-      const userRoles = rolesRes.data?.map((r) => r.role) || [];
-      const hasSuperuserRole = userRoles.some((r: any) => r?.is_superuser || r?.code === 'ADMIN');
+      interface UserRoleItem {
+        code?: string;
+        name?: string;
+        is_superuser?: boolean;
+      }
+      const userRoles = (rolesRes.data?.map((r) => r.role) || []) as (UserRoleItem | null)[];
+      const hasSuperuserRole = userRoles.some((r) => r?.is_superuser || r?.code === 'ADMIN');
 
       setIsAdmin(hasSuperuserRole);
       setActiveView(hasSuperuserRole ? 'admin' : 'gestor');

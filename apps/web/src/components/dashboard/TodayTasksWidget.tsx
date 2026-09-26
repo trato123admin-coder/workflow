@@ -234,7 +234,9 @@ export const TodayTasksWidget: React.FC<TodayTasksWidgetProps> = ({ cases }) => 
         <div className="py-8 text-center text-xs text-muted-foreground space-y-1">
           <CheckCircle2 className="w-6 h-6 mx-auto text-emerald-500 mb-2" />
           <p className="font-semibold text-foreground">¡Todo al día por hoy!</p>
-          <p className="text-[11px]">No hay plazos vencidos ni alertas bloqueantes en tus expedientes.</p>
+          <p className="text-[11px]">
+            No hay plazos vencidos ni alertas bloqueantes en tus expedientes.
+          </p>
         </div>
       ) : (
         <div className="divide-y divide-border -mx-1">
