@@ -41,13 +41,23 @@ export function getStorageProvider(): StorageProvider {
   return activeProvider;
 }
 
+let activeTemplatesProvider: StorageProvider | null = null;
+
 export function getTemplatesStorageProvider(): StorageProvider {
+  if (activeTemplatesProvider) {
+    return activeTemplatesProvider;
+  }
   const client = getSupabaseServiceClient();
-  return new SupabaseStorageProvider(client, 'templates');
+  activeTemplatesProvider = new SupabaseStorageProvider(client, 'templates');
+  return activeTemplatesProvider;
 }
 
 export function setStorageProvider(provider: StorageProvider | null): void {
   activeProvider = provider;
+}
+
+export function setTemplatesStorageProvider(provider: StorageProvider | null): void {
+  activeTemplatesProvider = provider;
 }
 
 export function setSupabaseServiceClient(client: SupabaseClient | null): void {

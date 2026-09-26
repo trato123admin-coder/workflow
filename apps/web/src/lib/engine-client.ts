@@ -159,12 +159,25 @@ export interface TemplateLintApiResponse {
  * Solicita una inspección y lint previo de una plantilla DOCX al Engine.
  */
 export async function lintTemplateWithEngine(file: File): Promise<TemplateLintApiResponse> {
+  const supabase = createClient();
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
+
+  if (sessionError || !session?.access_token) {
+    throw new Error('Debe iniciar sesión para inspeccionar plantillas');
+  }
+
   const formData = new FormData();
   formData.append('file', file);
 
   const engineUrl = getEngineUrl();
   const response = await fetch(`${engineUrl}/v1/templates/lint`, {
     method: 'POST',
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+    },
     body: formData,
   });
 
@@ -221,8 +234,22 @@ export async function uploadTemplateToEngine(params: UploadTemplateParams) {
  * Obtiene la URL firmada para descargar el archivo DOCX de una plantilla.
  */
 export async function requestTemplateDownloadUrl(templateId: string): Promise<string> {
+  const supabase = createClient();
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
+
+  if (sessionError || !session?.access_token) {
+    throw new Error('Debe iniciar sesión para descargar plantillas');
+  }
+
   const engineUrl = getEngineUrl();
-  const response = await fetch(`${engineUrl}/v1/templates/${templateId}/download`);
+  const response = await fetch(`${engineUrl}/v1/templates/${templateId}/download`, {
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+    },
+  });
 
   const json = await response.json();
   if (!response.ok) {

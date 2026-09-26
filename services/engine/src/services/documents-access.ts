@@ -54,7 +54,7 @@ async function verifyProfileActive(supabase: SupabaseClient, userId: string): Pr
 export async function authenticateUser(
   supabase: SupabaseClient,
   userJwt: string,
-  requiredPermission?: string,
+  requiredPermission?: string | string[],
 ): Promise<UserContext> {
   const { data: authData, error: authError } = await supabase.auth.getUser(userJwt);
   if (authError || !authData?.user) {
@@ -115,12 +115,16 @@ export async function authenticateUser(
     }
   }
 
-  if (requiredPermission && !isSuperuser && !permissionCodes.has(requiredPermission)) {
-    throw createDocumentError(
-      `Permiso insuficiente: se requiere el permiso '${requiredPermission}'`,
-      403,
-      'FORBIDDEN_INSUFFICIENT_PERMISSIONS',
-    );
+  if (requiredPermission && !isSuperuser) {
+    const required = Array.isArray(requiredPermission) ? requiredPermission : [requiredPermission];
+    const hasAny = required.some((perm) => permissionCodes.has(perm));
+    if (!hasAny) {
+      throw createDocumentError(
+        `Permiso insuficiente: se requiere uno de los siguientes permisos: [${required.join(', ')}]`,
+        403,
+        'FORBIDDEN_INSUFFICIENT_PERMISSIONS',
+      );
+    }
   }
 
   return { userId, isSuperuser, permissionCodes };

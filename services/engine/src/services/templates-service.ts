@@ -177,16 +177,27 @@ export async function uploadTemplate(
 
   const nextVersion = (existingVersions?.[0]?.version ?? 0) + 1;
 
-  // 7. Subir a Storage privado (bucket 'templates')
-  const storage = getTemplatesStorageProvider();
-  const cleanName = options.filename.replace(/[^a-zA-Z0-9._-]/g, '_');
-  const storageKey = `${options.documentTypeId}/v${nextVersion}_${cleanName}`;
+  // 7. Deduplicación criptográfica por SHA-256 (patrón idéntico a Sprint 5)
+  const { data: existingFile } = await supabase
+    .from('templates')
+    .select('storage_key')
+    .eq('checksum', sha256)
+    .limit(1)
+    .maybeSingle();
 
-  await storage.put(storageKey, options.fileBuffer, {
-    mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    sha256,
-    size: options.fileBuffer.length,
-  });
+  const storage = getTemplatesStorageProvider();
+  let storageKey = existingFile?.storage_key;
+
+  if (!storageKey) {
+    const cleanName = options.filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+    storageKey = `${options.documentTypeId}/v${nextVersion}_${cleanName}`;
+
+    await storage.put(storageKey, options.fileBuffer, {
+      mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      sha256,
+      size: options.fileBuffer.length,
+    });
+  }
 
   // 8. Insertar registro en public.templates usando service_role
   const { data: templateRow, error: templateError } = await supabase

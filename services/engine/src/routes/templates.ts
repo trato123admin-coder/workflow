@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify';
 import { getSupabaseServiceClient, getTemplatesStorageProvider } from '../storage/index.js';
 import { lintDocxBuffer, uploadTemplate } from '../services/templates-service.js';
+import { authenticateUser } from '../services/documents-access.js';
 import { createDocumentError, type DocumentError } from '../services/documents-types.js';
 
 function extractBearerToken(authHeader: string | undefined): string {
@@ -21,10 +22,15 @@ function extractBearerToken(authHeader: string | undefined): string {
 export const templateRoutes: FastifyPluginAsync = async (fastify) => {
   /**
    * Endpoint para inspección y lint previo de una plantilla DOCX.
+   * Exige autenticación de usuario activo para no filtrar campos internos a usuarios no identificados.
    * POST /v1/templates/lint
    */
   fastify.post('/v1/templates/lint', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
+      const userJwt = extractBearerToken(request.headers.authorization);
+      const supabase = getSupabaseServiceClient();
+      await authenticateUser(supabase, userJwt);
+
       if (!request.isMultipart()) {
         return reply.status(400).send({
           error: 'NO_FILE',
@@ -46,7 +52,6 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
       const filename = data.filename || 'plantilla.docx';
 
       // Obtener campos autorizados de la base de datos
-      const supabase = getSupabaseServiceClient();
       const { data: fields } = await supabase
         .from('document_fields')
         .select('code')
@@ -143,12 +148,16 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
 
   /**
    * Endpoint para generar URL firmada de descarga de una plantilla DOCX.
+   * Exige autenticación y permisos de lectura (documents.read o templates.manage).
    * GET /v1/templates/:id/download
    */
   fastify.get('/v1/templates/:id/download', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
-      const { id } = request.params as { id: string };
+      const userJwt = extractBearerToken(request.headers.authorization);
       const supabase = getSupabaseServiceClient();
+      await authenticateUser(supabase, userJwt, ['documents.read', 'templates.manage']);
+
+      const { id } = request.params as { id: string };
 
       const { data: template, error } = await supabase
         .from('templates')
