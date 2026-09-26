@@ -96,9 +96,10 @@ export async function POST(request: Request) {
       success: true,
       requiresMfa,
     });
-  } catch {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json(
-      { error: 'Error interno en el servidor de autenticación' },
+      { error: 'Error interno en el servidor de autenticación', details: message },
       { status: 500 },
     );
   }

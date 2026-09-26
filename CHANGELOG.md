@@ -6,6 +6,53 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Sprint 5 — Documentos y almacenamiento
+
+#### Agregado
+
+- **Base de Datos & Seguridad (Supabase):**
+  - Migración `20260926000000_storage_and_documents_schema.sql`:
+    - Tablas `storage_backends`, `document_types`, `document_alternatives`, `case_model_documents`, `case_documents` y `document_versions` con RLS estricta basada en `private.has_permission()` y `private.can_access_case()`.
+    - Bucket privado `case-documents` (100% blindado a `service_role`, 0 políticas públicas/autenticadas en `storage.objects`).
+    - Función RPC `public.sync_case_document_slots` (`SECURITY DEFINER`) con sincronización idempotente de slots según partes y bienes, manteniendo slots inactivos sin eliminarlos de la base de datos.
+    - Disparador de inmutabilidad `trg_guard_case_model_documents_immutability` para modelos de caso publicados.
+    - Clave foránea circular `fk_case_documents_current_version` e índice único por proceso que evita colisiones en asignaciones documentales de `HEREDERO`.
+  - Migración `20260926010000_case_documents_audit_trigger.sql`:
+    - Disparador de auditoría `trg_audit_case_documents` conectado a `public.case_documents` (`AFTER INSERT OR UPDATE`) con `private.tg_audit_log()` para registrar cambios de estado (`VALIDATED`/`OBSERVED`) y notas en `public.audit_logs`.
+  - Suite de pruebas pgTAP `supabase/tests/database/08_documents_and_storage.test.sql` con 18 pruebas automatizadas exitosas.
+- **Paquete Compartido (`@workflow/shared`):**
+  - Esquemas Zod y tipos (`documentTypeSchema`, `caseDocumentSchema`, `documentVersionSchema`).
+  - Validación binaria de magic bytes (`validateMagicBytes`) para PDF, DOCX, JPG y PNG.
+  - Evaluación de compuertas de cierre documentario M1 (`checkM1ClosingGates`).
+  - Constantes de tipos MIME permitidos y topes de tamaño.
+- **Servicio Engine (`services/engine`):**
+  - Interfaz `StorageProvider` y adaptador `SupabaseStorageProvider`.
+  - Validación dinámica de cuota y tipos MIME desde `system_settings` (`storage.allowed_mime`, `storage.max_file_mb`).
+  - Deduplicación criptográfica por SHA-256 (un solo archivo físico almacenado ante duplicados).
+  - Descargas seguras mediante URLs prefirmadas de 60 segundos con auditoría en `audit_logs` (`DOWNLOAD_DOCUMENT`).
+  - Blindaje de subida: validación de Bearer JWT, verificación de usuario activo `profiles.is_active` (`FORBIDDEN_USER_INACTIVE`), verificación de MFA `aal2` si el rol lo requiere (`FORBIDDEN_MFA_REQUIRED`), validación de confidencialidad y permiso `documents.upload`.
+- **Aplicación Web (`apps/web`):**
+  - Componente de subida `FileUploader.tsx`:
+    - Drag & drop, selección de archivo y captura desde cámara (`capture="environment"`).
+    - Atributo `accept` y textos explicativos construidos dinámicamente desde `system_settings`.
+    - Optimización en el cliente de imágenes ($\le 2000$px, calidad 82%).
+    - Generación nativa en JavaScript de PDF para fotos de cámara (`convertImageToPdf` con `/Filter /DCTDecode`).
+    - Alerta de arranque en frío de Render (>3.5 s).
+  - Pestaña de documentos en detalle de caso (`CaseDocumentsTab.tsx`):
+    - Agrupación por ámbito (Caso / Persona / Bien).
+    - Banner interactivo de compuertas M1 con detalle de requisitos pendientes.
+    - Sincronización idempotente de slots vía botón `Sincronizar Slots`.
+    - Renglón de documento (`CaseDocumentItemRow.tsx`) con estados visuales y acciones auditadas.
+    - Historial de versiones (`DocumentVersionsModal.tsx`) con copiado de hash SHA-256 y descarga temporal.
+    - Modal de aprobación y observación (`DocumentStatusModal.tsx`) con motivo obligatorio para observaciones.
+  - Biblioteca documentaria centralizada (`/documents`):
+    - Catálogo Maestro de Tipos (`DocumentTypeCatalogTable.tsx`, Mockup 6 / A.7 #7) con filtros por pestañas (_Todos, Plantillas, Subidos, Externos, Activos_) y toggle de estado.
+    - Repositorio de expedientes (`CaseDocumentsLibraryTab.tsx`) con filtros por ámbito, estado y búsqueda global.
+  - Pestaña de configuración de almacenamiento (`StorageSettingsTab.tsx`, Mockup 7):
+    - Visualización de cuota de almacenamiento con aviso visual al superar el 80% (`storage.usage_warn_percent`).
+    - Tarjetas de proveedores físicos (`StorageBackendCards.tsx`).
+    - Edición reactiva de políticas de subida y optimización en `system_settings`.
+
 ### Sprint 4b — Tableros, búsqueda, actividad y rendimiento
 
 #### Agregado

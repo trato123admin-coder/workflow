@@ -9,6 +9,7 @@ import { CaseKanbanBoard } from '../../../components/cases/CaseKanbanBoard';
 import { CasePartiesTab } from '../../../components/cases/CasePartiesTab';
 import { CaseEstateTab } from '../../../components/cases/CaseEstateTab';
 import { CaseActivityTab } from '../../../components/cases/CaseActivityTab';
+import { CaseDocumentsTab } from '../../../components/cases/CaseDocumentsTab';
 import { CaseHeader } from '../../../components/cases/CaseHeader';
 import { useCaseDetail } from './useCaseDetail';
 import {
@@ -22,9 +23,10 @@ import {
   LayoutGrid,
   List,
   MessageSquare,
+  FileText,
 } from 'lucide-react';
 
-type DetailTab = 'processes' | 'parties' | 'estate' | 'activity';
+type DetailTab = 'processes' | 'parties' | 'estate' | 'documents' | 'activity';
 type ProcessView = 'table' | 'kanban';
 
 export default function CaseDetailPage() {
@@ -153,6 +155,18 @@ export default function CaseDetailPage() {
             </button>
             <button
               type="button"
+              onClick={() => setActiveTab('documents')}
+              className={`pb-3 flex items-center gap-1.5 border-b-2 transition-all ${
+                activeTab === 'documents'
+                  ? 'border-primary text-primary font-bold'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              <span>Documentos</span>
+            </button>
+            <button
+              type="button"
               onClick={() => setActiveTab('activity')}
               className={`pb-3 flex items-center gap-1.5 border-b-2 transition-all ${
                 activeTab === 'activity'
@@ -223,6 +237,8 @@ export default function CaseDetailPage() {
         )}
 
         {activeTab === 'estate' && <CaseEstateTab caseId={caseId} />}
+
+        {activeTab === 'documents' && <CaseDocumentsTab caseId={caseId} />}
 
         {activeTab === 'activity' && <CaseActivityTab caseId={caseId} />}
       </div>

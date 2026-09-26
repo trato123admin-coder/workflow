@@ -54,7 +54,15 @@ export default function LoginPage() {
         return;
       }
 
-      router.push('/users');
+      let target = '/users';
+      if (typeof window !== 'undefined') {
+        const param = new URLSearchParams(window.location.search).get('redirectTo');
+        if (param && param.startsWith('/') && !param.startsWith('//')) {
+          target = param;
+        }
+      }
+
+      router.push(target);
       router.refresh();
     } catch {
       setServerError('Ocurrió un error inesperado al conectar con el servidor');
