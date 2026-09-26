@@ -131,3 +131,103 @@ export async function requestDocumentDownloadUrl(
     throw err;
   }
 }
+
+export interface UploadTemplateParams {
+  file: File;
+  documentTypeId: string;
+  name: string;
+  validFrom?: string;
+  validUntil?: string | null;
+  estimatedManualMinutes?: number;
+  onColdStartNotice?: (isWakingUp: boolean) => void;
+}
+
+export interface TemplateLintApiResponse {
+  lint: {
+    isValid: boolean;
+    brokenMarkers: string[];
+    unknownFields: string[];
+    validFields: string[];
+    errors: string[];
+    warnings: string[];
+  };
+  filename: string;
+  size: number;
+}
+
+/**
+ * Solicita una inspección y lint previo de una plantilla DOCX al Engine.
+ */
+export async function lintTemplateWithEngine(file: File): Promise<TemplateLintApiResponse> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const engineUrl = getEngineUrl();
+  const response = await fetch(`${engineUrl}/v1/templates/lint`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  const json = await response.json();
+  if (!response.ok) {
+    throw new Error(json.message || `Error en la inspección de la plantilla (${response.status})`);
+  }
+
+  return json as TemplateLintApiResponse;
+}
+
+/**
+ * Sube una nueva versión de plantilla al Engine con validación y lint.
+ */
+export async function uploadTemplateToEngine(params: UploadTemplateParams) {
+  const supabase = createClient();
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
+
+  if (sessionError || !session?.access_token) {
+    throw new Error('Debe iniciar sesión para administrar plantillas');
+  }
+
+  const formData = new FormData();
+  formData.append('file', params.file);
+  formData.append('document_type_id', params.documentTypeId);
+  formData.append('name', params.name);
+  if (params.validFrom) formData.append('valid_from', params.validFrom);
+  if (params.validUntil) formData.append('valid_until', params.validUntil);
+  if (params.estimatedManualMinutes !== undefined) {
+    formData.append('estimated_manual_minutes', String(params.estimatedManualMinutes));
+  }
+
+  const engineUrl = getEngineUrl();
+  const response = await fetch(`${engineUrl}/v1/templates/upload`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: formData,
+  });
+
+  const json = await response.json();
+  if (!response.ok) {
+    throw new Error(json.message || `Error al subir la plantilla (${response.status})`);
+  }
+
+  return json;
+}
+
+/**
+ * Obtiene la URL firmada para descargar el archivo DOCX de una plantilla.
+ */
+export async function requestTemplateDownloadUrl(templateId: string): Promise<string> {
+  const engineUrl = getEngineUrl();
+  const response = await fetch(`${engineUrl}/v1/templates/${templateId}/download`);
+
+  const json = await response.json();
+  if (!response.ok) {
+    throw new Error(json.message || `Error al obtener enlace de descarga (${response.status})`);
+  }
+
+  return json.downloadUrl as string;
+}
