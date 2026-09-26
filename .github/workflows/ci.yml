@@ -90,4 +90,15 @@ jobs:
         run: supabase start
 
       - name: Run Database Tests (pgTAP)
-        run: supabase test db --debug
+        id: pgtap
+        run: |
+          set -o pipefail
+          supabase test db --debug 2>&1 | tee pgtap_output.log
+
+      - name: Report pgTAP Test Summary
+        if: always()
+        run: |
+          echo "### pgTAP Test Results" >> $GITHUB_STEP_SUMMARY
+          echo '```text' >> $GITHUB_STEP_SUMMARY
+          tail -n 120 pgtap_output.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
