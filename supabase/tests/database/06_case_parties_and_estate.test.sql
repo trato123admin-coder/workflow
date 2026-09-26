@@ -142,6 +142,7 @@ select throws_ok(
     values ((select v_case_id from s4_vars), (select v_heir_adult_id from s4_vars), 'CAUSANTE', true)
   $$,
   '23505',
+  'one_causante_per_case',
   '2.2 Segundo CAUSANTE activo en el mismo caso es rechazado por el índice único'
 );
 
@@ -162,6 +163,7 @@ select throws_ok(
     values ((select v_case_id from s4_vars), 'CUENTA_BANCARIA', 'Cuenta BCP Corriente', '123456', 'IDENTIFICADO')
   $$,
   '23514',
+  'chk_case_assets_bank_account_digits',
   '3.1 Cuenta bancaria con más de 4 dígitos (123456) es rechazada por CHECK'
 );
 
@@ -171,6 +173,7 @@ select throws_ok(
     values ((select v_case_id from s4_vars), 'CUENTA_BANCARIA', 'Cuenta BCP Corriente', '12A4', 'IDENTIFICADO')
   $$,
   '23514',
+  'chk_case_assets_bank_account_digits',
   '3.2 Cuenta bancaria con caracteres no numéricos es rechazada por CHECK'
 );
 
@@ -180,6 +183,7 @@ select throws_ok(
     values ((select v_case_id from s4_vars), 'CUENTA_BANCARIA', 'Cuenta BCP Corta', '123', 'IDENTIFICADO')
   $$,
   '23514',
+  'chk_case_assets_bank_account_digits',
   '3.3 Cuenta bancaria con menos de 4 dígitos (123) es rechazada por CHECK'
 );
 
