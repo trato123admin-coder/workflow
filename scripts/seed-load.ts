@@ -124,7 +124,7 @@ export async function loadSyntheticSeed() {
         : `Expediente Sucesorio de Volumen ${caseNum}`,
       client_person_id: clientId,
       case_model_version_id: modelVer.id,
-      status_id: initialStatus.id,
+      status: 'OPEN',
       route: 'NOTARIAL',
       priority: isBench ? 'HIGH' : 'NORMAL',
       is_confidential: false,
