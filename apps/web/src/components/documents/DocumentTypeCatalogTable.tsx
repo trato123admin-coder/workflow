@@ -9,7 +9,9 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
+  Plus,
 } from 'lucide-react';
+import { CreateDocumentTypeModal } from './CreateDocumentTypeModal';
 
 export interface DocumentTypeItem {
   id: string;
@@ -30,16 +32,19 @@ export interface DocumentTypeItem {
 interface DocumentTypeCatalogTableProps {
   types: DocumentTypeItem[];
   onToggleActive?: (id: string, current: boolean) => Promise<void>;
+  onReload?: () => Promise<void> | void;
   canManage?: boolean;
 }
 
 export const DocumentTypeCatalogTable: React.FC<DocumentTypeCatalogTableProps> = ({
   types,
   onToggleActive,
+  onReload,
   canManage = false,
 }) => {
   const [filterTab, setFilterTab] = useState<'TODOS' | 'PLANTILLAS' | 'SUBIDOS' | 'EXTERNOS' | 'ACTIVOS'>('TODOS');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const filteredTypes = useMemo(() => {
     return types.filter((item) => {
@@ -164,15 +169,28 @@ export const DocumentTypeCatalogTable: React.FC<DocumentTypeCatalogTableProps> =
             </button>
           </div>
 
-          <div className="relative w-full sm:w-64">
-            <Search className="w-4 h-4 absolute left-3 top-2.5 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Buscar tipo o código…"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-input bg-surface text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 sm:w-64">
+              <Search className="w-4 h-4 absolute left-3 top-2.5 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Buscar tipo o código…"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-input bg-surface text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+
+            {canManage && (
+              <button
+                type="button"
+                onClick={() => setIsCreateOpen(true)}
+                className="px-3 py-1.5 rounded-xl bg-primary text-primary-foreground font-semibold text-xs hover:bg-primary/90 flex items-center gap-1.5 transition-colors shrink-0 shadow-sm"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Nuevo Tipo</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -250,6 +268,16 @@ export const DocumentTypeCatalogTable: React.FC<DocumentTypeCatalogTableProps> =
           </table>
         </div>
       </div>
+
+      {isCreateOpen && (
+        <CreateDocumentTypeModal
+          isOpen={isCreateOpen}
+          onClose={() => setIsCreateOpen(false)}
+          onSuccess={() => {
+            if (onReload) void onReload();
+          }}
+        />
+      )}
     </div>
   );
 };

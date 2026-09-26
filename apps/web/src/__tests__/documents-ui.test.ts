@@ -1,10 +1,11 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { optimizeImageFile } from '../lib/image-compression';
 import { getEngineUrl } from '../lib/engine-client';
 import {
   DEFAULT_UPLOAD_CONFIG,
   fetchStorageUploadConfig,
 } from '../lib/settings-client';
+import { DocumentTypeFormSchema } from '../components/documents/CreateDocumentTypeModal';
 
 describe('Document UI & Client Utilities (S5-04, S5-08, S5-09, S5-10)', () => {
   it('retorna URL base del Engine por defecto o desde variable', () => {
@@ -45,5 +46,80 @@ describe('Document UI & Client Utilities (S5-04, S5-08, S5-09, S5-10)', () => {
 
     expect(isWarnUnder).toBe(false);
     expect(isWarnOver).toBe(true);
+  });
+
+  describe('DocumentTypeFormSchema - Validación Zod del Catálogo Maestro (S5-08)', () => {
+    it('valida exitosamente un tipo documental de ámbito CASO', () => {
+      const validCase = {
+        code: 'ACTA_CONCILIACION',
+        name: 'Acta de Conciliación Extrajudicial',
+        category: 'LEGAL',
+        nature: 'UPLOADED',
+        scope: 'CASO',
+        requires_template: false,
+      };
+
+      const result = DocumentTypeFormSchema.safeParse(validCase);
+      expect(result.success).toBe(true);
+    });
+
+    it('rechaza código con minúsculas o caracteres inválidos', () => {
+      const invalidCode = {
+        code: 'acta-invalida!',
+        name: 'Acta Inválida',
+        category: 'LEGAL',
+        nature: 'UPLOADED',
+        scope: 'CASO',
+        requires_template: false,
+      };
+
+      const result = DocumentTypeFormSchema.safeParse(invalidCode);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].path).toContain('code');
+      }
+    });
+
+    it('exige party_role cuando el ámbito es PERSONA', () => {
+      const missingRole = {
+        code: 'CERT_DOMICILIARIO',
+        name: 'Certificado Domiciliario',
+        category: 'IDENTIDAD',
+        nature: 'UPLOADED',
+        scope: 'PERSONA',
+        party_role: null,
+        requires_template: false,
+      };
+
+      const result = DocumentTypeFormSchema.safeParse(missingRole);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toContain('rol del interviniente');
+      }
+
+      const withRole = { ...missingRole, party_role: 'HEREDERO' };
+      expect(DocumentTypeFormSchema.safeParse(withRole).success).toBe(true);
+    });
+
+    it('exige asset_type cuando el ámbito es BIEN', () => {
+      const missingAsset = {
+        code: 'GRAVAMEN_VEHICULAR',
+        name: 'Certificado de Gravamen Vehicular',
+        category: 'PATRIMONIO',
+        nature: 'EXTERNAL',
+        scope: 'BIEN',
+        asset_type: null,
+        requires_template: false,
+      };
+
+      const result = DocumentTypeFormSchema.safeParse(missingAsset);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toContain('tipo de bien');
+      }
+
+      const withAsset = { ...missingAsset, asset_type: 'VEHICULO' };
+      expect(DocumentTypeFormSchema.safeParse(withAsset).success).toBe(true);
+    });
   });
 });

@@ -9,6 +9,7 @@ import {
   type DocumentTypeItem,
 } from '../../components/documents/DocumentTypeCatalogTable';
 import { CaseDocumentsLibraryTab } from '../../components/documents/CaseDocumentsLibraryTab';
+import { ConfirmImpactDialog } from '../../components/ui/ConfirmImpactDialog';
 
 interface RolePermCheck {
   roles?: {
@@ -67,20 +68,84 @@ export default function DocumentLibraryPage() {
     void loadDocTypes();
   }, [loadDocTypes]);
 
-  const handleToggleActive = async (id: string, current: boolean) => {
+  const [impactDialogData, setImpactDialogData] = useState<{
+    isOpen: boolean;
+    id: string;
+    code: string;
+    name: string;
+    usage: {
+      count: number;
+      locations: string[];
+      canSafelyDeactivate: boolean;
+    };
+  } | null>(null);
+
+  const executeToggle = async (id: string, nextState: boolean) => {
     try {
       const supabase = createClient();
       const { error } = await supabase
         .from('document_types')
-        .update({ is_active: !current })
+        .update({ is_active: nextState })
         .eq('id', id);
 
       if (error) throw error;
       setDocTypes((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, is_active: !current } : t)),
+        prev.map((t) => (t.id === id ? { ...t, is_active: nextState } : t)),
       );
     } catch (err: unknown) {
       setErrorMessage((err as Error).message || 'Error al cambiar estado del tipo de documento');
+    }
+  };
+
+  const handleToggleActive = async (id: string, current: boolean) => {
+    if (!current) {
+      // Activando directamente
+      await executeToggle(id, true);
+      return;
+    }
+
+    // Desactivando -> evaluar impacto de uso
+    try {
+      const targetDoc = docTypes.find((t) => t.id === id);
+      const supabase = createClient();
+      const [slotsRes, modelsRes] = await Promise.all([
+        supabase
+          .from('case_documents')
+          .select('id', { count: 'exact', head: true })
+          .eq('document_type_id', id)
+          .eq('is_active', true),
+        supabase
+          .from('case_model_documents')
+          .select('id', { count: 'exact', head: true })
+          .eq('document_type_id', id),
+      ]);
+
+      const slotCount = slotsRes.count || 0;
+      const modelCount = modelsRes.count || 0;
+      const totalCount = slotCount + modelCount;
+
+      if (totalCount > 0) {
+        const locations: string[] = [];
+        if (slotCount > 0) locations.push(`${slotCount} slots en expedientes activos`);
+        if (modelCount > 0) locations.push(`${modelCount} definiciones en modelos de caso`);
+
+        setImpactDialogData({
+          isOpen: true,
+          id,
+          code: targetDoc?.code || 'DOC',
+          name: targetDoc?.name || 'Tipo de Documento',
+          usage: {
+            count: totalCount,
+            locations,
+            canSafelyDeactivate: true,
+          },
+        });
+        return;
+      }
+
+      await executeToggle(id, false);
+    } catch {
+      await executeToggle(id, false);
     }
   };
 
@@ -143,11 +208,29 @@ export default function DocumentLibraryPage() {
             <DocumentTypeCatalogTable
               types={docTypes}
               onToggleActive={handleToggleActive}
+              onReload={loadDocTypes}
               canManage={canManageTypes}
             />
           )
         ) : (
           <CaseDocumentsLibraryTab />
+        )}
+
+        {impactDialogData?.isOpen && (
+          <ConfirmImpactDialog
+            isOpen={impactDialogData.isOpen}
+            onClose={() => setImpactDialogData(null)}
+            onConfirm={() => {
+              const docId = impactDialogData.id;
+              setImpactDialogData(null);
+              void executeToggle(docId, false);
+            }}
+            title="Desactivar tipo de documento"
+            itemName={impactDialogData.name}
+            itemCode={impactDialogData.code}
+            usage={impactDialogData.usage}
+            isDeactivating={true}
+          />
         )}
       </div>
     </AppShell>
