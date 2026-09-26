@@ -414,7 +414,7 @@ begin
         when client.person_type = 'JURIDICA' then coalesce(client.legal_name, 'Persona Jurídica')
         else trim(coalesce(client.first_name, '') || ' ' || coalesce(client.last_name, ''))
       end as subtitle,
-      coalesce(ci.name, c.status) as badge,
+      coalesce(ci.label, c.status) as badge,
       '/cases/' || c.id::text as route_url,
       jsonb_build_object(
         'case_number', c.case_number,
