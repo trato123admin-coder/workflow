@@ -1,8 +1,10 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
+import multipart from '@fastify/multipart';
 import { randomUUID } from 'node:crypto';
 import { healthRoutes } from './routes/health.js';
 import { moduleRoutes } from './routes/modules.js';
+import { documentRoutes } from './routes/documents.js';
 import { getEngineEnv } from './config/env.js';
 
 export async function buildApp(): Promise<FastifyInstance> {
@@ -37,12 +39,19 @@ export async function buildApp(): Promise<FastifyInstance> {
     origin: env.ENGINE_ALLOWED_ORIGINS === '*' ? true : env.ENGINE_ALLOWED_ORIGINS.split(','),
   });
 
+  await fastify.register(multipart, {
+    limits: {
+      fileSize: 50 * 1024 * 1024,
+    },
+  });
+
   fastify.addHook('onSend', async (request, reply) => {
     reply.header('x-request-id', request.id);
   });
 
   await fastify.register(healthRoutes);
   await fastify.register(moduleRoutes);
+  await fastify.register(documentRoutes);
 
   return fastify;
 }
