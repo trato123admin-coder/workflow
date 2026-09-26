@@ -68,7 +68,11 @@ export const DocumentStatusModal: React.FC<DocumentStatusModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isValidating ? `Aprobar Documento: ${documentTitle}` : `Observar Documento: ${documentTitle}`}
+      title={
+        isValidating
+          ? `Aprobar Documento: ${documentTitle}`
+          : `Observar Documento: ${documentTitle}`
+      }
       description={
         isValidating
           ? 'Al validar, el documento cumple los requisitos legales del trámite.'
@@ -84,7 +88,10 @@ export const DocumentStatusModal: React.FC<DocumentStatusModalProps> = ({
         )}
 
         <div>
-          <label htmlFor="status-notes" className="block text-xs font-semibold text-foreground mb-1">
+          <label
+            htmlFor="status-notes"
+            className="block text-xs font-semibold text-foreground mb-1"
+          >
             {isValidating ? 'Notas de aprobación (opcional)' : 'Motivo de la observación *'}
           </label>
           <textarea
@@ -114,7 +121,9 @@ export const DocumentStatusModal: React.FC<DocumentStatusModalProps> = ({
             type="submit"
             disabled={isSubmitting}
             className={`px-4 py-2 rounded-xl text-xs font-semibold text-white flex items-center gap-1.5 disabled:opacity-50 ${
-              isValidating ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-amber-600 hover:bg-amber-700'
+              isValidating
+                ? 'bg-emerald-600 hover:bg-emerald-700'
+                : 'bg-amber-600 hover:bg-amber-700'
             }`}
           >
             {isSubmitting ? (

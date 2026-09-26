@@ -42,7 +42,9 @@ export const DocumentTypeCatalogTable: React.FC<DocumentTypeCatalogTableProps> =
   onReload,
   canManage = false,
 }) => {
-  const [filterTab, setFilterTab] = useState<'TODOS' | 'PLANTILLAS' | 'SUBIDOS' | 'EXTERNOS' | 'ACTIVOS'>('TODOS');
+  const [filterTab, setFilterTab] = useState<
+    'TODOS' | 'PLANTILLAS' | 'SUBIDOS' | 'EXTERNOS' | 'ACTIVOS'
+  >('TODOS');
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
@@ -212,9 +214,7 @@ export const DocumentTypeCatalogTable: React.FC<DocumentTypeCatalogTableProps> =
             <tbody className="divide-y divide-border">
               {filteredTypes.map((item) => (
                 <tr key={item.id} className="hover:bg-muted/20 transition-colors">
-                  <td className="py-3 px-4 font-mono font-bold text-foreground">
-                    {item.code}
-                  </td>
+                  <td className="py-3 px-4 font-mono font-bold text-foreground">{item.code}</td>
                   <td className="py-3 px-4">
                     <p className="font-semibold text-foreground">{item.name}</p>
                     <p className="text-[11px] text-muted-foreground font-medium">
@@ -246,7 +246,11 @@ export const DocumentTypeCatalogTable: React.FC<DocumentTypeCatalogTableProps> =
                         }`}
                         title="Hacer clic para activar o desactivar"
                       >
-                        {item.is_active ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                        {item.is_active ? (
+                          <CheckCircle2 className="w-3 h-3" />
+                        ) : (
+                          <XCircle className="w-3 h-3" />
+                        )}
                         <span>{item.is_active ? 'Activo' : 'Inactivo'}</span>
                       </button>
                     ) : (
@@ -257,7 +261,11 @@ export const DocumentTypeCatalogTable: React.FC<DocumentTypeCatalogTableProps> =
                             : 'bg-muted text-muted-foreground border-border'
                         }`}
                       >
-                        {item.is_active ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                        {item.is_active ? (
+                          <CheckCircle2 className="w-3 h-3" />
+                        ) : (
+                          <XCircle className="w-3 h-3" />
+                        )}
                         <span>{item.is_active ? 'Activo' : 'Inactivo'}</span>
                       </span>
                     )}

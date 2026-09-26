@@ -15,7 +15,8 @@ export const DEFAULT_UPLOAD_CONFIG: StorageUploadConfig = {
     'image/jpeg',
     'image/png',
   ],
-  acceptAttribute: '.pdf,.docx,.jpg,.jpeg,.png,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png',
+  acceptAttribute:
+    '.pdf,.docx,.jpg,.jpeg,.png,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png',
   displayHelpText: 'Formatos: PDF, Word (.docx), JPG, PNG. Máx. 10 MB.',
 };
 

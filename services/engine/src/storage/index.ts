@@ -16,7 +16,9 @@ export function getSupabaseServiceClient(): SupabaseClient {
 
   const env = getEngineEnv();
   if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error('Variables SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY no configuradas en el engine');
+    throw new Error(
+      'Variables SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY no configuradas en el engine',
+    );
   }
 
   supabaseServiceClient = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {

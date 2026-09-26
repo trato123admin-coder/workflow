@@ -8,7 +8,7 @@ import { verifyUserDownloadAccess } from './documents-access.js';
  * Valida can_access_case + documents.read, audita DOWNLOAD_DOCUMENT y genera URL firmada de 60s.
  */
 export async function getAuditedDownloadUrl(
-  options: DownloadUrlOptions
+  options: DownloadUrlOptions,
 ): Promise<DownloadUrlResponse> {
   const supabase = getSupabaseServiceClient();
   const storage = getStorageProvider();
@@ -17,14 +17,11 @@ export async function getAuditedDownloadUrl(
   const { userId, versionRecord } = await verifyUserDownloadAccess(
     supabase,
     options.userJwt,
-    options.versionId
+    options.versionId,
   );
 
   // 2. Generar URL firmada con expiración estricta de 60 segundos
-  const downloadUrl = await storage.signedUrl(
-    versionRecord.storage_key,
-    SIGNED_URL_TTL_SECONDS
-  );
+  const downloadUrl = await storage.signedUrl(versionRecord.storage_key, SIGNED_URL_TTL_SECONDS);
 
   // 3. Registrar auditoría append-only del evento DOWNLOAD_DOCUMENT
   await supabase.from('audit_logs').insert({

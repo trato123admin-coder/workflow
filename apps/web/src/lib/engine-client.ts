@@ -19,7 +19,7 @@ export interface UploadDocumentParams {
  * Realiza la subida de un documento al Engine validando JWT y gestionando Cold-start de Render.
  */
 export async function uploadDocumentToEngine(
-  params: UploadDocumentParams
+  params: UploadDocumentParams,
 ): Promise<UploadVersionResponse> {
   const supabase = createClient();
   const {
@@ -82,7 +82,7 @@ export async function uploadDocumentToEngine(
  */
 export async function requestDocumentDownloadUrl(
   versionId: string,
-  onColdStartNotice?: (isWakingUp: boolean) => void
+  onColdStartNotice?: (isWakingUp: boolean) => void,
 ): Promise<DownloadUrlResponse> {
   const supabase = createClient();
   const {

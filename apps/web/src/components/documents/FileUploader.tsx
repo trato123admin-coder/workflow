@@ -2,7 +2,14 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  UploadCloud, Camera, FileText, AlertCircle, Loader2, X, FileCheck, FileType,
+  UploadCloud,
+  Camera,
+  FileText,
+  AlertCircle,
+  Loader2,
+  X,
+  FileCheck,
+  FileType,
 } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { optimizeImageFile, convertImageToPdf } from '../../lib/image-compression';
@@ -51,9 +58,16 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
   }, [isOpen]);
 
   const resetState = () => {
-    setSelectedFile(null); setRawSourceFile(null); setOriginalSize(null);
-    setChangeSummary(''); setConvertToPdf(false); setIsProcessing(false);
-    setIsUploading(false); setIsColdStarting(false); setErrorMessage(null); setIsDragOver(false);
+    setSelectedFile(null);
+    setRawSourceFile(null);
+    setOriginalSize(null);
+    setChangeSummary('');
+    setConvertToPdf(false);
+    setIsProcessing(false);
+    setIsUploading(false);
+    setIsColdStarting(false);
+    setErrorMessage(null);
+    setIsDragOver(false);
   };
 
   const handleClose = () => {
@@ -89,7 +103,9 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
     if (rawSourceFile && rawSourceFile.type.startsWith('image/')) {
       setIsProcessing(true);
       try {
-        const finalFile = checked ? await convertImageToPdf(rawSourceFile) : await optimizeImageFile(rawSourceFile);
+        const finalFile = checked
+          ? await convertImageToPdf(rawSourceFile)
+          : await optimizeImageFile(rawSourceFile);
         setSelectedFile(finalFile);
       } finally {
         setIsProcessing(false);
@@ -151,7 +167,10 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
 
         {!selectedFile ? (
           <div
-            onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragOver(true);
+            }}
             onDragLeave={() => setIsDragOver(false)}
             onDrop={(e) => {
               e.preventDefault();
@@ -160,14 +179,20 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
               if (file) void processFile(file, false);
             }}
             className={`border-2 border-dashed rounded-2xl p-6 text-center transition-colors ${
-              isDragOver ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50 bg-surface'
+              isDragOver
+                ? 'border-primary bg-primary/5'
+                : 'border-border hover:border-primary/50 bg-surface'
             }`}
           >
             <div className="w-12 h-12 rounded-full bg-primary/10 text-primary mx-auto flex items-center justify-center mb-3">
               <UploadCloud className="w-6 h-6" />
             </div>
-            <p className="text-sm font-semibold text-foreground mb-1">Arrastra y suelta tu archivo aquí</p>
-            <p className="text-xs text-muted-foreground mb-4">o selecciona desde tu dispositivo o cámara</p>
+            <p className="text-sm font-semibold text-foreground mb-1">
+              Arrastra y suelta tu archivo aquí
+            </p>
+            <p className="text-xs text-muted-foreground mb-4">
+              o selecciona desde tu dispositivo o cámara
+            </p>
             <div className="flex items-center justify-center gap-2">
               <button
                 type="button"
@@ -209,7 +234,9 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
                   <FileText className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold text-foreground truncate">{selectedFile.name}</p>
+                  <p className="text-xs font-semibold text-foreground truncate">
+                    {selectedFile.name}
+                  </p>
                   <p className="text-[11px] text-muted-foreground">
                     {formatBytes(selectedFile.size)}
                     {originalSize && originalSize > selectedFile.size && (
@@ -253,7 +280,10 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
             )}
 
             <div>
-              <label htmlFor="change-summary" className="block text-xs font-semibold text-foreground mb-1">
+              <label
+                htmlFor="change-summary"
+                className="block text-xs font-semibold text-foreground mb-1"
+              >
                 Notas de la versión (opcional)
               </label>
               <input
@@ -283,11 +313,20 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
                 className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 flex items-center gap-1.5"
               >
                 {isUploading ? (
-                  <><Loader2 className="w-3.5 h-3.5 animate-spin" /><span>Transfiriendo…</span></>
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Transfiriendo…</span>
+                  </>
                 ) : isProcessing ? (
-                  <><Loader2 className="w-3.5 h-3.5 animate-spin" /><span>Procesando…</span></>
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Procesando…</span>
+                  </>
                 ) : (
-                  <><FileCheck className="w-3.5 h-3.5" /><span>Subir Documento</span></>
+                  <>
+                    <FileCheck className="w-3.5 h-3.5" />
+                    <span>Subir Documento</span>
+                  </>
                 )}
               </button>
             </div>

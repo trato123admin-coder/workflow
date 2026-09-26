@@ -42,7 +42,7 @@ async function verifyProfileActive(supabase: SupabaseClient, userId: string): Pr
     throw createDocumentError(
       'Usuario inactivo o desactivado por el administrador',
       403,
-      'FORBIDDEN_USER_INACTIVE'
+      'FORBIDDEN_USER_INACTIVE',
     );
   }
 }
@@ -53,7 +53,7 @@ async function verifyProfileActive(supabase: SupabaseClient, userId: string): Pr
  */
 export async function authenticateUser(
   supabase: SupabaseClient,
-  userJwt: string
+  userJwt: string,
 ): Promise<UserContext> {
   const { data: authData, error: authError } = await supabase.auth.getUser(userJwt);
   if (authError || !authData?.user) {
@@ -65,7 +65,8 @@ export async function authenticateUser(
 
   const { data: userRolesData, error: rolesError } = await supabase
     .from('user_roles')
-    .select(`
+    .select(
+      `
       roles!inner (
         id,
         is_superuser,
@@ -75,22 +76,26 @@ export async function authenticateUser(
           permissions!inner (code)
         )
       )
-    `)
+    `,
+    )
     .eq('user_id', userId);
 
   if (rolesError) {
     throw createDocumentError('Error al consultar roles de usuario', 500, 'ROLES_QUERY_ERROR');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const activeRoles = (userRolesData ?? []).map((ur) => (ur as any).roles).filter((r) => r?.is_active);
+  const activeRoles = (userRolesData ?? [])
+    .map(
+      (ur) => (ur as unknown as { roles?: { is_active?: boolean; requires_mfa?: boolean } }).roles,
+    )
+    .filter((r) => r?.is_active);
   const aal = decodeJwtAal(userJwt);
 
   if (activeRoles.some((r) => r.requires_mfa) && aal !== 'aal2') {
     throw createDocumentError(
       'Nivel de autenticación insuficiente: se requiere MFA (aal2) para los roles asignados',
       403,
-      'FORBIDDEN_MFA_REQUIRED'
+      'FORBIDDEN_MFA_REQUIRED',
     );
   }
 
@@ -117,7 +122,7 @@ export async function checkCaseAccess(
   user: UserContext,
   caseId: string,
   isConfidential: boolean,
-  requireWrite = false
+  requireWrite = false,
 ): Promise<void> {
   // Superusuario tiene bypass de acceso en lectura y escritura (private.is_superuser())
   if (user.isSuperuser) return;
@@ -130,7 +135,11 @@ export async function checkCaseAccess(
     .is('ended_at', null);
 
   if (error) {
-    throw createDocumentError('Error al consultar asignaciones del caso', 500, 'ASSIGNMENTS_QUERY_ERROR');
+    throw createDocumentError(
+      'Error al consultar asignaciones del caso',
+      500,
+      'ASSIGNMENTS_QUERY_ERROR',
+    );
   }
 
   const activeAssignments = assignments ?? [];
@@ -142,7 +151,7 @@ export async function checkCaseAccess(
     throw createDocumentError(
       'Acceso denegado: el caso es confidencial y no está asignado',
       403,
-      'FORBIDDEN_CONFIDENTIAL_CASE'
+      'FORBIDDEN_CONFIDENTIAL_CASE',
     );
   }
 
@@ -166,7 +175,7 @@ export async function checkCaseAccess(
       throw createDocumentError(
         'No tiene permisos de modificación en este caso (asignación VIEWER o sin permiso de escritura)',
         403,
-        'FORBIDDEN_CASE_WRITE'
+        'FORBIDDEN_CASE_WRITE',
       );
     }
   }
@@ -178,16 +187,18 @@ export async function checkCaseAccess(
 export async function verifyUserUploadAccess(
   supabase: SupabaseClient,
   userJwt: string,
-  caseDocumentId: string
+  caseDocumentId: string,
 ): Promise<{ userId: string; caseId: string }> {
   const user = await authenticateUser(supabase, userJwt);
 
   const { data: caseDoc, error } = await supabase
     .from('case_documents')
-    .select(`
+    .select(
+      `
       id, case_id, is_active,
       cases!inner (id, is_confidential, status)
-    `)
+    `,
+    )
     .eq('id', caseDocumentId)
     .maybeSingle();
 
@@ -199,7 +210,11 @@ export async function verifyUserUploadAccess(
   }
 
   if (!user.isSuperuser && !user.permissionCodes.has('documents.upload')) {
-    throw createDocumentError('Permiso requerido: documents.upload', 403, 'FORBIDDEN_DOCUMENTS_UPLOAD');
+    throw createDocumentError(
+      'Permiso requerido: documents.upload',
+      403,
+      'FORBIDDEN_DOCUMENTS_UPLOAD',
+    );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -215,7 +230,7 @@ export async function verifyUserUploadAccess(
 export async function verifyUserDownloadAccess(
   supabase: SupabaseClient,
   userJwt: string,
-  versionId: string
+  versionId: string,
 ): Promise<{
   userId: string;
   versionRecord: {
@@ -234,13 +249,15 @@ export async function verifyUserDownloadAccess(
 
   const { data: versionRecord, error } = await supabase
     .from('document_versions')
-    .select(`
+    .select(
+      `
       id, version, storage_backend, storage_key, file_name, size_bytes, mime_type, sha256,
       case_documents!inner (
         id, case_id, is_active,
         cases!inner (id, is_confidential, status)
       )
-    `)
+    `,
+    )
     .eq('id', versionId)
     .maybeSingle();
 

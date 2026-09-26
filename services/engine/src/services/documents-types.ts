@@ -6,7 +6,7 @@ export interface DocumentError extends Error {
 export function createDocumentError(
   message: string,
   statusCode: number,
-  code: string
+  code: string,
 ): DocumentError {
   const error = new Error(message) as DocumentError;
   error.statusCode = statusCode;

@@ -156,8 +156,8 @@ export const CaseDocumentItemRow: React.FC<CaseDocumentItemRowProps> = ({
           )}
           {doc.current_version && (
             <span className="text-primary font-medium flex items-center gap-1">
-              <FileText className="w-3 h-3" />
-              v{doc.current_version.version} ({doc.current_version.file_name})
+              <FileText className="w-3 h-3" />v{doc.current_version.version} (
+              {doc.current_version.file_name})
             </span>
           )}
         </div>

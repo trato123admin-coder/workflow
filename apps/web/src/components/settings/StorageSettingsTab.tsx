@@ -183,7 +183,9 @@ export const StorageSettingsTab: React.FC = () => {
             </div>
           </div>
           <div className="text-right">
-            <span className="font-bold text-foreground text-base">{formatBytes(usage.totalBytes)}</span>
+            <span className="font-bold text-foreground text-base">
+              {formatBytes(usage.totalBytes)}
+            </span>
             <span className="text-muted-foreground"> / 1.00 GB</span>
           </div>
         </div>
@@ -235,7 +237,9 @@ export const StorageSettingsTab: React.FC = () => {
               onChange={(e) => setMaxFileMb(Number(e.target.value))}
               className="w-full px-3 py-2 rounded-xl border border-input bg-surface text-foreground"
             />
-            <p className="text-[11px] text-muted-foreground mt-0.5">Tope para PDF y documentos. Inicial: 10 MB.</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              Tope para PDF y documentos. Inicial: 10 MB.
+            </p>
           </div>
 
           <div>
@@ -251,7 +255,9 @@ export const StorageSettingsTab: React.FC = () => {
               onChange={(e) => setImageMaxPx(Number(e.target.value))}
               className="w-full px-3 py-2 rounded-xl border border-input bg-surface text-foreground"
             />
-            <p className="text-[11px] text-muted-foreground mt-0.5">Resolución tope antes de subida (inicial 2000px).</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              Resolución tope antes de subida (inicial 2000px).
+            </p>
           </div>
 
           <div>
@@ -290,7 +296,11 @@ export const StorageSettingsTab: React.FC = () => {
             disabled={isSaving}
             className="px-4 py-2 rounded-xl bg-primary text-primary-foreground font-semibold flex items-center gap-1.5 hover:bg-primary/90 disabled:opacity-50"
           >
-            {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+            {isSaving ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Save className="w-3.5 h-3.5" />
+            )}
             <span>Guardar Parámetros</span>
           </button>
         </div>

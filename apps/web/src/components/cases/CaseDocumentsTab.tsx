@@ -70,32 +70,36 @@ export const CaseDocumentsTab: React.FC<CaseDocumentsTabProps> = ({ caseId }) =>
       // Cargar slots de documentos del expediente
       const { data, error } = await supabase
         .from('case_documents')
-        .select(`
+        .select(
+          `
           id, case_id, status, is_required, notes, current_version_id, is_active,
           document_types!inner (code, name, category, scope, party_role, asset_type),
           persons (id, first_name, last_name, legal_name),
           case_assets (id, asset_type, registry_ref, description),
           current_version:document_versions!fk_case_documents_current_version (id, version, file_name, size_bytes, mime_type)
-        `)
+        `,
+        )
         .eq('case_id', caseId)
         .eq('is_active', true)
         .order('id');
 
       if (error) throw error;
 
-      const mapped: EnrichedCaseDocument[] = ((data || []) as unknown as RawDocRow[]).map((row) => ({
-        id: row.id,
-        case_id: row.case_id,
-        status: row.status,
-        is_required: row.is_required,
-        is_active: Boolean(row.is_active),
-        notes: row.notes,
-        current_version_id: row.current_version_id,
-        document_type: row.document_types,
-        person: row.persons,
-        asset: row.case_assets,
-        current_version: row.current_version,
-      }));
+      const mapped: EnrichedCaseDocument[] = ((data || []) as unknown as RawDocRow[]).map(
+        (row) => ({
+          id: row.id,
+          case_id: row.case_id,
+          status: row.status,
+          is_required: row.is_required,
+          is_active: Boolean(row.is_active),
+          notes: row.notes,
+          current_version_id: row.current_version_id,
+          document_type: row.document_types,
+          person: row.persons,
+          asset: row.case_assets,
+          current_version: row.current_version,
+        }),
+      );
 
       setDocuments(mapped);
     } catch (err: unknown) {
@@ -155,7 +159,9 @@ export const CaseDocumentsTab: React.FC<CaseDocumentsTabProps> = ({ caseId }) =>
       <div className="p-4 rounded-2xl border border-border bg-surface flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-foreground">Compuertas de Cierre Documentario (M1):</span>
+            <span className="text-xs font-bold text-foreground">
+              Compuertas de Cierre Documentario (M1):
+            </span>
             {m1Status.canClose ? (
               <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2 className="w-3.5 h-3.5" />
@@ -170,7 +176,8 @@ export const CaseDocumentsTab: React.FC<CaseDocumentsTabProps> = ({ caseId }) =>
           </div>
           {!m1Status.canClose && (
             <p className="text-[11px] text-muted-foreground">
-              {m1Status.blockingReasons.join('. ')}. Todos los documentos requeridos deben estar en estado Validado.
+              {m1Status.blockingReasons.join('. ')}. Todos los documentos requeridos deben estar en
+              estado Validado.
             </p>
           )}
         </div>
@@ -237,7 +244,8 @@ export const CaseDocumentsTab: React.FC<CaseDocumentsTabProps> = ({ caseId }) =>
         </div>
       ) : filteredDocs.length === 0 ? (
         <div className="p-8 text-center rounded-2xl border border-dashed border-border bg-surface text-xs text-muted-foreground">
-          No hay documentos asignados en el ámbito {activeScope.toLowerCase()}. Si acaba de añadir personas o bienes, haga clic en &quot;Sincronizar Slots&quot;.
+          No hay documentos asignados en el ámbito {activeScope.toLowerCase()}. Si acaba de añadir
+          personas o bienes, haga clic en &quot;Sincronizar Slots&quot;.
         </div>
       ) : (
         <div className="space-y-2.5">

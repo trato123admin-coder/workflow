@@ -8,9 +8,13 @@ import {
 import { createDocumentError } from './documents-types.js';
 import { logger } from '../lib/logger.js';
 
-function resolveMaxFileBytes(settingsMap: Map<string, unknown>): { maxBytes: number; maxMb: number } {
+function resolveMaxFileBytes(settingsMap: Map<string, unknown>): {
+  maxBytes: number;
+  maxMb: number;
+} {
   let maxMb = DEFAULT_MAX_FILE_MB;
-  const setting = settingsMap.get('storage.max_file_mb') ?? settingsMap.get('documents.max_file_mb');
+  const setting =
+    settingsMap.get('storage.max_file_mb') ?? settingsMap.get('documents.max_file_mb');
   if (typeof setting === 'number' && setting > 0) {
     maxMb = setting;
   } else if (typeof setting === 'string' && !isNaN(Number(setting)) && Number(setting) > 0) {
@@ -20,7 +24,8 @@ function resolveMaxFileBytes(settingsMap: Map<string, unknown>): { maxBytes: num
 }
 
 function resolveAllowedMimes(settingsMap: Map<string, unknown>): string[] {
-  const setting = settingsMap.get('storage.allowed_mime') ?? settingsMap.get('documents.allowed_mime');
+  const setting =
+    settingsMap.get('storage.allowed_mime') ?? settingsMap.get('documents.allowed_mime');
   if (Array.isArray(setting) && setting.length > 0) {
     return setting.map(String);
   }
@@ -34,7 +39,7 @@ function resolveAllowedMimes(settingsMap: Map<string, unknown>): string[] {
 export async function validateUploadFile(
   supabase: SupabaseClient,
   fileBuffer: Buffer,
-  claimedMime: string
+  claimedMime: string,
 ): Promise<{ sha256: string }> {
   const { data: settingsRows, error: settingsError } = await supabase
     .from('system_settings')
@@ -47,9 +52,12 @@ export async function validateUploadFile(
     ]);
 
   if (settingsError) {
-    logger.warn('Error al consultar system_settings para validación de archivo; aplicando valores predeterminados', {
-      error: settingsError.message,
-    });
+    logger.warn(
+      'Error al consultar system_settings para validación de archivo; aplicando valores predeterminados',
+      {
+        error: settingsError.message,
+      },
+    );
   }
 
   const settingsMap = new Map<string, unknown>();
@@ -62,7 +70,7 @@ export async function validateUploadFile(
     throw createDocumentError(
       `El archivo excede el tamaño máximo permitido (${maxMb} MB)`,
       413,
-      'FILE_TOO_LARGE'
+      'FILE_TOO_LARGE',
     );
   }
 
@@ -71,7 +79,7 @@ export async function validateUploadFile(
     throw createDocumentError(
       `El tipo MIME '${claimedMime}' no está permitido. Tipos admitidos: ${allowedMimes.join(', ')}`,
       415,
-      'UNSUPPORTED_MEDIA_TYPE'
+      'UNSUPPORTED_MEDIA_TYPE',
     );
   }
 
@@ -80,7 +88,7 @@ export async function validateUploadFile(
     throw createDocumentError(
       `El contenido del archivo no coincide con su tipo declarado (${claimedMime}). Verificación de cabecera fallida`,
       400,
-      'INVALID_FILE_SIGNATURE'
+      'INVALID_FILE_SIGNATURE',
     );
   }
 

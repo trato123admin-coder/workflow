@@ -39,7 +39,7 @@ describe('SupabaseStorageProvider (S5-03)', () => {
 
     const provider = new SupabaseStorageProvider(mockClient, 'case-documents');
     await expect(
-      provider.put('key', Buffer.from('x'), { mime: 'image/png', sha256: 'x', size: 1 })
+      provider.put('key', Buffer.from('x'), { mime: 'image/png', sha256: 'x', size: 1 }),
     ).rejects.toThrow('Error subiendo archivo a Supabase Storage [key]: Bucket not found');
   });
 
@@ -48,7 +48,10 @@ describe('SupabaseStorageProvider (S5-03)', () => {
       storage: {
         from: vi.fn().mockReturnValue({
           createSignedUrl: vi.fn().mockResolvedValue({
-            data: { signedUrl: 'https://supabase.co/storage/v1/object/sign/case-documents/doc.pdf?token=xyz' },
+            data: {
+              signedUrl:
+                'https://supabase.co/storage/v1/object/sign/case-documents/doc.pdf?token=xyz',
+            },
             error: null,
           }),
         }),

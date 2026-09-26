@@ -173,10 +173,6 @@ begin
     from public.case_documents
    where case_id = 'cccccccc-5555-cccc-cccc-cccccccccc01'
      and party_id = v_party_id;
-
-  if v_active_slots_before = 2 and v_active_slots_after = 0 and v_total_slots = 2 then
-    insert into s4b_vars (v_model_version_id) values (null); -- flag de ok
-  end if;
 end;
 $$;
 

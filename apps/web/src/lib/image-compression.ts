@@ -3,7 +3,7 @@ import { DEFAULT_IMAGE_MAX_PX } from '@workflow/shared';
 function calculateScaledDimensions(
   width: number,
   height: number,
-  maxPx: number
+  maxPx: number,
 ): { width: number; height: number } {
   if (width <= maxPx && height <= maxPx) {
     return { width, height };
@@ -28,7 +28,7 @@ function calculateScaledDimensions(
 export async function optimizeImageFile(
   file: File,
   maxPx: number = DEFAULT_IMAGE_MAX_PX,
-  quality = 0.82
+  quality = 0.82,
 ): Promise<File> {
   if (!file.type.startsWith('image/')) {
     return file;
@@ -60,10 +60,12 @@ export async function optimizeImageFile(
         (blob) => {
           if (!blob || blob.size >= file.size) return resolve(file);
           const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-          resolve(new File([blob], `${baseName}.jpg`, { type: 'image/jpeg', lastModified: Date.now() }));
+          resolve(
+            new File([blob], `${baseName}.jpg`, { type: 'image/jpeg', lastModified: Date.now() }),
+          );
         },
         'image/jpeg',
-        quality
+        quality,
       );
     };
 
@@ -99,12 +101,16 @@ function buildJpegPdf(jpegBytes: Uint8Array, width: number, height: number): Uin
   offsets.push(currentOffset);
   add('2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n');
   offsets.push(currentOffset);
-  add(`3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${ptW} ${ptH}] /Contents 4 0 R /Resources << /XObject << /Im1 5 0 R >> >> >>\nendobj\n`);
+  add(
+    `3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${ptW} ${ptH}] /Contents 4 0 R /Resources << /XObject << /Im1 5 0 R >> >> >>\nendobj\n`,
+  );
   offsets.push(currentOffset);
   const stream = `q\n${ptW} 0 0 ${ptH} 0 0 cm\n/Im1 Do\nQ\n`;
   add(`4 0 obj\n<< /Length ${stream.length} >>\nstream\n${stream}endstream\nendobj\n`);
   offsets.push(currentOffset);
-  add(`5 0 obj\n<< /Type /XObject /Subtype /Image /Width ${width} /Height ${height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBytes.length} >>\nstream\n`);
+  add(
+    `5 0 obj\n<< /Type /XObject /Subtype /Image /Width ${width} /Height ${height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBytes.length} >>\nstream\n`,
+  );
   add(jpegBytes);
   add('\nendstream\nendobj\n');
 
@@ -131,7 +137,7 @@ function buildJpegPdf(jpegBytes: Uint8Array, width: number, height: number): Uin
  */
 export async function convertImageToPdf(
   file: File,
-  maxPx: number = DEFAULT_IMAGE_MAX_PX
+  maxPx: number = DEFAULT_IMAGE_MAX_PX,
 ): Promise<File> {
   if (file.type === 'application/pdf') return file;
   if (!file.type.startsWith('image/')) return file;
@@ -147,7 +153,12 @@ export async function convertImageToPdf(
       URL.revokeObjectURL(url);
       const pdfBytes = buildJpegPdf(jpegBytes, img.width || 800, img.height || 600);
       const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-      resolve(new File([pdfBytes.buffer as ArrayBuffer], `${baseName}.pdf`, { type: 'application/pdf', lastModified: Date.now() }));
+      resolve(
+        new File([pdfBytes.buffer as ArrayBuffer], `${baseName}.pdf`, {
+          type: 'application/pdf',
+          lastModified: Date.now(),
+        }),
+      );
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);

@@ -52,11 +52,13 @@ export const DocumentVersionsModal: React.FC<DocumentVersionsModalProps> = ({
       const supabase = createClient();
       const { data, error } = await supabase
         .from('document_versions')
-        .select(`
+        .select(
+          `
           id, version, file_name, size_bytes, mime_type, sha256,
           change_summary, created_at, created_by,
           profiles (first_name, last_name, email)
-        `)
+        `,
+        )
         .eq('case_document_id', caseDocumentId)
         .order('version', { ascending: false });
 
@@ -83,7 +85,7 @@ export const DocumentVersionsModal: React.FC<DocumentVersionsModalProps> = ({
     setErrorMessage(null);
     try {
       const result = await requestDocumentDownloadUrl(versionId, (waking) =>
-        setIsColdStarting(waking)
+        setIsColdStarting(waking),
       );
       window.open(result.download_url, '_blank', 'noopener,noreferrer');
     } catch (err: unknown) {

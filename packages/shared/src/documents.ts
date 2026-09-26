@@ -157,7 +157,7 @@ export type DownloadUrlResponse = z.infer<typeof downloadUrlResponseSchema>;
  * Un proceso o caso solo puede cerrarse si NO tiene documentos obligatorios en estado PENDING u OBSERVED.
  */
 export function checkM1ClosingGates(
-  documents: Array<{ is_required: boolean; status: CaseDocumentStatus; is_active: boolean }>
+  documents: Array<{ is_required: boolean; status: CaseDocumentStatus; is_active: boolean }>,
 ): { canClose: boolean; blockingReasons: string[] } {
   const blockingReasons: string[] = [];
 

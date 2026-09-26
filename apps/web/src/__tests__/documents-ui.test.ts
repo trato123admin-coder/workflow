@@ -1,10 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { optimizeImageFile } from '../lib/image-compression';
 import { getEngineUrl } from '../lib/engine-client';
-import {
-  DEFAULT_UPLOAD_CONFIG,
-  fetchStorageUploadConfig,
-} from '../lib/settings-client';
+import { DEFAULT_UPLOAD_CONFIG, fetchStorageUploadConfig } from '../lib/settings-client';
 import { DocumentTypeFormSchema } from '../components/documents/CreateDocumentTypeModal';
 
 describe('Document UI & Client Utilities (S5-04, S5-08, S5-09, S5-10)', () => {
@@ -39,7 +36,7 @@ describe('Document UI & Client Utilities (S5-04, S5-08, S5-09, S5-10)', () => {
     const warnPercent = 80;
 
     const underLimitBytes = 0.75 * quotaBytes; // 75%
-    const overLimitBytes = 0.82 * quotaBytes;  // 82%
+    const overLimitBytes = 0.82 * quotaBytes; // 82%
 
     const isWarnUnder = (underLimitBytes / quotaBytes) * 100 >= warnPercent;
     const isWarnOver = (overLimitBytes / quotaBytes) * 100 >= warnPercent;

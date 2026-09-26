@@ -4,10 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Search, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import { createClient } from '../../lib/supabase/client';
 import { DocumentVersionsModal } from './DocumentVersionsModal';
-import {
-  DocumentLibraryTable,
-  type LibraryDocumentItem,
-} from './DocumentLibraryTable';
+import { DocumentLibraryTable, type LibraryDocumentItem } from './DocumentLibraryTable';
 import { requestDocumentDownloadUrl } from '../../lib/engine-client';
 import type { CaseDocumentStatus } from '@workflow/shared';
 
@@ -19,9 +16,22 @@ interface RawDocLibraryRow {
   notes?: string | null;
   current_version_id?: string | null;
   cases?: { id: string; case_number: string; title: string } | null;
-  document_types?: { code: string; name: string; scope: 'CASO' | 'PERSONA' | 'BIEN'; nature: string } | null;
-  persons?: { first_name?: string | null; last_name?: string | null; legal_name?: string | null } | null;
-  case_assets?: { asset_type: string; registry_ref?: string | null; description?: string | null } | null;
+  document_types?: {
+    code: string;
+    name: string;
+    scope: 'CASO' | 'PERSONA' | 'BIEN';
+    nature: string;
+  } | null;
+  persons?: {
+    first_name?: string | null;
+    last_name?: string | null;
+    legal_name?: string | null;
+  } | null;
+  case_assets?: {
+    asset_type: string;
+    registry_ref?: string | null;
+    description?: string | null;
+  } | null;
   current_version?: { id: string; version: number; file_name: string; size_bytes: number } | null;
 }
 
@@ -44,7 +54,8 @@ export const CaseDocumentsLibraryTab: React.FC = () => {
       const supabase = createClient();
       const { data, error } = await supabase
         .from('case_documents')
-        .select(`
+        .select(
+          `
           id, case_id, status, is_required, notes, current_version_id,
           cases!inner ( id, case_number, title ),
           document_types!inner ( code, name, scope, nature ),
@@ -53,7 +64,8 @@ export const CaseDocumentsLibraryTab: React.FC = () => {
           current_version:document_versions!fk_case_documents_current_version (
             id, version, file_name, size_bytes
           )
-        `)
+        `,
+        )
         .eq('is_active', true)
         .order('id', { ascending: false });
 

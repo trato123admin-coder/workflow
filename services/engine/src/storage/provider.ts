@@ -15,11 +15,7 @@ export interface StorageProvider {
   readonly code: string;
 
   /** Sube un archivo con sus metadatos de integridad */
-  put(
-    key: string,
-    body: Buffer | Uint8Array | Readable,
-    meta: StorageMetadata
-  ): Promise<void>;
+  put(key: string, body: Buffer | Uint8Array | Readable, meta: StorageMetadata): Promise<void>;
 
   /** Obtiene un stream de lectura del archivo */
   get(key: string): Promise<Readable | NodeJS.ReadableStream>;

@@ -12,7 +12,7 @@ describe('Shared Documents Module (S5-07)', () => {
     it('incluye exactamente PDF, DOCX, JPEG y PNG', () => {
       expect(ALLOWED_MIME_TYPES).toContain('application/pdf');
       expect(ALLOWED_MIME_TYPES).toContain(
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       );
       expect(ALLOWED_MIME_TYPES).toContain('image/jpeg');
       expect(ALLOWED_MIME_TYPES).toContain('image/png');
@@ -36,8 +36,8 @@ describe('Shared Documents Module (S5-07)', () => {
       expect(
         validateMagicBytes(
           docxHeader,
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        )
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ),
       ).toBe(true);
     });
 
@@ -54,7 +54,7 @@ describe('Shared Documents Module (S5-07)', () => {
     it('rechaza buffers menores a 4 bytes o MIME no soportado', () => {
       expect(validateMagicBytes(new Uint8Array([0x25, 0x50]), 'application/pdf')).toBe(false);
       expect(validateMagicBytes(new Uint8Array([0x25, 0x50, 0x44, 0x46]), 'application/zip')).toBe(
-        false
+        false,
       );
     });
   });
@@ -82,7 +82,7 @@ describe('Shared Documents Module (S5-07)', () => {
       const result = checkM1ClosingGates(docs);
       expect(result.canClose).toBe(false);
       expect(result.blockingReasons).toContain(
-        'Existen documentos obligatorios pendientes de carga'
+        'Existen documentos obligatorios pendientes de carga',
       );
     });
 
@@ -95,7 +95,7 @@ describe('Shared Documents Module (S5-07)', () => {
       const result = checkM1ClosingGates(docs);
       expect(result.canClose).toBe(false);
       expect(result.blockingReasons).toContain(
-        'Existen documentos obligatorios con observaciones no subsanadas'
+        'Existen documentos obligatorios con observaciones no subsanadas',
       );
     });
   });

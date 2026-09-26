@@ -7,13 +7,13 @@ export class SupabaseStorageProvider implements StorageProvider {
 
   constructor(
     private readonly client: SupabaseClient,
-    private readonly bucketName: string = 'case-documents'
+    private readonly bucketName: string = 'case-documents',
   ) {}
 
   async put(
     key: string,
     body: Buffer | Uint8Array | Readable,
-    meta: StorageMetadata
+    meta: StorageMetadata,
   ): Promise<void> {
     let payload: Buffer | Uint8Array;
 
@@ -27,12 +27,10 @@ export class SupabaseStorageProvider implements StorageProvider {
       payload = Buffer.concat(chunks);
     }
 
-    const { error } = await this.client.storage
-      .from(this.bucketName)
-      .upload(key, payload, {
-        contentType: meta.mime,
-        upsert: true,
-      });
+    const { error } = await this.client.storage.from(this.bucketName).upload(key, payload, {
+      contentType: meta.mime,
+      upsert: true,
+    });
 
     if (error) {
       throw new Error(`Error subiendo archivo a Supabase Storage [${key}]: ${error.message}`);
@@ -40,13 +38,11 @@ export class SupabaseStorageProvider implements StorageProvider {
   }
 
   async get(key: string): Promise<Readable> {
-    const { data, error } = await this.client.storage
-      .from(this.bucketName)
-      .download(key);
+    const { data, error } = await this.client.storage.from(this.bucketName).download(key);
 
     if (error || !data) {
       throw new Error(
-        `Error descargando archivo de Supabase Storage [${key}]: ${error?.message ?? 'No data'}`
+        `Error descargando archivo de Supabase Storage [${key}]: ${error?.message ?? 'No data'}`,
       );
     }
 
@@ -55,9 +51,7 @@ export class SupabaseStorageProvider implements StorageProvider {
   }
 
   async delete(key: string): Promise<void> {
-    const { error } = await this.client.storage
-      .from(this.bucketName)
-      .remove([key]);
+    const { error } = await this.client.storage.from(this.bucketName).remove([key]);
 
     if (error) {
       throw new Error(`Error eliminando archivo de Supabase Storage [${key}]: ${error.message}`);
@@ -86,7 +80,7 @@ export class SupabaseStorageProvider implements StorageProvider {
 
     if (error || !data?.signedUrl) {
       throw new Error(
-        `Error generando URL firmada en Supabase Storage [${key}]: ${error?.message ?? 'URL vacía'}`
+        `Error generando URL firmada en Supabase Storage [${key}]: ${error?.message ?? 'URL vacía'}`,
       );
     }
 

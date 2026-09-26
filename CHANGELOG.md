@@ -46,7 +46,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
     - Historial de versiones (`DocumentVersionsModal.tsx`) con copiado de hash SHA-256 y descarga temporal.
     - Modal de aprobación y observación (`DocumentStatusModal.tsx`) con motivo obligatorio para observaciones.
   - Biblioteca documentaria centralizada (`/documents`):
-    - Catálogo Maestro de Tipos (`DocumentTypeCatalogTable.tsx`, Mockup 6 / A.7 #7) con filtros por pestañas (*Todos, Plantillas, Subidos, Externos, Activos*) y toggle de estado.
+    - Catálogo Maestro de Tipos (`DocumentTypeCatalogTable.tsx`, Mockup 6 / A.7 #7) con filtros por pestañas (_Todos, Plantillas, Subidos, Externos, Activos_) y toggle de estado.
     - Repositorio de expedientes (`CaseDocumentsLibraryTab.tsx`) con filtros por ámbito, estado y búsqueda global.
   - Pestaña de configuración de almacenamiento (`StorageSettingsTab.tsx`, Mockup 7):
     - Visualización de cuota de almacenamiento con aviso visual al superar el 80% (`storage.usage_warn_percent`).

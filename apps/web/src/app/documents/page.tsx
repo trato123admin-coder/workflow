@@ -89,9 +89,7 @@ export default function DocumentLibraryPage() {
         .eq('id', id);
 
       if (error) throw error;
-      setDocTypes((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, is_active: nextState } : t)),
-      );
+      setDocTypes((prev) => prev.map((t) => (t.id === id ? { ...t, is_active: nextState } : t)));
     } catch (err: unknown) {
       setErrorMessage((err as Error).message || 'Error al cambiar estado del tipo de documento');
     }
@@ -150,7 +148,9 @@ export default function DocumentLibraryPage() {
   };
 
   return (
-    <AppShell breadcrumbs={[{ label: 'Inicio', href: '/cases' }, { label: 'Biblioteca Documentaria' }]}>
+    <AppShell
+      breadcrumbs={[{ label: 'Inicio', href: '/cases' }, { label: 'Biblioteca Documentaria' }]}
+    >
       <div className="space-y-6">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-foreground">

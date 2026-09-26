@@ -14,7 +14,7 @@ export const logger = {
         message,
         timestamp: new Date().toISOString(),
         ...context,
-      }) + '\n'
+      }) + '\n',
     );
   },
   error(message: string, context?: LogContext): void {
@@ -24,7 +24,7 @@ export const logger = {
         message,
         timestamp: new Date().toISOString(),
         ...context,
-      }) + '\n'
+      }) + '\n',
     );
   },
   info(message: string, context?: LogContext): void {
@@ -34,7 +34,7 @@ export const logger = {
         message,
         timestamp: new Date().toISOString(),
         ...context,
-      }) + '\n'
+      }) + '\n',
     );
   },
 };

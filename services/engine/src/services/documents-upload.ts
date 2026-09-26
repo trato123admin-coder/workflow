@@ -5,13 +5,17 @@ import { validateUploadFile } from './documents-validation.js';
 import { verifyUserUploadAccess } from './documents-access.js';
 
 export async function uploadDocumentVersion(
-  options: UploadFileOptions
+  options: UploadFileOptions,
 ): Promise<UploadVersionResponse> {
   const supabase = getSupabaseServiceClient();
   const storage = getStorageProvider();
 
   const { sha256 } = await validateUploadFile(supabase, options.fileBuffer, options.claimedMime);
-  const { userId, caseId } = await verifyUserUploadAccess(supabase, options.userJwt, options.caseDocumentId);
+  const { userId, caseId } = await verifyUserUploadAccess(
+    supabase,
+    options.userJwt,
+    options.caseDocumentId,
+  );
 
   const { data: existingVersions } = await supabase
     .from('document_versions')
@@ -59,7 +63,11 @@ export async function uploadDocumentVersion(
     .single();
 
   if (insertError || !versionRecord) {
-    throw createDocumentError('Error al registrar versión de documento', 500, 'VERSION_INSERT_ERROR');
+    throw createDocumentError(
+      'Error al registrar versión de documento',
+      500,
+      'VERSION_INSERT_ERROR',
+    );
   }
 
   await supabase

@@ -111,10 +111,14 @@ describe('Engine Document Routes - Upload & Download (S5-05, S5-10)', () => {
                       case_id: validCaseId,
                       is_active: true,
                       status: 'PENDING',
-                      cases: { id: validCaseId, is_confidential: isCaseConfidential, status: 'OPEN' },
+                      cases: {
+                        id: validCaseId,
+                        is_confidential: isCaseConfidential,
+                        status: 'OPEN',
+                      },
                     },
                     error: null,
-                  })
+                  }),
                 ),
               }),
             }),
@@ -224,9 +228,14 @@ describe('Engine Document Routes - Upload & Download (S5-05, S5-10)', () => {
     setSupabaseServiceClient(null);
   });
 
-  function createMultipartPayload(boundary: string, filename: string, mime: string, content: Buffer): Buffer {
+  function createMultipartPayload(
+    boundary: string,
+    filename: string,
+    mime: string,
+    content: Buffer,
+  ): Buffer {
     const header = Buffer.from(
-      `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${filename}"\r\nContent-Type: ${mime}\r\n\r\n`
+      `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${filename}"\r\nContent-Type: ${mime}\r\n\r\n`,
     );
     const footer = Buffer.from(`\r\n--${boundary}--\r\n`);
     return Buffer.concat([header, content, footer]);
@@ -368,7 +377,9 @@ describe('Engine Document Routes - Upload & Download (S5-05, S5-10)', () => {
 
     const boundary = '----BoundaryPngRestricted';
     // PNG con magic bytes válidos \x89PNG\r\n\x1a\n
-    const pngBytes = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00]);
+    const pngBytes = Buffer.from([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00,
+    ]);
     const payload = createMultipartPayload(boundary, 'foto.png', 'image/png', pngBytes);
 
     const response = await app.inject({
@@ -457,7 +468,9 @@ describe('Engine Document Routes - Upload & Download (S5-05, S5-10)', () => {
 
   it('bloquea subida si el rol exige MFA y la sesión está en aal1 (HTTP 403 FORBIDDEN_MFA_REQUIRED)', async () => {
     roleRequiresMfa = true;
-    const aal1Payload = Buffer.from(JSON.stringify({ aal: 'aal1', sub: validUserId })).toString('base64');
+    const aal1Payload = Buffer.from(JSON.stringify({ aal: 'aal1', sub: validUserId })).toString(
+      'base64',
+    );
     const aal1Token = `header.${aal1Payload}.signature`;
 
     const boundary = '----BoundaryMfaRequired';
@@ -481,7 +494,9 @@ describe('Engine Document Routes - Upload & Download (S5-05, S5-10)', () => {
 
   it('permite subida si el rol exige MFA y la sesión está en aal2 (HTTP 201)', async () => {
     roleRequiresMfa = true;
-    const aal2Payload = Buffer.from(JSON.stringify({ aal: 'aal2', sub: validUserId })).toString('base64');
+    const aal2Payload = Buffer.from(JSON.stringify({ aal: 'aal2', sub: validUserId })).toString(
+      'base64',
+    );
     const aal2Token = `header.${aal2Payload}.signature`;
 
     const boundary = '----BoundaryMfaSuccess';
@@ -527,7 +542,7 @@ describe('Engine Document Routes - Upload & Download (S5-05, S5-10)', () => {
     expect(resBody.data.sha256).toHaveLength(64);
     expect(mockStorage.put).toHaveBeenCalled();
     expect(auditLogsInsertMock).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'UPLOAD_DOCUMENT' })
+      expect.objectContaining({ action: 'UPLOAD_DOCUMENT' }),
     );
   });
 
@@ -588,10 +603,7 @@ describe('Engine Document Routes - Upload & Download (S5-05, S5-10)', () => {
     expect(body.data.mime_type).toBe('application/pdf');
     expect(body.data.size_bytes).toBe(1048576);
 
-    expect(mockStorage.signedUrl).toHaveBeenCalledWith(
-      'case-333/doc-222/v1/partida.pdf',
-      60
-    );
+    expect(mockStorage.signedUrl).toHaveBeenCalledWith('case-333/doc-222/v1/partida.pdf', 60);
 
     expect(auditLogsInsertMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -605,7 +617,7 @@ describe('Engine Document Routes - Upload & Download (S5-05, S5-10)', () => {
           version: 1,
           ttl_seconds: 60,
         }),
-      })
+      }),
     );
   });
 });
