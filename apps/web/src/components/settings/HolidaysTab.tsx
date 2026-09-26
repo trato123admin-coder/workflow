@@ -9,7 +9,6 @@ import {
   CalendarDays,
   Plus,
   Loader2,
-  Trash2,
   Info,
   CalendarCheck2,
   AlertCircle,
@@ -74,19 +73,6 @@ export const HolidaysTab: React.FC = () => {
       );
     } catch (err: unknown) {
       setErrorMessage((err as Error).message || 'Error al actualizar estado del feriado');
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('¿Desea eliminar este feriado?')) return;
-    try {
-      const supabase = createClient();
-      const { error } = await supabase.from('holidays').delete().eq('id', id);
-
-      if (error) throw error;
-      setHolidays((prev) => prev.filter((h) => h.id !== id));
-    } catch (err: unknown) {
-      setErrorMessage((err as Error).message || 'Error al eliminar feriado');
     }
   };
 
@@ -208,21 +194,13 @@ export const HolidaysTab: React.FC = () => {
                         size="sm"
                       />
                     </td>
-                    <td className="px-4 py-3 text-right space-x-2 whitespace-nowrap">
+                    <td className="px-4 py-3 text-right whitespace-nowrap">
                       <button
                         type="button"
                         onClick={() => handleToggleActive(h.id, h.is_active)}
                         className="text-[11px] font-medium text-muted-foreground hover:text-foreground"
                       >
                         {h.is_active ? 'Desactivar' : 'Activar'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(h.id)}
-                        className="p-1 text-muted-foreground hover:text-destructive rounded"
-                        title="Eliminar feriado"
-                      >
-                        <Trash2 className="w-3.5 h-3.5 inline" />
                       </button>
                     </td>
                   </tr>

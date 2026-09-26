@@ -5,8 +5,9 @@ import { z } from 'zod';
 import { Modal } from '../../ui/Modal';
 import { FormField } from '../../ui/FormField';
 import { createClient } from '../../../lib/supabase/client';
+import { FilingDeadlineSection } from './FilingDeadlineSection';
 import { addBusinessDays, toIsoDateString } from '@workflow/shared';
-import { Loader2, Calendar, Calculator, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 import type { CaseFiling } from '@workflow/shared';
 
 export const FilingFormSchema = z.object({
@@ -256,62 +257,14 @@ export const FilingModal: React.FC<FilingModalProps> = ({
         </div>
 
         {/* Fechas y calculadora de días útiles */}
-        <div className="p-3 bg-muted/40 rounded-xl border border-border space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField id="filed_at" label="Fecha de Presentación">
-              <input
-                id="filed_at"
-                type="date"
-                value={formData.filed_at || ''}
-                onChange={(e) => setFormData({ ...formData, filed_at: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground text-xs focus:ring-1 focus:ring-primary"
-              />
-            </FormField>
-
-            <FormField id="response_due_date" label="Fecha Límite / Vencimiento">
-              <div className="relative">
-                <input
-                  id="response_due_date"
-                  type="date"
-                  value={formData.response_due_date || ''}
-                  onChange={(e) => setFormData({ ...formData, response_due_date: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground text-xs focus:ring-1 focus:ring-primary"
-                />
-              </div>
-            </FormField>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px] text-muted-foreground border-t border-border/50">
-            <span className="flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5" />
-              Calcula días hábiles descontando fines de semana y feriados activos.
-            </span>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => handleComputeDeadline(publicationWaitDays)}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-secondary text-secondary-foreground font-semibold hover:bg-secondary/80"
-              >
-                <Calculator className="w-3 h-3" />
-                <span>Sumar {publicationWaitDays} d. útiles (Edictos)</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleComputeDeadline(7)}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded bg-muted text-foreground hover:bg-muted/80"
-              >
-                +7 d. útiles
-              </button>
-              <button
-                type="button"
-                onClick={() => handleComputeDeadline(30)}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded bg-muted text-foreground hover:bg-muted/80"
-              >
-                +30 d. útiles
-              </button>
-            </div>
-          </div>
-        </div>
+        <FilingDeadlineSection
+          filedAt={formData.filed_at || ''}
+          responseDueDate={formData.response_due_date || ''}
+          onFiledAtChange={(val) => setFormData({ ...formData, filed_at: val })}
+          onDueDateChange={(val) => setFormData({ ...formData, response_due_date: val })}
+          onComputeDeadline={handleComputeDeadline}
+          publicationWaitDays={publicationWaitDays}
+        />
 
         <FormField id="notes" label="Notas y Observaciones" error={errors.notes}>
           <textarea

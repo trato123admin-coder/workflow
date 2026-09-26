@@ -3,37 +3,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { createClient } from '../../../lib/supabase/client';
 import { FilingModal } from './FilingModal';
-import { StatusBadge, type StatusCategory } from '../../ui/StatusBadge';
+import { FilingCard, type FilingWithRelations } from './FilingCard';
 import { EmptyState } from '../../ui/EmptyState';
-import { getFilingUrgency, getRemainingBusinessDays } from '@workflow/shared';
 import {
   ExternalLink,
   Plus,
   Loader2,
-  Calendar,
-  Building2,
-  Edit2,
-  FileCheck,
 } from 'lucide-react';
 import type { CaseFiling } from '@workflow/shared';
 
 interface CaseFilingsTabProps {
   caseId: string;
-}
-
-interface FilingWithRelations extends CaseFiling {
-  external_entity?: {
-    id: string;
-    name: string;
-    entity_type: string;
-    city?: string;
-  } | null;
-  case_process?: {
-    id: string;
-    workflow_status?: {
-      name: string;
-    } | null;
-  } | null;
 }
 
 export const CaseFilingsTab: React.FC<CaseFilingsTabProps> = ({ caseId }) => {
@@ -126,20 +106,6 @@ export const CaseFilingsTab: React.FC<CaseFilingsTabProps> = ({ caseId }) => {
     void loadData();
   }, [loadData]);
 
-  const getStatusCategory = (statusCode: string): StatusCategory => {
-    const item = statuses.find((s) => s.code === statusCode);
-    const cat = item?.metadata?.category as string | undefined;
-    if (cat === 'DONE') return 'success';
-    if (cat === 'OBSERVED') return 'warning';
-    if (cat === 'REJECTED') return 'danger';
-    if (cat === 'SUBMITTED') return 'info';
-    return 'neutral';
-  };
-
-  const getStatusLabel = (statusCode: string): string => {
-    return statuses.find((s) => s.code === statusCode)?.label || statusCode;
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -184,121 +150,18 @@ export const CaseFilingsTab: React.FC<CaseFilingsTabProps> = ({ caseId }) => {
         />
       ) : (
         <div className="space-y-3">
-          {filings.map((filing) => {
-            const itemStatus = statuses.find((s) => s.code === filing.status);
-            const statusCat = (itemStatus?.metadata?.category as string) || undefined;
-            const urgency = getFilingUrgency(
-              {
-                statusCategory: statusCat,
-                response_due_date: filing.response_due_date,
-              },
-              holidays,
-            );
-
-            let remainingDays: number | null = null;
-            if (filing.response_due_date && urgency !== 'DONE') {
-              remainingDays = getRemainingBusinessDays(filing.response_due_date, holidays);
-            }
-
-            return (
-              <div
-                key={filing.id}
-                className="p-4 rounded-xl border border-border bg-card text-card-foreground shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4"
-              >
-                <div className="space-y-2 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-bold text-sm text-foreground">
-                      {filing.reference_number || 'Trámite Sin N.º'}
-                    </span>
-                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground font-medium">
-                      {filing.filing_kind}
-                    </span>
-                    <StatusBadge
-                      category={getStatusCategory(filing.status)}
-                      label={getStatusLabel(filing.status)}
-                      size="sm"
-                    />
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Building2 className="w-3.5 h-3.5 text-muted-foreground" />
-                      <span>{filing.external_entity?.name || 'Entidad no especificada'}</span>
-                      {filing.external_entity?.city && (
-                        <span className="text-[10px]">({filing.external_entity.city})</span>
-                      )}
-                    </div>
-                    {filing.case_process?.workflow_status?.name && (
-                      <div className="flex items-center gap-1">
-                        <FileCheck className="w-3.5 h-3.5 text-muted-foreground" />
-                        <span>Proceso: {filing.case_process.workflow_status.name}</span>
-                      </div>
-                    )}
-                    {filing.filed_at && (
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5" />
-                        <span>Presentado: {filing.filed_at.substring(0, 10)}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {filing.notes && (
-                    <p className="text-xs text-muted-foreground bg-muted/30 p-2 rounded-lg border border-border/40">
-                      {filing.notes}
-                    </p>
-                  )}
-                </div>
-
-                {/* Plazos y Urgencia */}
-                <div className="flex items-center gap-4 border-t md:border-t-0 md:border-l border-border pt-3 md:pt-0 md:pl-4 shrink-0">
-                  <div className="text-right">
-                    <div className="text-[11px] text-muted-foreground">Vencimiento</div>
-                    <div className="text-xs font-bold text-foreground">
-                      {filing.response_due_date ? filing.response_due_date.substring(0, 10) : 'Sin plazo'}
-                    </div>
-                    <div className="mt-1">
-                      {urgency === 'EXPIRED' && (
-                        <StatusBadge
-                          category="danger"
-                          label={`Vencido (${Math.abs(remainingDays ?? 0)} d. útiles)`}
-                          size="sm"
-                        />
-                      )}
-                      {urgency === 'EXPIRING_SOON' && (
-                        <StatusBadge
-                          category="warning"
-                          label={`Por vencer (${remainingDays} d. útiles)`}
-                          size="sm"
-                        />
-                      )}
-                      {urgency === 'ON_TRACK' && (
-                        <StatusBadge
-                          category="info"
-                          label={remainingDays !== null ? `En plazo (${remainingDays} d. útiles)` : 'En plazo'}
-                          size="sm"
-                        />
-                      )}
-                      {urgency === 'DONE' && (
-                        <StatusBadge category="neutral" label="Concluido" size="sm" />
-                      )}
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingFiling(filing);
-                      setIsModalOpen(true);
-                    }}
-                    className="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted"
-                    title="Editar trámite"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+          {filings.map((filing) => (
+            <FilingCard
+              key={filing.id}
+              filing={filing}
+              statuses={statuses}
+              holidays={holidays}
+              onEdit={() => {
+                setEditingFiling(filing);
+                setIsModalOpen(true);
+              }}
+            />
+          ))}
         </div>
       )}
 
