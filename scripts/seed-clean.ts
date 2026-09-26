@@ -58,14 +58,16 @@ export async function cleanSyntheticSeed() {
 
   if ((remainingCases || 0) > 0 || (remainingPersons || 0) > 0) {
     throw new Error(
-      `Error de limpieza: Aún quedan ${remainingCases || 0} casos y ${remainingPersons || 0} personas sintéticas.`
+      `Error de limpieza: Aún quedan ${remainingCases || 0} casos y ${remainingPersons || 0} personas sintéticas.`,
     );
   }
 
   process.stdout.write('Limpieza de datos sintéticos completada con éxito.\n');
   process.stdout.write(`- Casos eliminados: ${deletedCases?.length || 0}\n`);
   process.stdout.write(`- Personas eliminadas: ${deletedPersons?.length || 0}\n`);
-  process.stdout.write('✓ Verificación: 0 casos sintéticos y 0 personas sintéticas restantes en la base de datos.\n');
+  process.stdout.write(
+    '✓ Verificación: 0 casos sintéticos y 0 personas sintéticas restantes en la base de datos.\n',
+  );
 }
 
 // Ejecutar si se invoca directamente

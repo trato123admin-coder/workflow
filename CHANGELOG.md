@@ -6,6 +6,52 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Sprint 4b — Tableros, búsqueda, actividad y rendimiento
+
+#### Agregado
+
+- **Base de Datos & Seguridad (Supabase):**
+  - Migración `20260925140000_case_comments_and_search_schema.sql`:
+    - Tabla `case_comments` con RLS habilitada (`comments_select_policy`, `comments_insert_policy`, `comments_update_policy`), sujeta a `private.can_access_case()`, permisos `cases.read.assigned`/`cases.write.assigned` y flag `module.case_comments`.
+    - Función RPC `public.global_search(_query text, _limit integer)` con `SECURITY DEFINER`, filtrado estricto por `private.can_access_case()` para casos y `private.has_permission('clients.read') AND private.can_access_person()` para personas (coincidiendo con las políticas de tabla del Sprint 3).
+    - Función RPC `public.duplicate_case(_source_case_id, _title, _include_parties, _copy_heir_shares)`: clonación controlada y atómica de expedientes, con reasignación del creador y clonación condicional de intervinientes y cuotas sucesorias (activos y pasivos excluidos por diseño para no arrastrar bienes ni deudas de forma automática).
+    - Disparador de auditoría automática `private.tg_audit_log()` conectado a `case_comments`.
+  - Script de verificación `20260925140000_case_comments_and_search_schema.verify.sql` (11 comprobaciones de integridad).
+  - Suite de pruebas pgTAP `supabase/tests/database/07_comments_and_search.test.sql` con 24 pruebas automatizadas exitosas.
+- **Paquete Compartido (`@workflow/shared`):**
+  - Diccionario canónico de métricas y KPI (`packages/shared/src/kpis.ts`):
+    - Función pura `computeKpis()` para cálculo unificado de métricas de expediente (Total casos, Activos, Concluidos, Detenidos/Bloqueados, Alerta Semáforo, Fuera de SLA, Avance promedio).
+    - Función `computeStatusDistribution()` para consolidación de estados en categorías semánticas (`PENDING`, `IN_PROGRESS`, `BLOCKED`, `DONE`, `CANCELLED`).
+    - Función `computeProcessFunnel()` para embudo de avance de procesos sucesorios.
+    - Función `computeAnalystWorkload()` para balanceo de carga de trabajo por analista/gestor.
+    - 6 pruebas unitarias completas en Vitest verificando consistencia matemática transversal entre tarjetas y gráficos.
+- **Aplicación Web (`apps/web`):**
+  - Tablero de Dirección / Admin (`AdminDashboard.tsx`, Mockup 1):
+    - 4 tarjetas KPI principales (`KpiCard`), gráfico de dona de distribución de estados (`StatusDonutChart.tsx`), embudo de procesos sucesorios (`ProcessFunnelWidget.tsx`) y carga por analista (`AnalystWorkloadWidget.tsx`).
+  - Tablero de Operaciones / Gestor (`GestorDashboard.tsx`, Mockup 2):
+    - 4 tarjetas operativas (`Mis casos activos`, `En curso`, `Alertas semáforo`, `Fuera de SLA`), selector de vista Kanban / Tabla, y conmutador de perfil en cabecera persistido en `user_preferences`.
+  - Diálogo de Búsqueda Global Ctrl+K (`GlobalSearchDialog.tsx`):
+    - Búsqueda con debounce (300 ms), navegación por teclado (flechas y Enter), iconos semánticos por tipo de entidad y badges de estado y vía procesal.
+    - Acceso rápido integrado en `Topbar.tsx`.
+  - Duplicación de Expedientes (`DuplicateCaseDialog.tsx`):
+    - Modal accesible integrado en `CaseHeader.tsx` con opciones para transferir causante, herederos y cuotas hereditarias.
+  - Pestaña de Actividad y Línea de Tiempo (`CaseActivityTab.tsx`, `ActivityTimelineItem.tsx`):
+    - Vista unificada en tiempo real de eventos del sistema (`case_events`) y comentarios con menciones (`case_comments`).
+    - Formulario reactivo para publicar notas y comentarios internos con permisos validados.
+  - Bandeja "Qué hago hoy" (`TodayTasksWidget.tsx`):
+    - Widget operativo que prioriza casos detenidos, advertencias de semáforos (`get_case_semaphore_warnings`) y vencimientos de SLA.
+- **Rendimiento & Validación a Escala Real (`scripts/`):**
+  - Script de generación sintética `scripts/seed-load.ts`:
+    - Generación masiva de **10 000 casos**, 100 personas, 20 009 partes, 20 bienes y 110 000 procesos (140 129 filas totales).
+    - Caso benchmark completo con 10 herederos, 20 bienes y 11 procesos.
+    - Consumo atómico y seguro de números consecutivos desde `case_counters` (`private.next_case_number()`).
+    - Aislamiento absoluto con flag `custom_data: { is_synthetic: true }`.
+  - Script de limpieza segura `scripts/seed-clean.ts`:
+    - Eliminación en cascada de datos sintéticos con verificación de 0 casos y 0 personas residuales, sin alterar contadores de producción.
+  - Script de validación de latencia `scripts/benchmark-perf.ts`:
+    - Consulta concurrente de ficha completa (caso + intervinientes + bienes + procesos + advertencias de semáforo).
+    - **Resultado en Staging sobre 10 000 casos:** **p95 = 373.4 ms** (objetivo p95 < 2 000 ms superado ampliamente).
+
 ### Sprint 4a — Intervinientes, patrimonio, semáforos y asistente de 5 pasos
 
 #### Agregado
