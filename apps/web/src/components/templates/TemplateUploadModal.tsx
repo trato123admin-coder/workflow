@@ -8,14 +8,8 @@ import {
   uploadTemplateToEngine,
   type TemplateLintApiResponse,
 } from '../../lib/engine-client';
-import {
-  Loader2,
-  FileCheck,
-  AlertTriangle,
-  XCircle,
-  CheckCircle2,
-  Upload,
-} from 'lucide-react';
+import { TemplateLintFeedback } from './TemplateLintFeedback';
+import { Loader2, Upload } from 'lucide-react';
 
 interface DocumentTypeOption {
   id: string;
@@ -214,73 +208,12 @@ export const TemplateUploadModal: React.FC<TemplateUploadModalProps> = ({
           )}
         </div>
 
-        {/* Estado de Linting */}
-        {isLinting && (
-          <div className="p-3 bg-muted rounded-xl flex items-center gap-2 text-xs text-muted-foreground">
-            <Loader2 className="w-4 h-4 animate-spin text-primary" />
-            <span>Analizando estructura interna del archivo Word...</span>
-          </div>
-        )}
-
-        {/* Errores de Linting (Bloqueantes) */}
-        {hasBrokenOrMacro && (
-          <div className="p-3.5 bg-destructive/10 border border-destructive/20 rounded-xl text-destructive text-xs space-y-2">
-            <div className="flex items-center gap-2 font-bold">
-              <XCircle className="w-4 h-4 shrink-0" />
-              <span>Errores detectados en la plantilla (Subida bloqueada)</span>
-            </div>
-            {lintError && <p className="pl-6">{lintError}</p>}
-            {lintResult?.lint.errors.map((err, i) => (
-              <p key={i} className="pl-6">
-                • {err}
-              </p>
-            ))}
-            {lintResult?.lint.brokenMarkers && lintResult.lint.brokenMarkers.length > 0 && (
-              <div className="pl-6 text-[11px]">
-                Marcadores rotos detectados en el XML de Word:
-                <ul className="list-disc pl-4 mt-1 font-mono">
-                  {lintResult.lint.brokenMarkers.map((bm, i) => (
-                    <li key={i}>{bm}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Advertencias de Linting (No bloqueantes) */}
-        {lintResult && lintResult.lint.isValid && lintResult.lint.unknownFields.length > 0 && (
-          <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-800 dark:text-amber-300 text-xs space-y-1.5">
-            <div className="flex items-center gap-2 font-bold">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
-              <span>Advertencia: Marcadores no registrados en el catálogo</span>
-            </div>
-            <p className="pl-6 text-[11px]">
-              Los siguientes campos no están en la lista blanca de la base de datos:
-            </p>
-            <div className="pl-6 font-mono text-[11px] flex flex-wrap gap-1">
-              {lintResult.lint.unknownFields.map((uf, i) => (
-                <span key={i} className="px-1.5 py-0.5 rounded bg-amber-500/20 font-bold">
-                  {uf}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Éxito de Linting */}
-        {lintResult && lintResult.lint.isValid && (
-          <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-800 dark:text-emerald-300 text-xs space-y-1">
-            <div className="flex items-center gap-2 font-bold">
-              <CheckCircle2 className="w-4 h-4 shrink-0" />
-              <span>Plantilla válida y sin macros</span>
-            </div>
-            <p className="pl-6 text-[11px]">
-              Se detectaron {lintResult.lint.validFields.length} marcadores autorizados listos para
-              sustitución.
-            </p>
-          </div>
-        )}
+        <TemplateLintFeedback
+          isLinting={isLinting}
+          lintError={lintError}
+          lintResult={lintResult}
+          hasBrokenOrMacro={hasBrokenOrMacro}
+        />
 
         <div className="flex justify-end gap-2 pt-4 border-t border-border">
           <button
