@@ -20,5 +20,26 @@ Registro de migraciones ejecutadas, entorno de aplicación y resultado de su res
 | `20260926010000_case_documents_audit_trigger.sql` | 2026-09-26 | Staging (Cloud) | Verificado OK (Verify #11) | Aplicada manualmente por el operador en Staging. Conexión del trigger de auditoría `trg_audit_case_documents` a `public.case_documents` (AFTER INSERT OR UPDATE) para registrar cambios de estado (VALIDATED/OBSERVED) y notas en `audit_logs` con `user_id`, `old_data` y `new_data`. |
 | `20260926020000_external_filings_and_templates_schema.sql` | 2026-09-26 | Staging (Cloud) | Verificado OK (Verify #12) | Aplicada manualmente por el operador en Staging. Tablas `external_entities`, `case_filings`, `document_fields`, `templates`, `template_fields` con RLS habilitada. Extensión `btree_gist` y restricción `EXCLUDE` sobre vigencias no solapadas en `templates`. Bucket privado `templates` blindado a `service_role`. Trigger `trg_audit_case_filings` conectado a `audit_logs`. Función `add_business_days` con tolerancia a tabla `holidays` vacía. Parámetro `filings.publication_wait_business_days` en `setting_definitions` y `system_settings`. |
 
+---
 
+## Resumen de Estado de Migraciones (Sprint 6 - Cierre)
 
+- **Total de migraciones en repositorio (`supabase/migrations/`):** 13
+- **Total de migraciones aplicadas en Staging:** 13
+- **Total de migraciones verificadas con `verify.sql`:** 13
+- **Migraciones pendientes por aplicar:** 0 (Ninguna)
+- **Fecha de última verificación:** 2026-09-26
+- **Próximas migraciones:** Sprint 7 (Generación documental y docx-templates).
+
+### Procedimiento de comprobación en SQL Editor de Supabase:
+```sql
+-- 1. Verificar que todas las 13 versiones están registradas
+select version, inserted_at
+from supabase_migrations.schema_migrations
+order by version asc;
+
+-- 2. Confirmación funcional de la última migración (Sprint 6)
+-- Ejecutar el contenido completo de:
+-- supabase/verify/20260926020000_external_filings_and_templates_schema.verify.sql
+-- Debe retornar: '>>> SPRINT 6 VERIFICATION COMPLETED SUCCESSFULLY <<<'
+```
