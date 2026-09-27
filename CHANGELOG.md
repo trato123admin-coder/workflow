@@ -33,7 +33,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
     - `POST /v1/templates/lint`: Descompresión en memoria de DOCX, detección de marcadores partidos en múltiples nodos `<w:r>`, validación contra `document_fields` y rechazo de macros `.docm`/`vbaProject.bin`.
     - `POST /v1/templates/upload`: Validación de Bearer JWT, verificación de usuario activo y MFA, ejecución obligatoria de lint, subida a bucket privado `templates` con SHA-256 e inserción controlada en base de datos.
     - `GET /v1/templates/:id/download`: Emisión de URLs prefirmadas de 60 segundos vía `StorageProvider`.
-  - Suite de pruebas de integración `services/engine/src/__tests__/templates-lint.test.ts` (11 pruebas de plantillas, 37 pruebas totales en engine).
+  - Suite de pruebas de integración `services/engine/src/__tests__/templates-lint.test.ts` (11 pruebas de plantillas, 38 pruebas totales en engine, 158 pruebas totales en el monorepo).
 - **Aplicación Web (`apps/web`):**
   - Directorio de Entidades (`/entities`): Buscador, filtro reactivo por tipo desde catálogo y modal `EntityModal` con contactos dinámicos.
   - Trámites Externos en Detalle de Caso (`CaseFilingsTab` y `FilingModal` en `/cases/[id]`): Plazos calculados en días útiles con el parámetro configurable `filings.publication_wait_business_days` y semáforo de urgencia visual.
