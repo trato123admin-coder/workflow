@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from '../ui/Modal';
 import { FormField } from '../ui/FormField';
 import {
@@ -34,6 +34,13 @@ export const TemplateUploadModal: React.FC<TemplateUploadModalProps> = ({
   const todayIso = new Date().toISOString().substring(0, 10);
 
   const [documentTypeId, setDocumentTypeId] = useState(documentTypes[0]?.id || '');
+
+  useEffect(() => {
+    if (!documentTypeId && documentTypes.length > 0) {
+      setDocumentTypeId(documentTypes[0].id);
+    }
+  }, [documentTypes, documentTypeId]);
+
   const [name, setName] = useState('');
   const [validFrom, setValidFrom] = useState(todayIso);
   const [validUntil, setValidUntil] = useState('');
@@ -71,7 +78,19 @@ export const TemplateUploadModal: React.FC<TemplateUploadModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedFile || !documentTypeId || !name.trim()) return;
+    const targetDocTypeId = documentTypeId || documentTypes[0]?.id || '';
+    if (!targetDocTypeId) {
+      setServerError('Debe seleccionar un tipo de documento asociado');
+      return;
+    }
+    if (!name.trim()) {
+      setServerError('Debe ingresar un nombre para la plantilla');
+      return;
+    }
+    if (!selectedFile) {
+      setServerError('Debe seleccionar un archivo .docx');
+      return;
+    }
 
     if (lintResult && !lintResult.lint.isValid) {
       setServerError('No se puede subir una plantilla con errores de estructura o macros');
@@ -84,7 +103,7 @@ export const TemplateUploadModal: React.FC<TemplateUploadModalProps> = ({
     try {
       await uploadTemplateToEngine({
         file: selectedFile,
-        documentTypeId,
+        documentTypeId: targetDocTypeId,
         name: name.trim(),
         validFrom,
         validUntil: validUntil || null,
@@ -121,7 +140,7 @@ export const TemplateUploadModal: React.FC<TemplateUploadModalProps> = ({
           <FormField id="doc_type" label="Tipo de Documento Asociado" required>
             <select
               id="doc_type"
-              value={documentTypeId}
+              value={documentTypeId || documentTypes[0]?.id || ''}
               onChange={(e) => setDocumentTypeId(e.target.value)}
               className="w-full px-3 py-2 text-xs rounded-lg border border-input bg-background text-foreground focus:ring-1 focus:ring-primary"
             >
