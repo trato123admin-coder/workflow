@@ -15,10 +15,8 @@ import {
 } from 'lucide-react';
 
 interface HolidayItem {
-  id: string;
   date: string;
   name: string;
-  is_recurring: boolean;
   is_active: boolean;
   created_at: string;
 }
@@ -33,7 +31,6 @@ export const HolidaysTab: React.FC = () => {
   const [formData, setFormData] = useState({
     date: '',
     name: '',
-    is_recurring: false,
   });
 
   const loadHolidays = useCallback(async () => {
@@ -59,17 +56,17 @@ export const HolidaysTab: React.FC = () => {
     void loadHolidays();
   }, [loadHolidays]);
 
-  const handleToggleActive = async (id: string, currentActive: boolean) => {
+  const handleToggleActive = async (date: string, currentActive: boolean) => {
     try {
       const supabase = createClient();
       const { error } = await supabase
         .from('holidays')
         .update({ is_active: !currentActive })
-        .eq('id', id);
+        .eq('date', date);
 
       if (error) throw error;
       setHolidays((prev) =>
-        prev.map((h) => (h.id === id ? { ...h, is_active: !currentActive } : h)),
+        prev.map((h) => (h.date === date ? { ...h, is_active: !currentActive } : h)),
       );
     } catch (err: unknown) {
       setErrorMessage((err as Error).message || 'Error al actualizar estado del feriado');
@@ -87,14 +84,13 @@ export const HolidaysTab: React.FC = () => {
         {
           date: formData.date,
           name: formData.name.trim(),
-          is_recurring: formData.is_recurring,
           is_active: true,
         },
       ]);
 
       if (error) throw error;
       setIsModalOpen(false);
-      setFormData({ date: '', name: '', is_recurring: false });
+      setFormData({ date: '', name: '' });
       void loadHolidays();
     } catch (err: unknown) {
       setErrorMessage((err as Error).message || 'Error al registrar feriado');
@@ -172,21 +168,17 @@ export const HolidaysTab: React.FC = () => {
                 <tr>
                   <th className="px-4 py-3">Fecha</th>
                   <th className="px-4 py-3">Festividad / Motivo</th>
-                  <th className="px-4 py-3">Tipo</th>
                   <th className="px-4 py-3">Estado</th>
                   <th className="px-4 py-3 text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {holidays.map((h) => (
-                  <tr key={h.id} className="hover:bg-muted/30 transition-colors">
+                  <tr key={h.date} className="hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3 font-semibold text-foreground whitespace-nowrap">
                       {h.date}
                     </td>
                     <td className="px-4 py-3 text-foreground">{h.name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {h.is_recurring ? 'Feriado Anual Recurrente' : 'Feriado Específico / Decreto'}
-                    </td>
                     <td className="px-4 py-3">
                       <StatusBadge
                         category={h.is_active ? 'success' : 'neutral'}
@@ -197,7 +189,7 @@ export const HolidaysTab: React.FC = () => {
                     <td className="px-4 py-3 text-right whitespace-nowrap">
                       <button
                         type="button"
-                        onClick={() => handleToggleActive(h.id, h.is_active)}
+                        onClick={() => handleToggleActive(h.date, h.is_active)}
                         className="text-[11px] font-medium text-muted-foreground hover:text-foreground"
                       >
                         {h.is_active ? 'Desactivar' : 'Activar'}
@@ -241,22 +233,6 @@ export const HolidaysTab: React.FC = () => {
               className="w-full px-3 py-2 text-xs rounded-lg border border-input bg-background text-foreground focus:ring-1 focus:ring-primary"
             />
           </FormField>
-
-          <div className="flex items-center gap-2 pt-1">
-            <input
-              id="holiday_recurring"
-              type="checkbox"
-              checked={formData.is_recurring}
-              onChange={(e) => setFormData({ ...formData, is_recurring: e.target.checked })}
-              className="w-4 h-4 rounded border-input text-primary focus:ring-primary"
-            />
-            <label
-              htmlFor="holiday_recurring"
-              className="text-xs font-medium text-foreground cursor-pointer"
-            >
-              Feriado calendario recurrente anual
-            </label>
-          </div>
 
           <div className="flex justify-end gap-2 pt-4 border-t border-border">
             <button
