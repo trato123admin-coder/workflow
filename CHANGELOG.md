@@ -33,15 +33,15 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
     - `POST /v1/templates/lint`: Descompresión en memoria de DOCX, detección de marcadores partidos en múltiples nodos `<w:r>`, validación contra `document_fields` y rechazo de macros `.docm`/`vbaProject.bin`.
     - `POST /v1/templates/upload`: Validación de Bearer JWT, verificación de usuario activo y MFA, ejecución obligatoria de lint, subida a bucket privado `templates` con SHA-256 e inserción controlada en base de datos.
     - `GET /v1/templates/:id/download`: Emisión de URLs prefirmadas de 60 segundos vía `StorageProvider`.
-  - Suite de pruebas de integración `services/engine/src/__tests__/templates-lint.test.ts` (32 pruebas).
+  - Suite de pruebas de integración `services/engine/src/__tests__/templates-lint.test.ts` (11 pruebas de plantillas, 37 pruebas totales en engine).
 - **Aplicación Web (`apps/web`):**
   - Directorio de Entidades (`/entities`): Buscador, filtro reactivo por tipo desde catálogo y modal `EntityModal` con contactos dinámicos.
   - Trámites Externos en Detalle de Caso (`CaseFilingsTab` y `FilingModal` en `/cases/[id]`): Plazos calculados en días útiles con el parámetro configurable `filings.publication_wait_business_days` y semáforo de urgencia visual.
   - Administración de Feriados (`HolidaysTab` en `/settings`): Mantenimiento de días no laborables y conmutación de estado activo.
-  - Catálogo de Plantillas (`/templates`): Vista de versiones vigentes, tiempo manual estimado y descarga directa de archivos DOCX.
-  - Carga con Pre-Lint (`TemplateUploadModal`): Análisis interactivo de Word en tiempo real bloqueando archivos inválidos o macros y advirtiendo sobre campos no registrados.
+  - Catálogo de Plantillas (`/templates`): Vista de versiones vigentes, tiempo manual estimado y descarga directa de archivos DOCX con URL firmada del engine.
+  - Carga con Pre-Lint (`TemplateUploadModal`, `TemplateLintFeedback`): Análisis interactivo de Word en tiempo real bloqueando archivos inválidos, campos desconocidos o macros.
   - Caso Dorado (`GoldenCaseModal`): Visor del expediente de prueba ideal con equivalencias de marcadores a valores resueltos.
-  - Diccionario de Campos (`DocumentFieldsDictionary`): Listado de marcadores admitidos en lista blanca con acción de copiado directo.
+  - Diccionario de Campos (`DocumentFieldsDictionary`, ruta directa `/templates/fields`): Listado de marcadores admitidos en lista blanca con acción de copiado directo.
 
 ### Sprint 5 — Documentos y almacenamiento
 
