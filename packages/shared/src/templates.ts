@@ -23,7 +23,7 @@ export const documentFieldSchema = z.object({
     .string()
     .regex(
       /^(case|client|parties|estate|liabilities|system|custom)\.[a-zA-Z0-9_.]+$/,
-      'Ruta de origen no válida o fuera del espacio de nombres permitido'
+      'Ruta de origen no válida o fuera del espacio de nombres permitido',
     ),
   is_required: z.boolean().default(false),
   default_value: z.string().nullable().optional(),
@@ -87,12 +87,15 @@ export interface DocxLintResult {
 export function isMacroEnabledDocx(
   filename: string,
   mimeType?: string,
-  entryNames: string[] = []
+  entryNames: string[] = [],
 ): boolean {
   if (filename.toLowerCase().endsWith('.docm')) {
     return true;
   }
-  if (mimeType?.includes('macroEnabled') || mimeType?.includes('wordprocessingml.template.macroEnabled')) {
+  if (
+    mimeType?.includes('macroEnabled') ||
+    mimeType?.includes('wordprocessingml.template.macroEnabled')
+  ) {
     return true;
   }
   for (const name of entryNames) {
@@ -153,7 +156,7 @@ export function lintDocxXml(documentXml: string, validPlaceholders: string[] = [
     const closeCount = (paragraphText.match(/\}\}/g) || []).length;
     if (openCount !== closeCount) {
       result.brokenMarkers.push(
-        `Marcador desbalanceado en párrafo: ${openCount} apertura(s) '{{' y ${closeCount} cierre(s) '}}'`
+        `Marcador desbalanceado en párrafo: ${openCount} apertura(s) '{{' y ${closeCount} cierre(s) '}}'`,
       );
     }
 
@@ -177,7 +180,7 @@ export function lintDocxXml(documentXml: string, validPlaceholders: string[] = [
       const isContainedInSingleNode = textNodes.some((node) => node.includes(fullMarker));
       if (!isContainedInSingleNode) {
         result.brokenMarkers.push(
-          `Marcador '${fullMarker}' partido por Word en múltiples fragmentos XML (<w:r>). Debe reescribirse de corrido.`
+          `Marcador '${fullMarker}' partido por Word en múltiples fragmentos XML (<w:r>). Debe reescribirse de corrido.`,
         );
       }
     }
@@ -189,7 +192,7 @@ export function lintDocxXml(documentXml: string, validPlaceholders: string[] = [
       if (!validSet.has(ph.toLowerCase())) {
         result.unknownPlaceholders.push(ph);
         result.errors.push(
-          `El marcador '{{${ph}}}' no coincide con ningún campo autorizado en el catálogo blanco de document_fields.`
+          `El marcador '{{${ph}}}' no coincide con ningún campo autorizado en el catálogo blanco de document_fields.`,
         );
       }
     }

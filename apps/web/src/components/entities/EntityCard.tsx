@@ -33,9 +33,7 @@ export const EntityCard: React.FC<EntityCardProps> = ({
             <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
               {typeLabel}
             </span>
-            <h3 className="text-sm font-bold text-foreground mt-1.5 line-clamp-1">
-              {entity.name}
-            </h3>
+            <h3 className="text-sm font-bold text-foreground mt-1.5 line-clamp-1">{entity.name}</h3>
           </div>
           <button
             type="button"
@@ -70,9 +68,7 @@ export const EntityCard: React.FC<EntityCardProps> = ({
             Contactos ({contacts.length}):
           </p>
           {contacts.length === 0 ? (
-            <p className="text-[11px] text-muted-foreground italic">
-              Sin contactos registrados
-            </p>
+            <p className="text-[11px] text-muted-foreground italic">Sin contactos registrados</p>
           ) : (
             <div className="space-y-1.5 max-h-24 overflow-y-auto pr-1">
               {contacts.map((c, i) => (
@@ -82,11 +78,7 @@ export const EntityCard: React.FC<EntityCardProps> = ({
                 >
                   <div className="font-semibold text-foreground flex justify-between">
                     <span>{c.name}</span>
-                    {c.role && (
-                      <span className="text-muted-foreground font-normal">
-                        {c.role}
-                      </span>
-                    )}
+                    {c.role && <span className="text-muted-foreground font-normal">{c.role}</span>}
                   </div>
                   <div className="flex flex-wrap gap-2 text-muted-foreground mt-0.5">
                     {c.phone && (

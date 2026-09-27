@@ -5,11 +5,7 @@ import { createClient } from '../../../lib/supabase/client';
 import { FilingModal } from './FilingModal';
 import { FilingCard, type FilingWithRelations } from './FilingCard';
 import { EmptyState } from '../../ui/EmptyState';
-import {
-  ExternalLink,
-  Plus,
-  Loader2,
-} from 'lucide-react';
+import { ExternalLink, Plus, Loader2 } from 'lucide-react';
 import type { CaseFiling } from '@workflow/shared';
 
 interface CaseFilingsTabProps {
@@ -18,9 +14,13 @@ interface CaseFilingsTabProps {
 
 export const CaseFilingsTab: React.FC<CaseFilingsTabProps> = ({ caseId }) => {
   const [filings, setFilings] = useState<FilingWithRelations[]>([]);
-  const [entities, setEntities] = useState<Array<{ id: string; name: string; entity_type: string }>>([]);
+  const [entities, setEntities] = useState<
+    Array<{ id: string; name: string; entity_type: string }>
+  >([]);
   const [processes, setProcesses] = useState<Array<{ id: string; name: string }>>([]);
-  const [statuses, setStatuses] = useState<Array<{ code: string; label: string; metadata?: Record<string, unknown> }>>([]);
+  const [statuses, setStatuses] = useState<
+    Array<{ code: string; label: string; metadata?: Record<string, unknown> }>
+  >([]);
   const [holidays, setHolidays] = useState<string[]>([]);
   const [publicationDays, setPublicationDays] = useState<number>(15);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,11 +38,13 @@ export const CaseFilingsTab: React.FC<CaseFilingsTabProps> = ({ caseId }) => {
         await Promise.all([
           supabase
             .from('case_filings')
-            .select(`
+            .select(
+              `
               *,
               external_entity:external_entities (id, name, entity_type, city),
               case_process:case_processes (id, workflow_status:workflow_statuses(name))
-            `)
+            `,
+            )
             .eq('case_id', caseId)
             .order('created_at', { ascending: false }),
           supabase
@@ -60,10 +62,7 @@ export const CaseFilingsTab: React.FC<CaseFilingsTabProps> = ({ caseId }) => {
             .eq('catalog_code', 'filing_statuses')
             .eq('is_active', true)
             .order('sort_order', { ascending: true }),
-          supabase
-            .from('holidays')
-            .select('date')
-            .eq('is_active', true),
+          supabase.from('holidays').select('date').eq('is_active', true),
           supabase
             .from('system_settings')
             .select('value')

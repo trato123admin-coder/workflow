@@ -154,8 +154,8 @@ export const GoldenCaseModal: React.FC<GoldenCaseModalProps> = ({ isOpen, onClos
               Entorno de pruebas y validación sin datos reales:
             </p>
             <p className="text-muted-foreground text-[11px]">
-              Utilice estos marcadores y valores al redactar sus modelos en Word para asegurar que el
-              motor reemplace exactamente los campos requeridos en el Sprint 7 (Generación).
+              Utilice estos marcadores y valores al redactar sus modelos en Word para asegurar que
+              el motor reemplace exactamente los campos requeridos en el Sprint 7 (Generación).
             </p>
           </div>
         </div>

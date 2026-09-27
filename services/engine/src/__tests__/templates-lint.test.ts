@@ -38,7 +38,9 @@ describe('Engine: Templates Lint Service y Endpoints (S6-05)', () => {
       get: vi.fn(),
       delete: vi.fn().mockResolvedValue(undefined),
       exists: vi.fn().mockResolvedValue(false),
-      signedUrl: vi.fn().mockResolvedValue('https://signed.url/v1/download-template?token=signed60s'),
+      signedUrl: vi
+        .fn()
+        .mockResolvedValue('https://signed.url/v1/download-template?token=signed60s'),
       healthCheck: vi.fn().mockResolvedValue(true),
     };
     setTemplatesStorageProvider(mockStorage);

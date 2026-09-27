@@ -6,12 +6,7 @@ import { createClient } from '../../lib/supabase/client';
 import { EntityModal } from '../../components/entities/EntityModal';
 import { EntityCard } from '../../components/entities/EntityCard';
 import { EmptyState } from '../../components/ui/EmptyState';
-import {
-  Building2,
-  Plus,
-  Search,
-  Loader2,
-} from 'lucide-react';
+import { Building2, Plus, Search, Loader2 } from 'lucide-react';
 import type { ExternalEntity } from '@workflow/shared';
 
 interface CatalogTypeItem {
@@ -42,10 +37,7 @@ export default function EntitiesDirectoryPage() {
           .eq('catalog_code', 'external_entity_types')
           .eq('is_active', true)
           .order('sort_order', { ascending: true }),
-        supabase
-          .from('external_entities')
-          .select('*')
-          .order('name', { ascending: true }),
+        supabase.from('external_entities').select('*').order('name', { ascending: true }),
       ]);
 
       if (typesRes.error) throw typesRes.error;
@@ -73,9 +65,7 @@ export default function EntitiesDirectoryPage() {
         .eq('id', id);
 
       if (error) throw error;
-      setEntities((prev) =>
-        prev.map((e) => (e.id === id ? { ...e, is_active: !current } : e)),
-      );
+      setEntities((prev) => prev.map((e) => (e.id === id ? { ...e, is_active: !current } : e)));
     } catch (err: unknown) {
       setErrorMessage((err as Error).message || 'Error al cambiar estado de la entidad');
     }
@@ -109,7 +99,8 @@ export default function EntitiesDirectoryPage() {
               <span>Directorio de Entidades Externas</span>
             </h1>
             <p className="text-xs text-muted-foreground">
-              Notarías, oficinas de SUNARP, estudios jurídicos y bancos vinculados a trámites sucesorios.
+              Notarías, oficinas de SUNARP, estudios jurídicos y bancos vinculados a trámites
+              sucesorios.
             </p>
           </div>
           <button

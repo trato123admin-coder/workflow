@@ -9,7 +9,7 @@ function extractBearerToken(authHeader: string | undefined): string {
     throw createDocumentError(
       'Encabezado de autorización Bearer ausente o inválido',
       401,
-      'UNAUTHORIZED'
+      'UNAUTHORIZED',
     );
   }
   const token = authHeader.substring(7).trim();
@@ -151,42 +151,45 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
    * Exige autenticación y permisos de lectura (documents.read o templates.manage).
    * GET /v1/templates/:id/download
    */
-  fastify.get('/v1/templates/:id/download', async (request: FastifyRequest, reply: FastifyReply) => {
-    try {
-      const userJwt = extractBearerToken(request.headers.authorization);
-      const supabase = getSupabaseServiceClient();
-      await authenticateUser(supabase, userJwt, ['documents.read', 'templates.manage']);
+  fastify.get(
+    '/v1/templates/:id/download',
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const userJwt = extractBearerToken(request.headers.authorization);
+        const supabase = getSupabaseServiceClient();
+        await authenticateUser(supabase, userJwt, ['documents.read', 'templates.manage']);
 
-      const { id } = request.params as { id: string };
+        const { id } = request.params as { id: string };
 
-      const { data: template, error } = await supabase
-        .from('templates')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle();
+        const { data: template, error } = await supabase
+          .from('templates')
+          .select('*')
+          .eq('id', id)
+          .maybeSingle();
 
-      if (error || !template) {
-        return reply.status(404).send({
-          error: 'NOT_FOUND',
-          message: 'Plantilla no encontrada',
-          statusCode: 404,
+        if (error || !template) {
+          return reply.status(404).send({
+            error: 'NOT_FOUND',
+            message: 'Plantilla no encontrada',
+            statusCode: 404,
+          });
+        }
+
+        const storage = getTemplatesStorageProvider();
+        const signedUrl = await storage.signedUrl(template.storage_key, 60);
+
+        return reply.status(200).send({
+          downloadUrl: signedUrl,
+          expiresIn: 60,
+        });
+      } catch (err: unknown) {
+        const docErr = err as DocumentError;
+        return reply.status(docErr.statusCode || 500).send({
+          error: docErr.code || 'INTERNAL_ERROR',
+          message: docErr.message,
+          statusCode: docErr.statusCode || 500,
         });
       }
-
-      const storage = getTemplatesStorageProvider();
-      const signedUrl = await storage.signedUrl(template.storage_key, 60);
-
-      return reply.status(200).send({
-        downloadUrl: signedUrl,
-        expiresIn: 60,
-      });
-    } catch (err: unknown) {
-      const docErr = err as DocumentError;
-      return reply.status(docErr.statusCode || 500).send({
-        error: docErr.code || 'INTERNAL_ERROR',
-        message: docErr.message,
-        statusCode: docErr.statusCode || 500,
-      });
-    }
-  });
+    },
+  );
 };

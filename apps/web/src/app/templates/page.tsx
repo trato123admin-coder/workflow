@@ -34,7 +34,9 @@ interface TemplateWithDocType extends Template {
 export default function TemplatesPage() {
   const [activeTab, setActiveTab] = useState<'TEMPLATES' | 'FIELDS'>('TEMPLATES');
   const [templates, setTemplates] = useState<TemplateWithDocType[]>([]);
-  const [docTypes, setDocTypes] = useState<Array<{ id: string; name: string; code: string; category: string }>>([]);
+  const [docTypes, setDocTypes] = useState<
+    Array<{ id: string; name: string; code: string; category: string }>
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -50,10 +52,12 @@ export default function TemplatesPage() {
       const [tplRes, typesRes] = await Promise.all([
         supabase
           .from('templates')
-          .select(`
+          .select(
+            `
             *,
             document_type:document_types (id, code, name, category)
-          `)
+          `,
+          )
           .order('name', { ascending: true }),
         supabase
           .from('document_types')
@@ -109,7 +113,8 @@ export default function TemplatesPage() {
               <span>Plantillas y Modelos Documentales</span>
             </h1>
             <p className="text-xs text-muted-foreground">
-              Catálogo de modelos Word con inspección de marcadores, control de vigencias y casos de prueba.
+              Catálogo de modelos Word con inspección de marcadores, control de vigencias y casos de
+              prueba.
             </p>
           </div>
 
@@ -201,7 +206,8 @@ export default function TemplatesPage() {
                         <div className="flex items-center gap-1.5">
                           <Calendar className="w-3.5 h-3.5" />
                           <span>
-                            Vigencia: {tpl.valid_from} {tpl.valid_until ? `al ${tpl.valid_until}` : '(Indefinida)'}
+                            Vigencia: {tpl.valid_from}{' '}
+                            {tpl.valid_until ? `al ${tpl.valid_until}` : '(Indefinida)'}
                           </span>
                         </div>
                         {tpl.estimated_manual_minutes > 0 && (
@@ -211,7 +217,8 @@ export default function TemplatesPage() {
                           </div>
                         )}
                         <div className="text-[11px] font-mono text-muted-foreground">
-                          Versión: {tpl.version} {tpl.checksum && `(${tpl.checksum.substring(0, 8)})`}
+                          Versión: {tpl.version}{' '}
+                          {tpl.checksum && `(${tpl.checksum.substring(0, 8)})`}
                         </div>
                       </div>
                     </div>
@@ -252,10 +259,7 @@ export default function TemplatesPage() {
           documentTypes={docTypes}
         />
 
-        <GoldenCaseModal
-          isOpen={isGoldenCaseOpen}
-          onClose={() => setIsGoldenCaseOpen(false)}
-        />
+        <GoldenCaseModal isOpen={isGoldenCaseOpen} onClose={() => setIsGoldenCaseOpen(false)} />
       </div>
     </AppShell>
   );

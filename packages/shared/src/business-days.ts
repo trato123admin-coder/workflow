@@ -71,7 +71,7 @@ export function isBusinessDay(date: Date | string, holidays: (string | Date)[] =
 export function addBusinessDays(
   fromDate: Date | string,
   days: number,
-  holidays: (string | Date)[] = []
+  holidays: (string | Date)[] = [],
 ): string {
   if (!fromDate) return '';
   const current = parseUtcDate(fromDate);
@@ -108,7 +108,7 @@ export function addBusinessDays(
 export function getRemainingBusinessDays(
   targetDate: Date | string,
   holidays: (string | Date)[] = [],
-  fromDate?: Date | string
+  fromDate?: Date | string,
 ): number {
   if (!targetDate) return 0;
   const start = parseUtcDate(fromDate ?? new Date());

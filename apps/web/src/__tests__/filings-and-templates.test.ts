@@ -115,7 +115,7 @@ describe('Sprint 6 Web UI & Form Validations (S6-01 to S6-06)', () => {
         },
         [],
         3,
-        '2026-10-05' // faltan 3 días hábiles
+        '2026-10-05', // faltan 3 días hábiles
       );
 
       expect(urgency).toBe('EXPIRING_SOON');

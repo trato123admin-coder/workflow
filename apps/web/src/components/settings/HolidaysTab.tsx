@@ -5,14 +5,7 @@ import { createClient } from '../../lib/supabase/client';
 import { StatusBadge } from '../ui/StatusBadge';
 import { Modal } from '../ui/Modal';
 import { FormField } from '../ui/FormField';
-import {
-  CalendarDays,
-  Plus,
-  Loader2,
-  Info,
-  CalendarCheck2,
-  AlertCircle,
-} from 'lucide-react';
+import { CalendarDays, Plus, Loader2, Info, CalendarCheck2, AlertCircle } from 'lucide-react';
 
 interface HolidayItem {
   date: string;

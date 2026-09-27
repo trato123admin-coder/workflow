@@ -24,7 +24,7 @@ export interface UploadTemplateOptions {
 
 export async function verifyTemplateManageAccess(
   supabase: SupabaseClient,
-  userJwt: string
+  userJwt: string,
 ): Promise<UserContext> {
   return authenticateUser(supabase, userJwt, 'templates.manage');
 }
@@ -35,7 +35,7 @@ export async function verifyTemplateManageAccess(
 export function lintDocxBuffer(
   buffer: Buffer,
   validPlaceholders: string[],
-  filename: string
+  filename: string,
 ): DocxLintResult {
   // 1. Detección temprana de macros por nombre o extensión
   if (isMacroEnabledDocx(filename)) {
@@ -116,7 +116,7 @@ export function lintDocxBuffer(
  */
 export async function uploadTemplate(
   supabase: SupabaseClient,
-  options: UploadTemplateOptions
+  options: UploadTemplateOptions,
 ): Promise<{ template: Template; lintResult: DocxLintResult }> {
   // 1. Validar autenticación, identidad, is_active, MFA y permiso templates.manage reutilizando authenticateUser
   const user = await verifyTemplateManageAccess(supabase, options.userJwt);
@@ -135,7 +135,7 @@ export async function uploadTemplate(
     throw createDocumentError(
       `El archivo excede el tamaño máximo permitido de ${(maxBytes / (1024 * 1024)).toFixed(0)} MB`,
       413,
-      'FILE_TOO_LARGE'
+      'FILE_TOO_LARGE',
     );
   }
 
@@ -149,18 +149,14 @@ export async function uploadTemplate(
   const validPlaceholders = activeFields.map((f) => f.code);
 
   // 4. Ejecutar el linting
-  const lintResult = lintDocxBuffer(
-    options.fileBuffer,
-    validPlaceholders,
-    options.filename
-  );
+  const lintResult = lintDocxBuffer(options.fileBuffer, validPlaceholders, options.filename);
 
   // Decisión de Política: Cualquier error o marcador desconocido bloquea la subida con 422
   if (!lintResult.isValid) {
     throw createDocumentError(
       `Plantilla rechazada por errores de formato o campos no autorizados: ${lintResult.errors.join('; ')}`,
       422,
-      'TEMPLATE_LINT_ERROR'
+      'TEMPLATE_LINT_ERROR',
     );
   }
 
@@ -224,13 +220,13 @@ export async function uploadTemplate(
       throw createDocumentError(
         'El rango de vigencia de la plantilla colisiona con otra versión activa para el mismo tipo de documento',
         409,
-        'TEMPLATE_VALIDITY_OVERLAP'
+        'TEMPLATE_VALIDITY_OVERLAP',
       );
     }
     throw createDocumentError(
       `Error al registrar plantilla en la base de datos: ${templateError?.message}`,
       500,
-      'DB_INSERT_ERROR'
+      'DB_INSERT_ERROR',
     );
   }
 
@@ -239,14 +235,12 @@ export async function uploadTemplate(
   for (const placeholder of lintResult.placeholders) {
     const fieldId = fieldMap.get(placeholder.toLowerCase());
     if (fieldId) {
-      await supabase
-        .from('template_fields')
-        .insert({
-          template_id: templateRow.id,
-          document_field_id: fieldId,
-          placeholder,
-          is_required: false,
-        });
+      await supabase.from('template_fields').insert({
+        template_id: templateRow.id,
+        document_field_id: fieldId,
+        placeholder,
+        is_required: false,
+      });
     }
   }
 

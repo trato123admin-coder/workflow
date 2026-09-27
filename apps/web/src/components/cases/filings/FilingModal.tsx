@@ -170,12 +170,7 @@ export const FilingModal: React.FC<FilingModalProps> = ({
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            id="entity_id"
-            label="Entidad Externa"
-            required
-            error={errors.entity_id}
-          >
+          <FormField id="entity_id" label="Entidad Externa" required error={errors.entity_id}>
             <select
               id="entity_id"
               value={formData.entity_id}
@@ -214,7 +209,12 @@ export const FilingModal: React.FC<FilingModalProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormField id="filing_kind" label="Tipo de Acto / Trámite" required error={errors.filing_kind}>
+          <FormField
+            id="filing_kind"
+            label="Tipo de Acto / Trámite"
+            required
+            error={errors.filing_kind}
+          >
             <input
               id="filing_kind"
               type="text"

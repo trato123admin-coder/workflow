@@ -61,7 +61,7 @@ export function getFilingUrgency(
   },
   holidays: (string | Date)[] = [],
   warningThresholdDays = 3,
-  currentDate?: Date | string
+  currentDate?: Date | string,
 ): FilingUrgency {
   const cat = (filing.statusCategory || '').toUpperCase();
   if (cat === 'DONE' || cat === 'REJECTED') {

@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  externalEntitySchema,
-  caseFilingSchema,
-  getFilingUrgency,
-} from '../filings.js';
+import { externalEntitySchema, caseFilingSchema, getFilingUrgency } from '../filings.js';
 
 describe('Trámites Externos y Entidades (filings)', () => {
   describe('Validación de Esquemas', () => {
@@ -58,14 +54,14 @@ describe('Trámites Externos y Entidades (filings)', () => {
         getFilingUrgency({
           statusCategory: 'DONE',
           response_due_date: '2026-09-01',
-        })
+        }),
       ).toBe('DONE');
 
       expect(
         getFilingUrgency({
           statusCategory: 'REJECTED',
           response_due_date: '2026-09-01',
-        })
+        }),
       ).toBe('DONE');
     });
 
@@ -79,8 +75,8 @@ describe('Trámites Externos y Entidades (filings)', () => {
           },
           [],
           3,
-          '2026-10-05'
-        )
+          '2026-10-05',
+        ),
       ).toBe('EXPIRED');
     });
 
@@ -94,8 +90,8 @@ describe('Trámites Externos y Entidades (filings)', () => {
           },
           [],
           3,
-          '2026-10-05'
-        )
+          '2026-10-05',
+        ),
       ).toBe('EXPIRING_SOON');
     });
 
@@ -104,7 +100,7 @@ describe('Trámites Externos y Entidades (filings)', () => {
         getFilingUrgency({
           statusCategory: 'SUBMITTED',
           response_due_date: null,
-        })
+        }),
       ).toBe('ON_TRACK');
     });
   });

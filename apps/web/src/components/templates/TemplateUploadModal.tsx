@@ -100,8 +100,7 @@ export const TemplateUploadModal: React.FC<TemplateUploadModalProps> = ({
     }
   };
 
-  const hasBrokenOrMacro =
-    Boolean(lintError) || Boolean(lintResult && !lintResult.lint.isValid);
+  const hasBrokenOrMacro = Boolean(lintError) || Boolean(lintResult && !lintResult.lint.isValid);
 
   return (
     <Modal
@@ -199,7 +198,9 @@ export const TemplateUploadModal: React.FC<TemplateUploadModalProps> = ({
               onChange={handleFileChange}
               className="hidden"
             />
-            <p className="text-[11px] mt-1">Archivos Word XML (.docx). Se rechazan archivos con macros (.docm).</p>
+            <p className="text-[11px] mt-1">
+              Archivos Word XML (.docx). Se rechazan archivos con macros (.docm).
+            </p>
           </div>
           {selectedFile && (
             <p className="text-xs font-semibold text-foreground pt-1">

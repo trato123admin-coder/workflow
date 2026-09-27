@@ -52,7 +52,7 @@ describe('Motor de Lint para Plantillas DOCX (templates)', () => {
       const result = lintDocxXml(xml, whitelist);
       expect(result.isValid).toBe(false);
       expect(result.brokenMarkers.length).toBeGreaterThan(0);
-      expect(result.brokenMarkers[0]).toContain("partido por Word");
+      expect(result.brokenMarkers[0]).toContain('partido por Word');
       expect(result.errors).toContain(result.brokenMarkers[0]);
     });
 
@@ -107,10 +107,7 @@ describe('Motor de Lint para Plantillas DOCX (templates)', () => {
 
     it('detecta tipo MIME habilitado para macros', () => {
       expect(
-        isMacroEnabledDocx(
-          'archivo.docx',
-          'application/vnd.ms-word.document.macroEnabled.12'
-        )
+        isMacroEnabledDocx('archivo.docx', 'application/vnd.ms-word.document.macroEnabled.12'),
       ).toBe(true);
     });
 
@@ -119,16 +116,17 @@ describe('Motor de Lint para Plantillas DOCX (templates)', () => {
         isMacroEnabledDocx('archivo.docx', 'application/vnd.openxmlformats', [
           'word/document.xml',
           'word/vbaProject.bin',
-        ])
+        ]),
       ).toBe(true);
     });
 
     it('permite archivos DOCX estándar sin macros', () => {
       expect(
-        isMacroEnabledDocx('solicitud.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', [
-          'word/document.xml',
-          'word/styles.xml',
-        ])
+        isMacroEnabledDocx(
+          'solicitud.docx',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          ['word/document.xml', 'word/styles.xml'],
+        ),
       ).toBe(false);
     });
   });

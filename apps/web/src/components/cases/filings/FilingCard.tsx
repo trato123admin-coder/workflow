@@ -28,12 +28,7 @@ interface FilingCardProps {
   onEdit: () => void;
 }
 
-export const FilingCard: React.FC<FilingCardProps> = ({
-  filing,
-  statuses,
-  holidays,
-  onEdit,
-}) => {
+export const FilingCard: React.FC<FilingCardProps> = ({ filing, statuses, holidays, onEdit }) => {
   const itemStatus = statuses.find((s) => s.code === filing.status);
   const statusCat = (itemStatus?.metadata?.category as string) || undefined;
   const urgency = getFilingUrgency(
@@ -133,13 +128,13 @@ export const FilingCard: React.FC<FilingCardProps> = ({
             {urgency === 'ON_TRACK' && (
               <StatusBadge
                 category="info"
-                label={remainingDays !== null ? `En plazo (${remainingDays} d. útiles)` : 'En plazo'}
+                label={
+                  remainingDays !== null ? `En plazo (${remainingDays} d. útiles)` : 'En plazo'
+                }
                 size="sm"
               />
             )}
-            {urgency === 'DONE' && (
-              <StatusBadge category="neutral" label="Concluido" size="sm" />
-            )}
+            {urgency === 'DONE' && <StatusBadge category="neutral" label="Concluido" size="sm" />}
           </div>
         </div>
 
