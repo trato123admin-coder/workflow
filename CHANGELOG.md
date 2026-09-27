@@ -6,6 +6,41 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Sprint 7a — Motor de reglas determinista, administrador y asistente en modo reglas
+
+#### Agregado
+
+- **Base de Datos & Seguridad (Supabase):**
+  - Migración `20260927000000_document_rules_and_recommendations_schema.sql` (Verificada OK en Staging):
+    - Tabla `document_rules` con campo JSONB `rule_definition`, versión de modelo opcional (`case_model_version_id`), prioridad (1-100), tipo de efecto (`RECOMMEND`, `EXCLUDE`, `REQUIRE`) e índice único de código.
+    - Tabla `ai_recommendations` para registro auditable de sugerencias documentales con `model_provider = 'RULES_ONLY'` obligatorio por restricción CHECK, captura de razones, campos faltantes, alternativas y estado de decisión (`was_accepted`, `accepted_at`).
+    - Disparador de auditoría `trg_audit_ai_recommendations` conectado a `private.tg_audit_log()`.
+    - Políticas RLS estrictas usando `private.can_access_case()`, `private.can_write_case()`, `private.has_permission('documents.read')`, `documents.generate` y `ai.use`.
+    - 7 reglas semilla del dominio sucesorio (`00-maestro` §4.4) registradas con precedencia y explicaciones formales.
+    - Script de verificación pgTAP `20260927000000_document_rules_and_recommendations_schema.verify.sql`.
+- **Paquete Compartido (`@workflow/shared`):**
+  - Motor de reglas DSL determinista en `packages/shared/src/rules/`:
+    - `types.ts`: Tipos estrictos para operadores, efectos, condiciones (`all`, `any`, `not`), contexto y decisiones.
+    - `whitelist.ts`: Lista blanca de hechos autorizados para evaluación de reglas.
+    - `schema.ts`: Esquema Zod para validación en tiempo de ejecución de definiciones de reglas.
+    - `evaluator.ts`: Evaluador booleano recursivo de condiciones con generación de traza explicativa paso a paso.
+    - `engine.ts`: Evaluador maestro `evaluateDocumentRules` con resolución determinista de conflictos y regla de precedencia incondicional `REQUIRE > EXCLUDE` (obligación legal absoluta), emitiendo advertencias de configuración si coinciden.
+    - `scoring.ts`: Función de puntuación del sistema con pesos configurables, normalización y suavizado de Laplace.
+  - 41 pruebas unitarias automatizadas (`rules-dsl.test.ts`) cubriendo todos los operadores, combinadores, precedencia y advertencias.
+- **Aplicación Web (`apps/web`):**
+  - Constructor de contexto seguro `rules-context-builder.ts`: Ensamblado de `RuleContext` desde Supabase con control de acceso por RLS, verificación anónima de menores (`age < 18` sin PII) y cálculo exacto de antigüedad en días.
+  - Administración de Reglas (`/rules`):
+    - `RulesTable.tsx`: Listado de reglas con conmutador reactivo `is_active` (soft toggle).
+    - `RuleModal.tsx`: Creación y edición de reglas con validación Zod en vivo.
+    - `RulesSimulator.tsx` (M7): Simulador interactivo con selector de expedientes protegidos, soporte de reglas globales y específicas del modelo, banner de advertencias de conflicto y visor de trazas.
+  - Asistente de Documentos (`/assistant`, S7-07 base):
+    - Flujo guiado de 5 pasos (`Stepper`): Expediente → Recomendación → Datos → Vista Previa → Confirmación.
+    - `RecommendationCard.tsx`: Sugerencia principal con badge obligatorio *"Sugerencia para revisión legal"*, desglose de puntuación (prioridad, tasa histórica, completitud), razones, alerta de campos faltantes y selección de alternativas.
+    - `MissingFieldsForm.tsx`: Identificación de datos prellenados del expediente y formulario para campos faltantes.
+    - `DocumentPreviewStep.tsx`: Vista previa con marca de agua *"BORRADOR - Sujeto a revisión legal"* y variables consolidadas.
+    - `GenerateStep.tsx`: Confirmación legal y aprobación de la sugerencia.
+    - Módulo `recommendations-stats.ts`: Tasa histórica en 1 sola consulta con suavizado de Laplace y deduplicación idempotente de impresiones (`was_accepted IS NULL`) ante recargas.
+
 ### Sprint 6 — Trámites externos y plantillas
 
 #### Agregado

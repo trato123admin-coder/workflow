@@ -19,17 +19,18 @@ Registro de migraciones ejecutadas, entorno de aplicación y resultado de su res
 | `20260926000000_storage_and_documents_schema.sql` | 2026-09-26 | Staging (Cloud) | Verificado OK (10/10 verify.sql) | Aplicada manualmente por el operador en Staging. Tablas `storage_backends`, `document_types`, `document_alternatives`, `case_model_documents`, `case_documents`, `document_versions` con RLS habilitada. Bucket privado `case-documents` sin políticas públicas/autenticadas (100% blindado a `service_role`). Función `sync_case_document_slots` SECURITY DEFINER y trigger de inmutabilidad `trg_guard_case_model_documents_immutability`. Clave foránea circular `fk_case_documents_current_version` e índice único por proceso que evita colisiones en `HEREDERO`. |
 | `20260926010000_case_documents_audit_trigger.sql` | 2026-09-26 | Staging (Cloud) | Verificado OK (Verify #11) | Aplicada manualmente por el operador en Staging. Conexión del trigger de auditoría `trg_audit_case_documents` a `public.case_documents` (AFTER INSERT OR UPDATE) para registrar cambios de estado (VALIDATED/OBSERVED) y notas en `audit_logs` con `user_id`, `old_data` y `new_data`. |
 | `20260926020000_external_filings_and_templates_schema.sql` | 2026-09-26 | Staging (Cloud) | Verificado OK (Verify #12) | Aplicada manualmente por el operador en Staging. Tablas `external_entities`, `case_filings`, `document_fields`, `templates`, `template_fields` con RLS habilitada. Extensión `btree_gist` y restricción `EXCLUDE` sobre vigencias no solapadas en `templates`. Bucket privado `templates` blindado a `service_role`. Trigger `trg_audit_case_filings` conectado a `audit_logs`. Función `add_business_days` con tolerancia a tabla `holidays` vacía. Parámetro `filings.publication_wait_business_days` en `setting_definitions` y `system_settings`. |
+| `20260927000000_document_rules_and_recommendations_schema.sql` | 2026-09-26 | Staging (Cloud) | Verificado OK (Verify #13) | Aplicada manualmente por el operador en Staging. Tablas `document_rules` y `ai_recommendations` con RLS habilitada y optimizada con `(select ...)`. Triggers `trg_audit_document_rules` y `trg_audit_ai_recommendations` conectados a `private.tg_audit_log`. Permiso `ai.use` asignado a rol `LAWYER`. Restricción `CHECK` `ck_ai_recommendations_model_provider` forzando `RULES_ONLY`. Carga de las 7 reglas semilla de `00-maestro` §4.4 asociadas a versión 1 de `SUCESION_INTESTADA_NOTARIAL`. |
 
 ---
 
-## Resumen de Estado de Migraciones (Sprint 6 - Cierre)
+## Resumen de Estado de Migraciones (Sprint 7a)
 
-- **Total de migraciones en repositorio (`supabase/migrations/`):** 13
-- **Total de migraciones aplicadas en Staging:** 13
-- **Total de migraciones verificadas con `verify.sql`:** 13
+- **Total de migraciones en repositorio (`supabase/migrations/`):** 14
+- **Total de migraciones aplicadas en Staging:** 14
+- **Total de migraciones verificadas con `verify.sql`:** 14
 - **Migraciones pendientes por aplicar:** 0 (Ninguna)
 - **Fecha de última verificación:** 2026-09-26
-- **Próximas migraciones:** Sprint 7 (Generación documental y docx-templates).
+- **Próximas migraciones:** Sprint 7b (generation_jobs, generated_documents).
 
 ### Procedimiento de comprobación en SQL Editor de Supabase (Catálogo de Objetos):
 ```sql
@@ -74,6 +75,11 @@ with migration_check as (
          exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'case_filings')
          and exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'templates')
          and exists(select 1 from pg_extension where extname = 'btree_gist')
+  union all
+  select '20260927000000_document_rules_and_recommendations_schema',
+         exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'document_rules')
+         and exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'ai_recommendations')
+         and exists(select 1 from public.document_rules where code like 'RULE_SEED_%')
 )
 select 
   migration,
@@ -81,8 +87,8 @@ select
 from migration_check
 order by migration asc;
 
--- 2. Confirmación funcional de la última migración (Sprint 6)
+-- 2. Confirmación funcional de la última migración (Sprint 7a)
 -- Ejecutar el contenido de:
--- supabase/verify/20260926020000_external_filings_and_templates_schema.verify.sql
--- Debe retornar: 'VERIFICACIÓN EXITOSA: Extensiones, bucket, add_business_days, restricción EXCLUDE y blindaje RLS/grants operativos al 100%.'
+-- supabase/verify/20260927000000_document_rules_and_recommendations_schema.verify.sql
+-- Debe retornar: 'VERIFICACIÓN EXITOSA: Tablas document_rules y ai_recommendations con RLS estricta (select ...), triggers tg_audit_log, FK profiles, CHECK RULES_ONLY, permiso ai.use en LAWYER y 7 reglas semilla activas.'
 ```
