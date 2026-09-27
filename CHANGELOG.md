@@ -6,6 +6,43 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Sprint 6 — Trámites externos y plantillas
+
+#### Agregado
+
+- **Base de Datos & Seguridad (Supabase):**
+  - Migración `20260926020000_external_filings_and_templates_schema.sql` (Verificada OK en Staging):
+    - Habilitación de extensión `btree_gist` para soporte de exclusión sobre rangos temporales.
+    - Creación de bucket privado de infraestructura `templates` para almacenamiento de modelos DOCX versionados.
+    - Directorio de entidades externas `external_entities` con clave foránea compuesta hacia `catalog_items ('external_entity_types')` y estructura de contactos en JSONB.
+    - Registro de trámites de expediente `case_filings` con relaciones a `cases`, `external_entities`, `case_processes` y clave foránea compuesta hacia `filing_statuses`.
+    - Catálogo blanco de campos de sustitución `document_fields` con restricción regex (`chk_document_fields_source_path`) para proteger tablas del sistema.
+    - Catálogo de plantillas `templates` y mapeo de marcadores `template_fields`.
+    - Restricción de exclusión real en PostgreSQL (`exclude_overlapping_template_validity`) que impide el solapamiento de rangos de vigencia en versiones activas de plantillas para el mismo tipo documental.
+    - Función SQL `public.add_business_days(_from_date date, _days int)` que computa días útiles descontando sábados, domingos y feriados activos de `holidays`, tolerante ante tablas vacías.
+    - Parámetro de sistema `filings.publication_wait_business_days` (valor 15) registrado en `setting_definitions` y sembrado en `system_settings`.
+    - RLS estricta: `external_entities` protegida con `entities.read`/`entities.manage`; `case_filings` integrada a `private.can_access_case()`/`private.can_write_case()`; `templates` y `template_fields` con mutaciones revocadas para `authenticated` y canalizadas exclusivamente vía `service_role` tras lint del engine.
+    - Suite de pruebas pgTAP `supabase/tests/database/09_filings_and_templates.test.sql`.
+- **Paquete Compartido (`@workflow/shared`):**
+  - Módulo `business-days.ts`: `addBusinessDays`, `getRemainingBusinessDays`, `isBusinessDay`, `toIsoDateString`.
+  - Módulo `filings.ts`: Esquemas Zod para entidades y trámites, y evaluador semántico de urgencias `getFilingUrgency` (`EXPIRED`, `EXPIRING_SOON`, `ON_TRACK`, `DONE`).
+  - Módulo `templates.ts`: Tipos Zod de plantillas y campos, analizador de marcadores XML `lintDocxXml` y rechazo de macros `isMacroEnabledDocx`.
+  - 97 pruebas unitarias automatizadas con cobertura total de plazos y análisis XML.
+- **Servicio Engine (`services/engine`):**
+  - Rutas de plantillas (`/v1/templates`):
+    - `POST /v1/templates/lint`: Descompresión en memoria de DOCX, detección de marcadores partidos en múltiples nodos `<w:r>`, validación contra `document_fields` y rechazo de macros `.docm`/`vbaProject.bin`.
+    - `POST /v1/templates/upload`: Validación de Bearer JWT, verificación de usuario activo y MFA, ejecución obligatoria de lint, subida a bucket privado `templates` con SHA-256 e inserción controlada en base de datos.
+    - `GET /v1/templates/:id/download`: Emisión de URLs prefirmadas de 60 segundos vía `StorageProvider`.
+  - Suite de pruebas de integración `services/engine/src/__tests__/templates-lint.test.ts` (11 pruebas de plantillas, 38 pruebas totales en engine, 158 pruebas totales en el monorepo).
+- **Aplicación Web (`apps/web`):**
+  - Directorio de Entidades (`/entities`): Buscador, filtro reactivo por tipo desde catálogo y modal `EntityModal` con contactos dinámicos.
+  - Trámites Externos en Detalle de Caso (`CaseFilingsTab` y `FilingModal` en `/cases/[id]`): Plazos calculados en días útiles con el parámetro configurable `filings.publication_wait_business_days` y semáforo de urgencia visual.
+  - Administración de Feriados (`HolidaysTab` en `/settings`): Mantenimiento de días no laborables y conmutación de estado activo.
+  - Catálogo de Plantillas (`/templates`): Vista de versiones vigentes, tiempo manual estimado y descarga directa de archivos DOCX con URL firmada del engine.
+  - Carga con Pre-Lint (`TemplateUploadModal`, `TemplateLintFeedback`): Análisis interactivo de Word en tiempo real bloqueando archivos inválidos, campos desconocidos o macros.
+  - Caso Dorado (`GoldenCaseModal`): Visor del expediente de prueba ideal con equivalencias de marcadores a valores resueltos.
+  - Diccionario de Campos (`DocumentFieldsDictionary`, ruta directa `/templates/fields`): Listado de marcadores admitidos en lista blanca con acción de copiado directo.
+
 ### Sprint 5 — Documentos y almacenamiento
 
 #### Agregado

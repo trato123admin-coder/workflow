@@ -18,10 +18,12 @@
     "@supabase/supabase-js": "^2.117.1",
     "@workflow/shared": "workspace:*",
     "fastify": "^5.2.1",
+    "pizzip": "^3.3.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/node": "^22.13.4",
+    "@types/pizzip": "^3.1.2",
     "eslint": "^9.20.1",
     "tsx": "^4.19.3",
     "typescript": "^5.7.3",
