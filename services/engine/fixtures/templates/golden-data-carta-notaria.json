@@ -1,0 +1,14 @@
+{
+  "case_number": "2026-000001",
+  "current_date": "27 de septiembre de 2026",
+  "city": "Lima",
+  "sender_name": "Juan Carlos Pérez Rodríguez",
+  "sender_document_number": "12345678",
+  "sender_address": "Av. Javier Prado Este 1234, San Isidro, Lima",
+  "recipient_name": "Notaría Fernández",
+  "recipient_address": "Jr. Cusco 890, Cercado de Lima",
+  "subject": "Solicitud de inicio de trámite de sucesión intestada",
+  "body": "Por medio de la presente, me dirijo a usted con la finalidad de solicitar el inicio del trámite de sucesión intestada del causante Pedro Antonio Pérez Sánchez, identificado con DNI N.° 87654321, fallecido el 10 de agosto de 2026. Adjunto los documentos requeridos para la tramitación correspondiente.",
+  "lawyer_name": "María Elena García Torres",
+  "lawyer_colegiatura": "CAL-12345"
+}

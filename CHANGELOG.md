@@ -6,6 +6,39 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Sprint 7b — Motor de generación de documentos DOCX/PDF
+
+#### Agregado
+
+- **Base de Datos & Seguridad (Supabase):**
+  - Migración `20260927100000_generation_jobs_schema.sql`:
+    - Enum `gen_status` con estados del ciclo de vida: `QUEUED`, `GENERATING`, `GENERATED`, `IN_REVIEW`, `APPROVED`, `REJECTED`, `SUPERSEDED`, `FAILED`.
+    - Tabla `generation_jobs` para trabajos de generación asíncronos con `idempotency_key` (UNIQUE), snapshot de datos (`input_data`), versión de plantilla, traza de reglas, reintentos con backoff y RLS estricta.
+    - Tabla `generated_documents` vinculando jobs con `document_versions`, snapshots inmutables, SHA-256, formato (DOCX/PDF), flujo de aprobación con constraint `four_eyes` y estados `SUPERSEDED`.
+    - RPC `create_generation_job()` con validación de permisos y manejo de idempotencia.
+    - Realtime habilitado en `generation_jobs` para suscripción desde el frontend.
+    - Políticas RLS: `can_access_case` + `documents.read`/`documents.generate` para jobs; solo `service_role` para `generated_documents`.
+  - pgTAP test `10_generation_jobs.test.sql` (20 assertions).
+- **Engine (`services/engine`):**
+  - `docx-renderer.ts`: Rendering DOCX con `docx-templates` (MIT), sustitución de campos, bucles y condicionales.
+  - `pdf-converter.ts`: Conversión DOCX→PDF con LibreOffice headless, perfil aislado por job, semáforo de concurrencia, timeout configurable.
+  - `watermark.ts`: Marca de agua "BORRADOR" diagonal en PDF usando `pdf-lib` (MIT, pure JS).
+  - `data-resolver.ts`: Resolución de campos de plantilla desde snapshots de datos con dot-notation paths y valores por defecto.
+  - `generation-worker.ts`: Worker asíncrono que procesa jobs `QUEUED`: render DOCX → convert PDF → upload Storage → create `document_versions` + `generated_documents` → reintentos con backoff.
+  - `routes/generation.ts`: `POST /v1/generation-jobs` (idempotente) y `POST /v1/documents/preview` (PDF temporal con marca de agua BORRADOR).
+  - `routes/approval.ts`: `POST /v1/generated-documents/:id/approve` (con `four_eyes`) y `POST /v1/generated-documents/:id/reject` (con motivo en auditoría). Marca versiones anteriores como `SUPERSEDED`.
+  - Dockerfile actualizado: `node:22-slim` con LibreOffice headless, fuentes Liberation y Carlito. Toggle `docs.pdf_generation` desactivado por defecto para plan gratuito de Render.
+  - Variables de entorno: `LIBREOFFICE_BIN`, `LIBREOFFICE_TIMEOUT_MS`, `LIBREOFFICE_MAX_CONCURRENT`.
+  - Dependencias: `docx-templates` ^4.13.0, `pdf-lib` ^1.17.1.
+- **Plantillas doradas (S7-08):**
+  - 3 fixtures DOCX de ejemplo: `CONTRATO_SERVICIOS`, `SOLICITUD_SUCESION_INTESTADA`, `CARTA_NOTARIA` con marcadores `{campo}` y datos JSON dorados.
+  - Script `generate-fixtures.ts` para regenerar los fixtures.
+  - Tests de integración: cada plantilla se renderiza, verifica ausencia de marcadores sin resolver y presencia de valores esperados.
+- **Pruebas:**
+  - 10 tests unitarios para `data-resolver` (paths planos, anidados, campos requeridos, defaults, tipos).
+  - 12 tests de integración para plantillas doradas.
+  - Total engine: 60 tests pasando (8 archivos).
+
 ### Sprint 7a — Motor de reglas determinista, administrador y asistente en modo reglas
 
 #### Agregado

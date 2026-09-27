@@ -6,6 +6,8 @@ import { healthRoutes } from './routes/health.js';
 import { moduleRoutes } from './routes/modules.js';
 import { documentRoutes } from './routes/documents.js';
 import { templateRoutes } from './routes/templates.js';
+import { generationRoutes } from './routes/generation.js';
+import { approvalRoutes } from './routes/approval.js';
 import { getEngineEnv } from './config/env.js';
 
 export async function buildApp(): Promise<FastifyInstance> {
@@ -54,6 +56,8 @@ export async function buildApp(): Promise<FastifyInstance> {
   await fastify.register(moduleRoutes);
   await fastify.register(documentRoutes);
   await fastify.register(templateRoutes);
+  await fastify.register(generationRoutes);
+  await fastify.register(approvalRoutes);
 
   return fastify;
 }

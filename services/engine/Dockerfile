@@ -23,13 +23,27 @@ COPY services/engine services/engine
 RUN pnpm --filter @workflow/shared build
 RUN pnpm --filter @workflow/engine build
 
-# Stage 2: Runner
-FROM node:22-alpine AS runner
+# Stage 2: Runner — Debian slim for LibreOffice + fonts
+FROM node:22-slim AS runner
 
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3001
 ENV HOST=0.0.0.0
+
+# LibreOffice headless + metrically compatible fonts (Carlito≈Calibri, Liberation≈Arial/Times)
+# Only install if docs.pdf_generation is enabled; the app gracefully degrades without it.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       libreoffice-writer-nogui \
+       fonts-liberation \
+       fonts-crosextra-carlito \
+       wget \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+ENV LIBREOFFICE_BIN=/usr/bin/soffice
+ENV LIBREOFFICE_TIMEOUT_MS=60000
+ENV LIBREOFFICE_MAX_CONCURRENT=1
 
 RUN corepack enable && corepack prepare pnpm@12.6.0 --activate
 
@@ -48,7 +62,7 @@ USER node
 
 EXPOSE 3001
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3001/healthz || exit 1
 
 CMD ["node", "services/engine/dist/server.js"]

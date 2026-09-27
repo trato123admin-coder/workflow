@@ -1,0 +1,18 @@
+{
+  "client_name": "Juan Carlos Pérez Rodríguez",
+  "client_document_type": "DNI",
+  "client_document_number": "12345678",
+  "client_address": "Av. Javier Prado Este 1234, San Isidro, Lima",
+  "case_number": "2026-000001",
+  "case_date": "27 de septiembre de 2026",
+  "lawyer_name": "María Elena García Torres",
+  "lawyer_colegiatura": "CAL-12345",
+  "company_name": "Estudio Jurídico García & Asociados",
+  "company_ruc": "20123456789",
+  "company_address": "Calle Las Begonias 456, San Isidro, Lima",
+  "service_description": "Asesoría legal en sucesión intestada del causante Pedro Pérez Sánchez",
+  "service_fee": "S/ 3,500.00",
+  "service_duration": "60 días calendario",
+  "city": "Lima",
+  "current_date": "27 de septiembre de 2026"
+}

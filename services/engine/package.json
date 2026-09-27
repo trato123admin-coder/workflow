@@ -17,7 +17,9 @@
     "@fastify/multipart": "^10.1.2",
     "@supabase/supabase-js": "^2.117.1",
     "@workflow/shared": "workspace:*",
+    "docx-templates": "^4.13.0",
     "fastify": "^5.2.1",
+    "pdf-lib": "^1.17.1",
     "pizzip": "^3.3.0",
     "zod": "^3.24.2"
   },

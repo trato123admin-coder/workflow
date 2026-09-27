@@ -10,6 +10,9 @@ export const engineEnvSchema = baseEnvSchema.extend({
   SUPABASE_URL: z.string().url().optional(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
   ENGINE_ALLOWED_ORIGINS: z.string().default('*'),
+  LIBREOFFICE_BIN: z.string().default(''),
+  LIBREOFFICE_TIMEOUT_MS: z.coerce.number().default(60_000),
+  LIBREOFFICE_MAX_CONCURRENT: z.coerce.number().default(1),
 });
 
 export type EngineEnv = z.infer<typeof engineEnvSchema>;
