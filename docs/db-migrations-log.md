@@ -31,15 +31,58 @@ Registro de migraciones ejecutadas, entorno de aplicación y resultado de su res
 - **Fecha de última verificación:** 2026-09-26
 - **Próximas migraciones:** Sprint 7 (Generación documental y docx-templates).
 
-### Procedimiento de comprobación en SQL Editor de Supabase:
+### Procedimiento de comprobación en SQL Editor de Supabase (Catálogo de Objetos):
 ```sql
--- 1. Verificar que todas las 13 versiones están registradas
-select version, inserted_at
-from supabase_migrations.schema_migrations
-order by version asc;
+with migration_check as (
+  select '20260924000000_initial_schema' as migration,
+         exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'audit_logs') as applied
+  union all
+  select '20260924100000_identity_and_roles',
+         exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'roles')
+  union all
+  select '20260924110000_security_hardening',
+         exists(select 1 from pg_proc where proname = 'has_permission')
+  union all
+  select '20260924120000_settings_and_catalogs',
+         exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'holidays')
+  union all
+  select '20260924130000_settings_seeds',
+         exists(select 1 from public.catalog_items limit 1)
+  union all
+  select '20260925100000_cases_and_persons_schema',
+         exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'cases')
+  union all
+  select '20260925110000_workflow_and_models_seeds',
+         exists(select 1 from public.case_models where code = 'SUCESION_INTESTADA_NOTARIAL')
+  union all
+  select '20260925120000_fix_persons_rls_unassigned',
+         exists(select 1 from information_schema.columns where table_schema = 'public' and table_name = 'persons' and column_name = 'created_by')
+  union all
+  select '20260925130000_case_parties_and_estate_schema',
+         exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'case_parties')
+  union all
+  select '20260925140000_case_comments_and_search_schema',
+         exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'case_comments')
+  union all
+  select '20260926000000_storage_and_documents_schema',
+         exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'case_documents')
+  union all
+  select '20260926010000_case_documents_audit_trigger',
+         exists(select 1 from pg_trigger where tgname = 'trg_audit_case_documents')
+  union all
+  select '20260926020000_external_filings_and_templates_schema',
+         exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'case_filings')
+         and exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'templates')
+         and exists(select 1 from pg_extension where extname = 'btree_gist')
+)
+select 
+  migration,
+  case when applied then 'OK - Aplicada y Activa' else 'PENDIENTE' end as estado
+from migration_check
+order by migration asc;
 
 -- 2. Confirmación funcional de la última migración (Sprint 6)
--- Ejecutar el contenido completo de:
+-- Ejecutar el contenido de:
 -- supabase/verify/20260926020000_external_filings_and_templates_schema.verify.sql
--- Debe retornar: '>>> SPRINT 6 VERIFICATION COMPLETED SUCCESSFULLY <<<'
+-- Debe retornar: 'VERIFICACIÓN EXITOSA: Extensiones, bucket, add_business_days, restricción EXCLUDE y blindaje RLS/grants operativos al 100%.'
 ```
