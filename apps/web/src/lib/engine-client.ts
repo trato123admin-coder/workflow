@@ -1,5 +1,5 @@
 import { createClient } from './supabase/client';
-import type { UploadVersionResponse, DownloadUrlResponse } from '@workflow/shared';
+import type { UploadVersionResponse, DownloadUrlResponse, DocxLintResult } from '@workflow/shared';
 
 export function getEngineUrl(): string {
   if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_ENGINE_URL) {
@@ -143,14 +143,7 @@ export interface UploadTemplateParams {
 }
 
 export interface TemplateLintApiResponse {
-  lint: {
-    isValid: boolean;
-    brokenMarkers: string[];
-    unknownFields: string[];
-    validFields: string[];
-    errors: string[];
-    warnings: string[];
-  };
+  lint: DocxLintResult;
   filename: string;
   size: number;
 }

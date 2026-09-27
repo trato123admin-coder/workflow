@@ -27,6 +27,10 @@ export const TemplateLintFeedback: React.FC<TemplateLintFeedbackProps> = ({
   }
 
   if (hasBrokenOrMacro) {
+    const errors = lintResult?.lint?.errors ?? [];
+    const brokenMarkers = lintResult?.lint?.brokenMarkers ?? [];
+    const unknownPlaceholders = lintResult?.lint?.unknownPlaceholders ?? [];
+
     return (
       <div className="p-3.5 bg-destructive/10 border border-destructive/20 rounded-xl text-destructive text-xs space-y-2">
         <div className="flex items-center gap-2 font-bold">
@@ -34,17 +38,27 @@ export const TemplateLintFeedback: React.FC<TemplateLintFeedbackProps> = ({
           <span>Errores detectados en la plantilla (Subida bloqueada)</span>
         </div>
         {lintError && <p className="pl-6">{lintError}</p>}
-        {lintResult?.lint.errors.map((err, i) => (
+        {errors.map((err, i) => (
           <p key={i} className="pl-6 font-mono text-[11px]">
             • {err}
           </p>
         ))}
-        {lintResult?.lint.brokenMarkers && lintResult.lint.brokenMarkers.length > 0 && (
+        {brokenMarkers.length > 0 && (
           <div className="pl-6 text-[11px]">
             Marcadores rotos detectados en el XML de Word:
             <ul className="list-disc pl-4 mt-1 font-mono">
-              {lintResult.lint.brokenMarkers.map((bm, i) => (
+              {brokenMarkers.map((bm, i) => (
                 <li key={i}>{bm}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {unknownPlaceholders.length > 0 && (
+          <div className="pl-6 text-[11px]">
+            Marcadores desconocidos no autorizados:
+            <ul className="list-disc pl-4 mt-1 font-mono">
+              {unknownPlaceholders.map((up, i) => (
+                <li key={i}>{up}</li>
               ))}
             </ul>
           </div>
@@ -53,7 +67,8 @@ export const TemplateLintFeedback: React.FC<TemplateLintFeedbackProps> = ({
     );
   }
 
-  if (lintResult && lintResult.lint.isValid) {
+  if (lintResult && lintResult.lint?.isValid) {
+    const validCount = lintResult.lint.placeholders?.length ?? 0;
     return (
       <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-800 dark:text-emerald-300 text-xs space-y-1">
         <div className="flex items-center gap-2 font-bold">
@@ -61,8 +76,8 @@ export const TemplateLintFeedback: React.FC<TemplateLintFeedbackProps> = ({
           <span>Plantilla válida y sin macros</span>
         </div>
         <p className="pl-6 text-[11px]">
-          Se detectaron {lintResult.lint.validFields.length} marcadores autorizados listos para
-          sustitución.
+          Se detectaron {validCount} marcadores autorizados listos para sustitución
+          {validCount > 0 && `: ${lintResult.lint.placeholders.join(', ')}`}.
         </p>
       </div>
     );
