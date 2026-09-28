@@ -67,7 +67,7 @@ begin
 
   -- 6. Verificar feature flag
   assert exists (
-    select 1 from public.feature_flags where code = 'module.cash'
+    select 1 from public.feature_flags where key = 'module.cash'
   ), 'VERIFY FAILED: Feature flag module.cash no registrado';
 
   -- 7. Verificar función de integridad
