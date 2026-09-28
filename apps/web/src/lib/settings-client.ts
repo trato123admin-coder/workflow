@@ -27,15 +27,21 @@ export const DEFAULT_UPLOAD_CONFIG: StorageUploadConfig = {
 export async function fetchStorageUploadConfig(): Promise<StorageUploadConfig> {
   try {
     const supabase = createClient();
-    const { data, error } = await supabase
-      .from('system_settings')
-      .select('key, value')
-      .in('key', [
-        'storage.max_file_mb',
-        'documents.max_file_mb',
-        'storage.allowed_mime',
-        'documents.allowed_mime',
-      ]);
+    const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
+      setTimeout(() => resolve({ data: null, error: new Error('Network timeout') }), 1500),
+    );
+    const { data, error } = await Promise.race([
+      supabase
+        .from('system_settings')
+        .select('key, value')
+        .in('key', [
+          'storage.max_file_mb',
+          'documents.max_file_mb',
+          'storage.allowed_mime',
+          'documents.allowed_mime',
+        ]),
+      timeoutPromise,
+    ]);
 
     if (error || !data || data.length === 0) return DEFAULT_UPLOAD_CONFIG;
 
