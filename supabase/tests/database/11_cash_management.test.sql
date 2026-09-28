@@ -121,6 +121,7 @@ select throws_ok(
        set amount = 200.00
      where id = 'd0000000-0000-0000-0000-000000000001'
   $$,
+  'Registro inmutable: no se permite modificacion ni eliminacion',
   'UPDATE sobre cash_movements es rechazado estrictamente'
 );
 
@@ -130,6 +131,7 @@ select throws_ok(
     delete from public.cash_movements
      where id = 'd0000000-0000-0000-0000-000000000001'
   $$,
+  'Registro inmutable: no se permite modificacion ni eliminacion',
   'DELETE sobre cash_movements es rechazado estrictamente'
 );
 
@@ -161,6 +163,7 @@ select throws_ok(
       'a2222222-2222-2222-2222-222222222222'
     )
   $$,
+  'Operacion bloqueada: la fecha 2026-08-15 no pertenece a ningun periodo abierto para la cuenta especificada',
   'No se puede insertar movimiento fuera del periodo contable abierto'
 );
 
@@ -224,6 +227,7 @@ select throws_ok(
       'a2222222-2222-2222-2222-222222222222'
     )
   $$,
+  'No se puede reversar un movimiento que ya es un reverso',
   'No se puede reversar un movimiento que ya es de tipo REVERSAL'
 );
 
@@ -255,6 +259,7 @@ select throws_ok(
       'a2222222-2222-2222-2222-222222222222'
     )
   $$,
+  'Este movimiento ya ha sido reversado previamente',
   'No se permite registrar un segundo reverso para el mismo movimiento original'
 );
 
@@ -313,6 +318,7 @@ select throws_ok(
            approved_by = 'a2222222-2222-2222-2222-222222222222'
      where id = 'e0000000-0000-0000-0000-000000000001'
   $$,
+  'P0403',
   'Control dual: quien abre el arqueo no puede auto-aprobarlo'
 );
 
