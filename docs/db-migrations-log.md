@@ -22,18 +22,18 @@ Registro de migraciones ejecutadas, entorno de aplicación y resultado de su res
 | `20260927000000_document_rules_and_recommendations_schema.sql` | 2026-09-26 | Staging (Cloud) | Verificado OK (Verify #13) | Aplicada manualmente por el operador en Staging. Tablas `document_rules` y `ai_recommendations` con RLS habilitada y optimizada con `(select ...)`. Triggers `trg_audit_document_rules` y `trg_audit_ai_recommendations` conectados a `private.tg_audit_log`. Permiso `ai.use` asignado a rol `LAWYER`. Restricción `CHECK` `ck_ai_recommendations_model_provider` forzando `RULES_ONLY`. Carga de las 7 reglas semilla de `00-maestro` §4.4 asociadas a versión 1 de `SUCESION_INTESTADA_NOTARIAL`. |
 | `20260927100000_generation_jobs_schema.sql` | 2026-09-27 | Staging (Cloud) | Verificado OK | Tablas `generation_jobs` y `generated_documents`, enum `gen_status`, trigger `tg_audit_log`, RLS estricta. |
 | `20260928000000_generation_jobs_security_hardening.sql` | 2026-09-28 | Staging (Cloud) | Verificado OK | Hardening de RLS para generation jobs y ruta de aprobación. |
-| `20260928110000_cash_management_schema.sql` | 2026-09-28 | Staging (Cloud) | Pendiente aplicación | Tablas `cash_accounts`, `cash_periods`, `cash_requests`, `cash_movements`, `cash_reconciliations`, vista `cash_account_balances`, bucket `cash-support`, triggers inmutabilidad y control dual, permisos `cash.*` y flag `module.cash`. |
+| `20260928110000_cash_management_schema.sql` | 2026-09-28 | Staging (Cloud) | Verificado OK (Verify #15) | Aplicada por el operador en Staging. Tablas `cash_accounts`, `cash_periods`, `cash_requests`, `cash_movements`, `cash_reconciliations`, vista `cash_account_balances`, bucket `cash-support`, triggers inmutabilidad y control dual, permisos `cash.*` y flag `module.cash`. |
 
 ---
 
 ## Resumen de Estado de Migraciones (Sprint 11)
 
 - **Total de migraciones en repositorio (`supabase/migrations/`):** 17
-- **Total de migraciones aplicadas en Staging:** 16
-- **Total de migraciones verificadas con `verify.sql`:** 16
-- **Migraciones pendientes por aplicar:** 1 (`20260928110000_cash_management_schema.sql`)
+- **Total de migraciones aplicadas en Staging:** 17
+- **Total de migraciones verificadas con `verify.sql`:** 17
+- **Migraciones pendientes por aplicar:** 0 (Ninguna)
 - **Fecha de última verificación:** 2026-09-28
-- **Próximas migraciones:** N/A (Sprint 11 en curso).
+- **Próximas migraciones:** N/A (Sprint 11 completado y verificado en Staging).
 
 ### Procedimiento de comprobación en SQL Editor de Supabase (Catálogo de Objetos):
 ```sql
