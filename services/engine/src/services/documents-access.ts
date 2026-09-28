@@ -200,6 +200,34 @@ export async function checkCaseAccess(
 }
 
 /**
+ * Valida acceso a un caso verificando confidencialidad y permisos de lectura/escritura.
+ */
+export async function verifyCaseAccess(
+  supabase: SupabaseClient,
+  user: UserContext,
+  caseId: string,
+  options: { requireWrite?: boolean } = {},
+): Promise<void> {
+  const { data: caseRow, error } = await supabase
+    .from('cases')
+    .select('id, is_confidential')
+    .eq('id', caseId)
+    .maybeSingle();
+
+  if (error || !caseRow) {
+    throw createDocumentError('Expediente no encontrado', 404, 'CASE_NOT_FOUND');
+  }
+
+  await checkCaseAccess(
+    supabase,
+    user,
+    caseId,
+    Boolean(caseRow.is_confidential),
+    options.requireWrite ?? false,
+  );
+}
+
+/**
  * Valida autenticación, pertenencia y permisos para subir una versión de documento.
  */
 export async function verifyUserUploadAccess(

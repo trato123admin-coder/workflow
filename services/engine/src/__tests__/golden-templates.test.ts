@@ -67,14 +67,14 @@ describe('Golden Template Tests', () => {
         expect(result.buffer.length).toBeGreaterThan(0);
       });
 
-      it('output has no unresolved {placeholder} markers', async () => {
+      it('output has no unresolved {{placeholder}} markers', async () => {
         const templateBuffer = readFileSync(templatePath);
         const data = JSON.parse(readFileSync(dataPath, 'utf-8'));
 
         const result = await renderDocx({ templateBuffer, data });
 
         const textContent = extractTextContent(result.buffer);
-        const unresolvedPattern = /\{[a-zA-Z_][a-zA-Z0-9_]*\}/g;
+        const unresolvedPattern = /\{\{[a-zA-Z_][a-zA-Z0-9_]*\}\}/g;
         const unresolved = textContent.match(unresolvedPattern) ?? [];
 
         expect(unresolved).toEqual([]);

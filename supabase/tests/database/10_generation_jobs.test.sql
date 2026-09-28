@@ -6,7 +6,7 @@ create extension if not exists pgtap with schema extensions;
 begin;
 set local search_path = public, extensions;
 
-select plan(20);
+select plan(22);
 
 -- ============================================================================
 -- 1. ESTRUCTURA: Tablas existen
@@ -83,6 +83,18 @@ select ok(
     where n.nspname = 'public' and p.proname = 'create_generation_job'
   ),
   'Función RPC create_generation_job existe'
+);
+
+-- ============================================================================
+-- 8. PRIVILEGIOS: authenticated NO puede INSERT directamente (solo vía RPC)
+-- ============================================================================
+select ok(
+  not has_table_privilege('authenticated', 'public.generation_jobs', 'INSERT'),
+  'authenticated NO tiene INSERT directo en generation_jobs (restringido a RPC)'
+);
+select ok(
+  not has_table_privilege('authenticated', 'public.generated_documents', 'INSERT'),
+  'authenticated NO tiene INSERT directo en generated_documents'
 );
 
 select * from finish();
