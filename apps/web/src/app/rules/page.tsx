@@ -27,7 +27,8 @@ export default function RulesPage() {
       const [rulesRes, docTypesRes] = await Promise.all([
         supabase
           .from('document_rules')
-          .select(`
+          .select(
+            `
             id,
             code,
             name,
@@ -42,7 +43,8 @@ export default function RulesPage() {
             rule_definition,
             is_active,
             target_document_type:document_types (id, code, name)
-          `)
+          `,
+          )
           .order('priority', { ascending: true }),
         supabase
           .from('document_types')
@@ -87,7 +89,7 @@ export default function RulesPage() {
 
       if (error) throw error;
       setRules((prev) =>
-        prev.map((r) => (r.id === rule.id ? { ...r, is_active: !r.is_active } : r))
+        prev.map((r) => (r.id === rule.id ? { ...r, is_active: !r.is_active } : r)),
       );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error desconocido';
@@ -106,7 +108,8 @@ export default function RulesPage() {
               Reglas Documentales
             </h1>
             <p className="text-sm text-slate-500 mt-1">
-              Configuración de aplicabilidad y exigibilidad de documentos según el motor de reglas (DSL).
+              Configuración de aplicabilidad y exigibilidad de documentos según el motor de reglas
+              (DSL).
             </p>
           </div>
 

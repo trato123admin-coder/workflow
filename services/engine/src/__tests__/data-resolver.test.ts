@@ -106,9 +106,7 @@ describe('resolveTemplateData', () => {
   });
 
   it('handles empty input data gracefully', () => {
-    const fields = [
-      makeField('name', 'client.name', true),
-    ];
+    const fields = [makeField('name', 'client.name', true)];
 
     const result = resolveTemplateData({ templateFields: fields, inputData: {} });
 
@@ -117,15 +115,12 @@ describe('resolveTemplateData', () => {
   });
 
   it('preserves numeric and boolean values', () => {
-    const fields = [
-      makeField('amount', 'case.amount'),
-      makeField('is_urgent', 'case.is_urgent'),
-    ];
-    const input = { case: { amount: 3500.50, is_urgent: true } };
+    const fields = [makeField('amount', 'case.amount'), makeField('is_urgent', 'case.is_urgent')];
+    const input = { case: { amount: 3500.5, is_urgent: true } };
 
     const result = resolveTemplateData({ templateFields: fields, inputData: input });
 
-    expect(result.data.amount).toBe(3500.50);
+    expect(result.data.amount).toBe(3500.5);
     expect(result.data.is_urgent).toBe(true);
   });
 

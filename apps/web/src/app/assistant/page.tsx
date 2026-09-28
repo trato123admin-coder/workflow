@@ -116,12 +116,12 @@ function AssistantContent() {
       // Decision rationale: The user was shown these candidates and chose a different one.
       // Recording them as not accepted reflects realistic conversion rates for Laplace smoothing.
       const otherCandidates = candidates.filter(
-        (c) => c.documentTypeId !== selectedCandidate.documentTypeId && c.recommendationId
+        (c) => c.documentTypeId !== selectedCandidate.documentTypeId && c.recommendationId,
       );
       await Promise.all(
         otherCandidates.map((c) =>
-          updateRecommendationDecision(supabase, c.recommendationId!, false)
-        )
+          updateRecommendationDecision(supabase, c.recommendationId!, false),
+        ),
       );
     } finally {
       setIsProcessingDecision(false);
@@ -135,7 +135,7 @@ function AssistantContent() {
   };
 
   const alternatives = candidates.filter(
-    (c) => c.documentTypeId !== selectedCandidate?.documentTypeId
+    (c) => c.documentTypeId !== selectedCandidate?.documentTypeId,
   );
 
   return (
@@ -148,7 +148,8 @@ function AssistantContent() {
             <h1 className="text-xl font-bold text-foreground">Asistente de Documentos</h1>
           </div>
           <p className="text-xs text-muted-foreground">
-            Sugerencia y preparación de documentos basada en reglas deterministas y métricas históricas.
+            Sugerencia y preparación de documentos basada en reglas deterministas y métricas
+            históricas.
           </p>
         </div>
 
@@ -275,9 +276,7 @@ export default function AssistantPage() {
   return (
     <Suspense
       fallback={
-        <div className="p-12 text-center text-sm text-muted-foreground">
-          Cargando asistente...
-        </div>
+        <div className="p-12 text-center text-sm text-muted-foreground">Cargando asistente...</div>
       }
     >
       <AssistantContent />

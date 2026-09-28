@@ -1,6 +1,6 @@
 export interface ScoringWeights {
   priorityWeight?: number; // w1
-  historyWeight?: number;  // w2
+  historyWeight?: number; // w2
   completenessWeight?: number; // w3
 }
 
@@ -8,7 +8,7 @@ export function calculateRecommendationScore(
   priority: number,
   history: { accepted: number; shown: number },
   completeness: number,
-  weights: ScoringWeights = {}
+  weights: ScoringWeights = {},
 ): number {
   const w1 = weights.priorityWeight ?? 0.4;
   const w2 = weights.historyWeight ?? 0.4;
@@ -24,5 +24,5 @@ export function calculateRecommendationScore(
   // Completeness should be between 0 and 1
   const completenessScore = Math.max(0, Math.min(1, completeness));
 
-  return (w1 * priorityScore) + (w2 * historyScore) + (w3 * completenessScore);
+  return w1 * priorityScore + w2 * historyScore + w3 * completenessScore;
 }

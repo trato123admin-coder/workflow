@@ -20,17 +20,20 @@ Registro de migraciones ejecutadas, entorno de aplicación y resultado de su res
 | `20260926010000_case_documents_audit_trigger.sql` | 2026-09-26 | Staging (Cloud) | Verificado OK (Verify #11) | Aplicada manualmente por el operador en Staging. Conexión del trigger de auditoría `trg_audit_case_documents` a `public.case_documents` (AFTER INSERT OR UPDATE) para registrar cambios de estado (VALIDATED/OBSERVED) y notas en `audit_logs` con `user_id`, `old_data` y `new_data`. |
 | `20260926020000_external_filings_and_templates_schema.sql` | 2026-09-26 | Staging (Cloud) | Verificado OK (Verify #12) | Aplicada manualmente por el operador en Staging. Tablas `external_entities`, `case_filings`, `document_fields`, `templates`, `template_fields` con RLS habilitada. Extensión `btree_gist` y restricción `EXCLUDE` sobre vigencias no solapadas en `templates`. Bucket privado `templates` blindado a `service_role`. Trigger `trg_audit_case_filings` conectado a `audit_logs`. Función `add_business_days` con tolerancia a tabla `holidays` vacía. Parámetro `filings.publication_wait_business_days` en `setting_definitions` y `system_settings`. |
 | `20260927000000_document_rules_and_recommendations_schema.sql` | 2026-09-26 | Staging (Cloud) | Verificado OK (Verify #13) | Aplicada manualmente por el operador en Staging. Tablas `document_rules` y `ai_recommendations` con RLS habilitada y optimizada con `(select ...)`. Triggers `trg_audit_document_rules` y `trg_audit_ai_recommendations` conectados a `private.tg_audit_log`. Permiso `ai.use` asignado a rol `LAWYER`. Restricción `CHECK` `ck_ai_recommendations_model_provider` forzando `RULES_ONLY`. Carga de las 7 reglas semilla de `00-maestro` §4.4 asociadas a versión 1 de `SUCESION_INTESTADA_NOTARIAL`. |
+| `20260927100000_generation_jobs_schema.sql` | 2026-09-27 | Staging (Cloud) | Verificado OK | Tablas `generation_jobs` y `generated_documents`, enum `gen_status`, trigger `tg_audit_log`, RLS estricta. |
+| `20260928000000_generation_jobs_security_hardening.sql` | 2026-09-28 | Staging (Cloud) | Verificado OK | Hardening de RLS para generation jobs y ruta de aprobación. |
+| `20260928110000_cash_management_schema.sql` | 2026-09-28 | Staging (Cloud) | Verificado OK (Verify #15) | Aplicada por el operador en Staging. Tablas `cash_accounts`, `cash_periods`, `cash_requests`, `cash_movements`, `cash_reconciliations`, vista `cash_account_balances`, bucket `cash-support`, triggers inmutabilidad y control dual, permisos `cash.*` y flag `module.cash`. |
 
 ---
 
-## Resumen de Estado de Migraciones (Sprint 7a)
+## Resumen de Estado de Migraciones (Sprint 11)
 
-- **Total de migraciones en repositorio (`supabase/migrations/`):** 14
-- **Total de migraciones aplicadas en Staging:** 14
-- **Total de migraciones verificadas con `verify.sql`:** 14
+- **Total de migraciones en repositorio (`supabase/migrations/`):** 17
+- **Total de migraciones aplicadas en Staging:** 17
+- **Total de migraciones verificadas con `verify.sql`:** 17
 - **Migraciones pendientes por aplicar:** 0 (Ninguna)
-- **Fecha de última verificación:** 2026-09-26
-- **Próximas migraciones:** Sprint 7b (generation_jobs, generated_documents).
+- **Fecha de última verificación:** 2026-09-28
+- **Próximas migraciones:** N/A (Sprint 11 completado y verificado en Staging).
 
 ### Procedimiento de comprobación en SQL Editor de Supabase (Catálogo de Objetos):
 ```sql
@@ -79,7 +82,11 @@ with migration_check as (
   select '20260927000000_document_rules_and_recommendations_schema',
          exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'document_rules')
          and exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'ai_recommendations')
-         and exists(select 1 from public.document_rules where code like 'RULE_SEED_%')
+  union all
+  select '20260928110000_cash_management_schema',
+         exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'cash_accounts')
+         and exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'cash_movements')
+         and exists(select 1 from information_schema.views where table_schema = 'public' and table_name = 'cash_account_balances')
 )
 select 
   migration,
@@ -87,8 +94,8 @@ select
 from migration_check
 order by migration asc;
 
--- 2. Confirmación funcional de la última migración (Sprint 7a)
+-- 2. Confirmación funcional de la migración de Caja Chica (Sprint 11)
 -- Ejecutar el contenido de:
--- supabase/verify/20260927000000_document_rules_and_recommendations_schema.verify.sql
--- Debe retornar: 'VERIFICACIÓN EXITOSA: Tablas document_rules y ai_recommendations con RLS estricta (select ...), triggers tg_audit_log, FK profiles, CHECK RULES_ONLY, permiso ai.use en LAWYER y 7 reglas semilla activas.'
+-- supabase/verify/20260928110000_cash_management_schema.verify.sql
+-- Debe retornar: 'VERIFICACIÓN EXITOSA: Tablas de caja chica con RLS, libro inmutable, control dual de arqueo, bucket cash-support y feature flag module.cash activos.'
 ```

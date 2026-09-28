@@ -64,7 +64,8 @@ export function useAssistantEvaluation(supabase: SupabaseClient) {
         // 3. Fetch active rules for model + global
         let query = supabase
           .from('document_rules')
-          .select(`
+          .select(
+            `
             id,
             code,
             name,
@@ -73,12 +74,13 @@ export function useAssistantEvaluation(supabase: SupabaseClient) {
             rule_definition,
             target_document_type_id,
             target_document_type:document_types (id, code, name)
-          `)
+          `,
+          )
           .eq('is_active', true);
 
         if (modelVersionId) {
           query = query.or(
-            `case_model_version_id.eq.${modelVersionId},case_model_version_id.is.null`
+            `case_model_version_id.eq.${modelVersionId},case_model_version_id.is.null`,
           );
         } else {
           query = query.is('case_model_version_id', null);
@@ -112,14 +114,12 @@ export function useAssistantEvaluation(supabase: SupabaseClient) {
 
         for (const decision of approvedDecisions) {
           const matchingRuleRows = typedRules.filter((r) =>
-            decision.matchingRuleCodes.includes(r.code)
+            decision.matchingRuleCodes.includes(r.code),
           );
 
           const firstRule = matchingRuleRows[0];
-          const docTypeId =
-            decision.documentTypeId || firstRule?.target_document_type_id || '';
-          const docTypeName =
-            firstRule?.target_document_type?.name || decision.documentTypeCode;
+          const docTypeId = decision.documentTypeId || firstRule?.target_document_type_id || '';
+          const docTypeName = firstRule?.target_document_type?.name || decision.documentTypeCode;
           const priority = decision.priority;
 
           // Fetch active template
@@ -210,7 +210,7 @@ export function useAssistantEvaluation(supabase: SupabaseClient) {
         setIsEvaluating(false);
       }
     },
-    [supabase]
+    [supabase],
   );
 
   return {

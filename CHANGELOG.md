@@ -6,6 +6,37 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Sprint 11 — Caja chica: Libro inmutable, solicitudes, arqueo y cierre
+
+#### Agregado
+
+- **Base de Datos & Seguridad (Supabase):**
+  - Migración `20260928110000_cash_management_schema.sql`:
+    - Tablas de caja chica: `cash_accounts` (cuentas y fondos fijos con responsable y moneda), `cash_periods` (períodos contables con control `OPEN`/`CLOSED`), `cash_requests` (solicitudes de fondos con flujo `PENDING`/`APPROVED`/`REJECTED`/`DISBURSED`), `cash_movements` (libro diario inmutable de ingresos, egresos, ajustes y reversos) y `cash_reconciliations` (arqueos y cierres con balance contado vs balance sistema).
+    - Vista `cash_account_balances` para cálculo dinámico del saldo actual sumando `IN` y restando `OUT`.
+    - Bucket privado `cash-support` para comprobantes de sustento digitalizados.
+    - Trigger `trg_cash_movements_immutable`: bloquea `UPDATE` y `DELETE` en `cash_movements`, garantizando inmutabilidad estricta incluso ante `service_role`.
+    - Trigger `trg_cash_movements_check_period`: impide asentar movimientos en períodos con estado `CLOSED`.
+    - Trigger `trg_cash_movements_validate_reversal`: asegura que todo asiento de reverso sea de sentido opuesto al original y mantenga integridad referencial.
+    - Trigger `trg_cash_reconciliation_dual_control`: exige control dual en arqueos (`opened_by <> approved_by`).
+    - Función de integridad `private.verify_cash_integrity()`.
+    - Políticas RLS que verifican permisos (`cash.read`, `cash.write`, `cash.request`, `cash.approve`, `cash.close`), aislamiento de cuentas por cajero, soporte de MFA (`aal2`) para autorizaciones y activación por `module.cash`.
+  - Prueba de base de datos pgTAP `11_cash_management.test.sql` con 24 aserciones exhaustivas.
+- **Paquete Compartido (`@workflow/shared`):**
+  - Módulo `packages/shared/src/cash.ts`: esquemas Zod (`cashAccountSchema`, `cashPeriodSchema`, `cashMovementSchema`, `cashRequestSchema`, `cashReconciliationSchema`), funciones puras de cálculo de saldo (`calculateBalance`), validación de reversos (`validateReversal`), cálculo de gastos por caso (`calculateCaseExpenses`) y reglas de negocio para umbrales (`isSupportRequired` > S/ 50.00, `isApprovalRequired` > S/ 300.00).
+  - 12 pruebas unitarias en `packages/shared/src/__tests__/cash.test.ts` con validación de invariancia y propiedades de doble entrada.
+- **Aplicación Web (`apps/web`):**
+  - Módulo integral `/cash`:
+    - `CashKpiCards`: saldo total consolidado, egresos del mes, solicitudes pendientes y estado de MFA.
+    - `CashCharts`: distribución de gastos por rubro (SVG donut chart) y comparativo mensual ingresos vs egresos (SVG bar chart).
+    - `CashMovementsTable`: libro diario con filtros de cuenta, fecha, búsqueda, paginación, descarga de comprobantes y acción de reverso.
+    - `CashRequestsTable`: bandeja de solicitudes de fondos con autorización y desembolso inmediato.
+    - `CashReconciliationsTable`: registro y aprobación de arqueos con control dual y visualización de discrepancias.
+    - Modales de operación: `MovementModal`, `ReversalModal`, `RequestModal`, `ReconciliationModal`.
+    - Hook desacoplado `useCashData` para estado reactivo y llamadas Supabase con tipado estricto.
+  - Pestaña "Gastos de caja" en detalle de caso (`/cases/[id]` - M9) mediante `CaseExpensesTab`: resumen de egresos vinculados al expediente sucesorio, detalle de movimientos y solicitud directa de fondos.
+  - 5 pruebas unitarias de UI en `apps/web/src/__tests__/cash-ui.test.ts`.
+
 ### Sprint 7b — Motor de generación de documentos DOCX/PDF
 
 #### Agregado
@@ -68,9 +99,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
     - `RulesSimulator.tsx` (M7): Simulador interactivo con selector de expedientes protegidos, soporte de reglas globales y específicas del modelo, banner de advertencias de conflicto y visor de trazas.
   - Asistente de Documentos (`/assistant`, S7-07 base):
     - Flujo guiado de 5 pasos (`Stepper`): Expediente → Recomendación → Datos → Vista Previa → Confirmación.
-    - `RecommendationCard.tsx`: Sugerencia principal con badge obligatorio *"Sugerencia para revisión legal"*, desglose de puntuación (prioridad, tasa histórica, completitud), razones, alerta de campos faltantes y selección de alternativas.
+    - `RecommendationCard.tsx`: Sugerencia principal con badge obligatorio _"Sugerencia para revisión legal"_, desglose de puntuación (prioridad, tasa histórica, completitud), razones, alerta de campos faltantes y selección de alternativas.
     - `MissingFieldsForm.tsx`: Identificación de datos prellenados del expediente y formulario para campos faltantes.
-    - `DocumentPreviewStep.tsx`: Vista previa con marca de agua *"BORRADOR - Sujeto a revisión legal"* y variables consolidadas.
+    - `DocumentPreviewStep.tsx`: Vista previa con marca de agua _"BORRADOR - Sujeto a revisión legal"_ y variables consolidadas.
     - `GenerateStep.tsx`: Confirmación legal y aprobación de la sugerencia.
     - Módulo `recommendations-stats.ts`: Tasa histórica en 1 sola consulta con suavizado de Laplace y deduplicación idempotente de impresiones (`was_accepted IS NULL`) ante recargas.
 

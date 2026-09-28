@@ -11,8 +11,12 @@ import { CaseEstateTab } from '../../../components/cases/CaseEstateTab';
 import { CaseActivityTab } from '../../../components/cases/CaseActivityTab';
 import { CaseDocumentsTab } from '../../../components/cases/CaseDocumentsTab';
 import { CaseFilingsTab } from '../../../components/cases/filings/CaseFilingsTab';
+import { CaseExpensesTab } from '../../../components/cash/CaseExpensesTab';
+import { RequestModal } from '../../../components/cash/RequestModal';
 import { CaseHeader } from '../../../components/cases/CaseHeader';
+import { createClient } from '../../../lib/supabase/client';
 import { useCaseDetail } from './useCaseDetail';
+import type { CashMovement } from '@workflow/shared';
 import {
   Lock,
   Clock,
@@ -26,9 +30,11 @@ import {
   MessageSquare,
   FileText,
   ExternalLink,
+  Coins,
 } from 'lucide-react';
 
-type DetailTab = 'processes' | 'parties' | 'estate' | 'documents' | 'filings' | 'activity';
+type DetailTab =
+  'processes' | 'parties' | 'estate' | 'documents' | 'filings' | 'activity' | 'expenses';
 type ProcessView = 'table' | 'kanban';
 
 export default function CaseDetailPage() {
@@ -37,6 +43,9 @@ export default function CaseDetailPage() {
 
   const [activeTab, setActiveTab] = useState<DetailTab>('processes');
   const [processView, setProcessView] = useState<ProcessView>('kanban');
+  const [caseMovements, setCaseMovements] = useState<CashMovement[]>([]);
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const [categories, setCategories] = useState<Array<{ code: string; label: string }>>([]);
 
   const {
     caseData,
@@ -49,6 +58,51 @@ export default function CaseDetailPage() {
     handleAdvanceProcess,
     handleCloseCase,
   } = useCaseDetail(caseId);
+
+  React.useEffect(() => {
+    if (!caseId) return;
+    const supabase = createClient();
+    supabase
+      .from('cash_movements')
+      .select('*')
+      .eq('case_id', caseId)
+      .order('movement_date', { ascending: false })
+      .then(({ data }) => {
+        if (data) setCaseMovements(data as CashMovement[]);
+      });
+
+    supabase
+      .from('catalog_items')
+      .select('code, label')
+      .eq('catalog_code', 'cash_categories')
+      .eq('is_active', true)
+      .then(({ data }) => {
+        if (data) setCategories(data);
+      });
+  }, [caseId, activeTab]);
+
+  const handleSaveRequestFromCase = async (req: {
+    amount: number;
+    currency: string;
+    category_code: string;
+    reason: string;
+    case_id?: string;
+  }) => {
+    const supabase = createClient();
+    const { data: authData } = await supabase.auth.getUser();
+    const correlative = `SOL-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    await supabase.from('cash_requests').insert({
+      request_number: correlative,
+      amount: req.amount,
+      currency: req.currency,
+      category_code: req.category_code,
+      reason: req.reason,
+      case_id: caseId,
+      requested_by: authData?.user?.id,
+      status: 'PENDING',
+    });
+  };
 
   if (unauthorized) {
     return (
@@ -119,78 +173,29 @@ export default function CaseDetailPage() {
         {/* Barra de Pestañas de Detalle de Caso */}
         <div className="flex items-center justify-between border-b border-border pb-px">
           <div className="flex gap-6 text-xs font-semibold">
-            <button
-              type="button"
-              onClick={() => setActiveTab('processes')}
-              className={`pb-3 flex items-center gap-1.5 border-b-2 transition-all ${
-                activeTab === 'processes'
-                  ? 'border-primary text-primary font-bold'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Clock className="w-4 h-4" />
-              <span>Procesos ({processes.length})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('parties')}
-              className={`pb-3 flex items-center gap-1.5 border-b-2 transition-all ${
-                activeTab === 'parties'
-                  ? 'border-primary text-primary font-bold'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Users className="w-4 h-4" />
-              <span>Personas</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('estate')}
-              className={`pb-3 flex items-center gap-1.5 border-b-2 transition-all ${
-                activeTab === 'estate'
-                  ? 'border-primary text-primary font-bold'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Building className="w-4 h-4" />
-              <span>Patrimonio</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('documents')}
-              className={`pb-3 flex items-center gap-1.5 border-b-2 transition-all ${
-                activeTab === 'documents'
-                  ? 'border-primary text-primary font-bold'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <FileText className="w-4 h-4" />
-              <span>Documentos</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('filings')}
-              className={`pb-3 flex items-center gap-1.5 border-b-2 transition-all ${
-                activeTab === 'filings'
-                  ? 'border-primary text-primary font-bold'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <ExternalLink className="w-4 h-4" />
-              <span>Trámites externos</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('activity')}
-              className={`pb-3 flex items-center gap-1.5 border-b-2 transition-all ${
-                activeTab === 'activity'
-                  ? 'border-primary text-primary font-bold'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <MessageSquare className="w-4 h-4" />
-              <span>Actividad</span>
-            </button>
+            {[
+              { id: 'processes' as const, l: `Procesos (${processes.length})`, i: Clock },
+              { id: 'parties' as const, l: 'Personas', i: Users },
+              { id: 'estate' as const, l: 'Patrimonio', i: Building },
+              { id: 'documents' as const, l: 'Documentos', i: FileText },
+              { id: 'filings' as const, l: 'Trámites externos', i: ExternalLink },
+              { id: 'activity' as const, l: 'Actividad', i: MessageSquare },
+              { id: 'expenses' as const, l: 'Gastos de caja', i: Coins },
+            ].map(({ id, l, i: Icon }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setActiveTab(id)}
+                className={`pb-3 flex items-center gap-1.5 border-b-2 transition-all ${
+                  activeTab === id
+                    ? 'border-primary text-primary font-bold'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                <span>{l}</span>
+              </button>
+            ))}
           </div>
 
           {activeTab === 'processes' && (
@@ -257,6 +262,28 @@ export default function CaseDetailPage() {
         {activeTab === 'filings' && <CaseFilingsTab caseId={caseId} />}
 
         {activeTab === 'activity' && <CaseActivityTab caseId={caseId} />}
+
+        {activeTab === 'expenses' && (
+          <CaseExpensesTab
+            caseId={caseId}
+            caseNumber={caseData?.case_number || ''}
+            movements={caseMovements}
+            onOpenRequest={() => setIsRequestModalOpen(true)}
+          />
+        )}
+
+        <RequestModal
+          isOpen={isRequestModalOpen}
+          onClose={() => setIsRequestModalOpen(false)}
+          categories={categories}
+          cases={
+            caseData
+              ? [{ id: caseData.id, case_number: caseData.case_number, title: caseData.title }]
+              : []
+          }
+          initialCaseId={caseId}
+          onSave={handleSaveRequestFromCase}
+        />
       </div>
     </AppShell>
   );

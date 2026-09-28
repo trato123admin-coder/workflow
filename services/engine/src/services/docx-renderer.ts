@@ -16,7 +16,7 @@ export interface RenderDocxParams {
   templateBuffer: Buffer;
   /** Flat map of placeholder → value */
   data: Record<string, unknown>;
-  /** Delimiter pair, default ['{', '}'] */
+  /** Delimiter pair, default ['{{', '}}'] */
   cmdDelimiter?: [string, string];
 }
 
@@ -35,9 +35,9 @@ export interface RenderDocxResult {
  * Renders a DOCX template by substituting placeholders with data.
  *
  * Uses `docx-templates` which handles:
- * - Simple field substitution: {field_name}
- * - Loops: {#items}...{/items}
- * - Conditionals: {#if condition}...{/if}
+ * - Simple field substitution: {{field_name}}
+ * - Loops: {{#items}}...{{/items}}
+ * - Conditionals: {{#if condition}}...{{/if}}
  *
  * @throws Error if the template cannot be parsed or rendered.
  */
@@ -47,7 +47,7 @@ export async function renderDocx(params: RenderDocxParams): Promise<RenderDocxRe
   const result = await createReport({
     template: templateBuffer,
     data,
-    cmdDelimiter: cmdDelimiter ?? ['{', '}'],
+    cmdDelimiter: cmdDelimiter ?? ['{{', '}}'],
     failFast: true,
     rejectNullish: false,
   });
@@ -64,13 +64,11 @@ export async function renderDocx(params: RenderDocxParams): Promise<RenderDocxRe
  * Extracts placeholder names from a DOCX template buffer.
  * Useful for validation and lint checks.
  *
- * Note: This is a simplified extraction that looks for {placeholder}
- * patterns in the XML content. For full lint, use the engine's
- * template lint endpoint.
+ * Checks for {{placeholder}} patterns matching Sprint 6 lintDocxXml.
  */
 export async function extractPlaceholders(
   templateBuffer: Buffer,
-  cmdDelimiter: [string, string] = ['{', '}'],
+  cmdDelimiter: [string, string] = ['{{', '}}'],
 ): Promise<string[]> {
   const [open, close] = cmdDelimiter;
   const escapedOpen = open.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

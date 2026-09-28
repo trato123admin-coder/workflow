@@ -27,12 +27,7 @@ export interface AddWatermarkParams {
  * @returns Modified PDF as Buffer with the watermark applied.
  */
 export async function addWatermark(params: AddWatermarkParams): Promise<Buffer> {
-  const {
-    pdfBuffer,
-    text = 'BORRADOR',
-    fontSize = 60,
-    opacity = 0.3,
-  } = params;
+  const { pdfBuffer, text = 'BORRADOR', fontSize = 60, opacity = 0.3 } = params;
 
   const pdfDoc = await PDFDocument.load(pdfBuffer);
   const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);

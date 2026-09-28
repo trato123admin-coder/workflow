@@ -97,7 +97,8 @@ export const RulesSimulator: React.FC<RulesSimulatorProps> = ({ supabase }) => {
       // 2. Fetch active rules for this case model version + global rules (where case_model_version_id is null)
       let query = supabase
         .from('document_rules')
-        .select(`
+        .select(
+          `
           id,
           code,
           name,
@@ -107,12 +108,13 @@ export const RulesSimulator: React.FC<RulesSimulatorProps> = ({ supabase }) => {
           rule_definition,
           target_document_type_id,
           target_document_type:document_types (id, code, name)
-        `)
+        `,
+        )
         .eq('is_active', true);
 
       if (modelVersionId) {
         query = query.or(
-          `case_model_version_id.eq.${modelVersionId},case_model_version_id.is.null`
+          `case_model_version_id.eq.${modelVersionId},case_model_version_id.is.null`,
         );
       } else {
         query = query.is('case_model_version_id', null);
@@ -168,8 +170,8 @@ export const RulesSimulator: React.FC<RulesSimulatorProps> = ({ supabase }) => {
               Simulador de Reglas Documentales (M7)
             </h2>
             <p className="text-xs text-slate-500 mt-1">
-              Evalúa las reglas activas contra los hechos reales de un expediente para verificar
-              qué documentos se exigen, recomiendan o descartan.
+              Evalúa las reglas activas contra los hechos reales de un expediente para verificar qué
+              documentos se exigen, recomiendan o descartan.
             </p>
           </div>
 
@@ -229,10 +231,18 @@ export const RulesSimulator: React.FC<RulesSimulatorProps> = ({ supabase }) => {
               </h3>
               <div className="mt-2 space-y-2 text-xs text-amber-800 dark:text-amber-300">
                 {simulationResult.warnings.map((w: RuleConflictWarning, idx: number) => (
-                  <div key={idx} className="bg-white/60 dark:bg-slate-900/60 p-2.5 rounded border border-amber-200 dark:border-amber-800">
+                  <div
+                    key={idx}
+                    className="bg-white/60 dark:bg-slate-900/60 p-2.5 rounded border border-amber-200 dark:border-amber-800"
+                  >
                     <p className="font-semibold">{w.message}</p>
                     <p className="mt-1 text-slate-600 dark:text-slate-400">
-                      <strong>Acción del sistema:</strong> El documento <code className="font-mono text-slate-800 dark:text-slate-200 bg-amber-100 dark:bg-amber-900/40 px-1 py-0.5 rounded">{w.documentTypeCode}</code> se marcó como <strong>OBLIGATORIO (REQUIRE)</strong> y la regla EXCLUDE fue ignorada conforme a la regla de precedencia legal incondicional.
+                      <strong>Acción del sistema:</strong> El documento{' '}
+                      <code className="font-mono text-slate-800 dark:text-slate-200 bg-amber-100 dark:bg-amber-900/40 px-1 py-0.5 rounded">
+                        {w.documentTypeCode}
+                      </code>{' '}
+                      se marcó como <strong>OBLIGATORIO (REQUIRE)</strong> y la regla EXCLUDE fue
+                      ignorada conforme a la regla de precedencia legal incondicional.
                     </p>
                   </div>
                 ))}
@@ -259,7 +269,9 @@ export const RulesSimulator: React.FC<RulesSimulatorProps> = ({ supabase }) => {
 
             <div className="mt-3 space-y-2.5 flex-1">
               {simulationResult.required.length === 0 ? (
-                <p className="text-xs text-slate-400 italic py-2">Ningún documento marcado como obligatorio.</p>
+                <p className="text-xs text-slate-400 italic py-2">
+                  Ningún documento marcado como obligatorio.
+                </p>
               ) : (
                 simulationResult.required.map((doc: RuleEngineDocumentDecision) => (
                   <div

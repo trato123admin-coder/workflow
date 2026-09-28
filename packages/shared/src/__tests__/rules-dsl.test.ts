@@ -48,11 +48,17 @@ describe('Rules DSL Evaluator', () => {
     expect(result.matched).toBe(true);
   });
   it('4. in operator matches if in array', () => {
-    const result = evaluateCondition({ fact: 'client.country', op: 'in', value: ['PE', 'CL', 'CO'] }, context);
+    const result = evaluateCondition(
+      { fact: 'client.country', op: 'in', value: ['PE', 'CL', 'CO'] },
+      context,
+    );
     expect(result.matched).toBe(true);
   });
   it('5. not_in operator matches if not in array', () => {
-    const result = evaluateCondition({ fact: 'client.country', op: 'not_in', value: ['US', 'EU'] }, context);
+    const result = evaluateCondition(
+      { fact: 'client.country', op: 'not_in', value: ['US', 'EU'] },
+      context,
+    );
     expect(result.matched).toBe(true);
   });
   it('6. gt operator matches strictly greater', () => {
@@ -72,11 +78,17 @@ describe('Rules DSL Evaluator', () => {
     expect(result.matched).toBe(true);
   });
   it('10. between operator matches inclusive range', () => {
-    const result = evaluateCondition({ fact: 'case.age_days', op: 'between', value: [10, 20] }, context);
+    const result = evaluateCondition(
+      { fact: 'case.age_days', op: 'between', value: [10, 20] },
+      context,
+    );
     expect(result.matched).toBe(true);
   });
   it('11. contains operator matches array elements', () => {
-    const result = evaluateCondition({ fact: 'assets.types', op: 'contains', value: 'VEHICULO' }, context);
+    const result = evaluateCondition(
+      { fact: 'assets.types', op: 'contains', value: 'VEHICULO' },
+      context,
+    );
     expect(result.matched).toBe(true);
   });
   it('12. exists operator matches non-null', () => {
@@ -84,89 +96,133 @@ describe('Rules DSL Evaluator', () => {
     expect(result.matched).toBe(true);
   });
   it('13. missing operator matches null or undefined', () => {
-    const result = evaluateCondition({ fact: 'case.assigned_lawyer_id', op: 'missing', value: true }, context);
+    const result = evaluateCondition(
+      { fact: 'case.assigned_lawyer_id', op: 'missing', value: true },
+      context,
+    );
     expect(result.matched).toBe(true);
   });
   it('14. starts_with matches string prefix', () => {
-    const result = evaluateCondition({ fact: 'client.client_type', op: 'starts_with', value: 'PERSONA' }, context);
+    const result = evaluateCondition(
+      { fact: 'client.client_type', op: 'starts_with', value: 'PERSONA' },
+      context,
+    );
     expect(result.matched).toBe(true);
   });
 
   // 15-20: Combinators
   it('15. all combinator matches if all conditions match', () => {
-    const result = evaluateCondition({
-      all: [
-        { fact: 'case.has_dispute', op: 'eq', value: true },
-        { fact: 'parties.heirs_count', op: 'gt', value: 2 }
-      ]
-    }, context);
+    const result = evaluateCondition(
+      {
+        all: [
+          { fact: 'case.has_dispute', op: 'eq', value: true },
+          { fact: 'parties.heirs_count', op: 'gt', value: 2 },
+        ],
+      },
+      context,
+    );
     expect(result.matched).toBe(true);
   });
   it('16. all combinator fails if one condition fails', () => {
-    const result = evaluateCondition({
-      all: [
-        { fact: 'case.has_dispute', op: 'eq', value: true },
-        { fact: 'parties.heirs_count', op: 'lt', value: 2 }
-      ]
-    }, context);
+    const result = evaluateCondition(
+      {
+        all: [
+          { fact: 'case.has_dispute', op: 'eq', value: true },
+          { fact: 'parties.heirs_count', op: 'lt', value: 2 },
+        ],
+      },
+      context,
+    );
     expect(result.matched).toBe(false);
   });
   it('17. any combinator matches if at least one matches', () => {
-    const result = evaluateCondition({
-      any: [
-        { fact: 'parties.heirs_count', op: 'lt', value: 2 },
-        { fact: 'client.country', op: 'eq', value: 'PE' }
-      ]
-    }, context);
+    const result = evaluateCondition(
+      {
+        any: [
+          { fact: 'parties.heirs_count', op: 'lt', value: 2 },
+          { fact: 'client.country', op: 'eq', value: 'PE' },
+        ],
+      },
+      context,
+    );
     expect(result.matched).toBe(true);
   });
   it('18. any combinator fails if none match', () => {
-    const result = evaluateCondition({
-      any: [
-        { fact: 'parties.heirs_count', op: 'lt', value: 2 },
-        { fact: 'client.country', op: 'eq', value: 'US' }
-      ]
-    }, context);
+    const result = evaluateCondition(
+      {
+        any: [
+          { fact: 'parties.heirs_count', op: 'lt', value: 2 },
+          { fact: 'client.country', op: 'eq', value: 'US' },
+        ],
+      },
+      context,
+    );
     expect(result.matched).toBe(false);
   });
   it('19. not combinator negates match', () => {
-    const result = evaluateCondition({
-      not: { fact: 'parties.has_minor_heir', op: 'eq', value: true }
-    }, context);
+    const result = evaluateCondition(
+      {
+        not: { fact: 'parties.has_minor_heir', op: 'eq', value: true },
+      },
+      context,
+    );
     expect(result.matched).toBe(true);
   });
   it('20. complex nested combinators', () => {
-    const result = evaluateCondition({
-      all: [
-        { any: [{ fact: 'case.route', op: 'eq', value: 'NOTARIAL' }, { fact: 'case.route', op: 'eq', value: 'JUDICIAL' }] },
-        { not: { fact: 'parties.has_minor_heir', op: 'eq', value: true } }
-      ]
-    }, context);
+    const result = evaluateCondition(
+      {
+        all: [
+          {
+            any: [
+              { fact: 'case.route', op: 'eq', value: 'NOTARIAL' },
+              { fact: 'case.route', op: 'eq', value: 'JUDICIAL' },
+            ],
+          },
+          { not: { fact: 'parties.has_minor_heir', op: 'eq', value: true } },
+        ],
+      },
+      context,
+    );
     expect(result.matched).toBe(true);
   });
 
   // 21-25: Null / Undefined handling
   it('21. missing fact evaluated as missing', () => {
-    const result = evaluateCondition({ fact: 'case.non_existent', op: 'missing', value: true }, context);
+    const result = evaluateCondition(
+      { fact: 'case.non_existent', op: 'missing', value: true },
+      context,
+    );
     expect(result.matched).toBe(true);
   });
   it('22. eq null on missing fact', () => {
-    const result = evaluateCondition({ fact: 'case.assigned_lawyer_id', op: 'eq', value: null }, context);
+    const result = evaluateCondition(
+      { fact: 'case.assigned_lawyer_id', op: 'eq', value: null },
+      context,
+    );
     // getFactValue returns undefined for missing or null values in path chain
     // Actually our mock has it completely absent, so it returns undefined. value is null.
     // eq strict comparison means undefined !== null, but let's test how exists works.
-    expect(result.matched).toBe(false); 
+    expect(result.matched).toBe(false);
   });
   it('23. lt on missing fact returns false', () => {
-    const result = evaluateCondition({ fact: 'quote.selected_amount', op: 'lt', value: 1000 }, context);
+    const result = evaluateCondition(
+      { fact: 'quote.selected_amount', op: 'lt', value: 1000 },
+      context,
+    );
     expect(result.matched).toBe(false);
   });
   it('24. contains on missing fact returns false', () => {
-    const result = evaluateCondition({ fact: 'docs.approved_types', op: 'contains', value: 'DNI' }, context);
+    const result = evaluateCondition(
+      { fact: 'docs.approved_types', op: 'contains', value: 'DNI' },
+      context,
+    );
     expect(result.matched).toBe(false);
   });
   it('25. between on missing fact returns false', () => {
-    const result = evaluateCondition({ fact: 'assets.total_estimated_value', op: 'between', value: [0, 100] }, context);
+    const result = evaluateCondition(
+      { fact: 'assets.total_estimated_value', op: 'between', value: [0, 100] },
+      context,
+    );
     expect(result.matched).toBe(false);
   });
 
@@ -181,7 +237,7 @@ describe('Rules DSL Evaluator', () => {
       version: 1,
       conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
       effect: { type: 'RECOMMEND', priority: 1, explanation: 'Test' },
-      explanation: 'Test rule'
+      explanation: 'Test rule',
     };
     expect(() => ruleDefinitionSchema.parse(validRule)).not.toThrow();
   });
@@ -190,7 +246,7 @@ describe('Rules DSL Evaluator', () => {
       version: 1,
       conditions: { fact: 'invalid.fact', op: 'eq', value: 'HIGH' },
       effect: { type: 'RECOMMEND', priority: 1, explanation: 'Test' },
-      explanation: 'Test rule'
+      explanation: 'Test rule',
     };
     expect(() => ruleDefinitionSchema.parse(invalidRule)).toThrow();
   });
@@ -220,21 +276,29 @@ describe('Rules DSL Evaluator', () => {
   it('33. Conflict: RECOMMEND priority 1 beats EXCLUDE priority 3', () => {
     const rules: RuleRecord[] = [
       {
-        id: 'r1', code: 'REC_1', target_document_type_id: 'd1', target_document_type_code: 'DOC_A',
+        id: 'r1',
+        code: 'REC_1',
+        target_document_type_id: 'd1',
+        target_document_type_code: 'DOC_A',
         rule_definition: {
-          version: 1, conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
+          version: 1,
+          conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
           effect: { type: 'RECOMMEND', priority: 1, explanation: 'Should recommend' },
-          explanation: ''
-        }
+          explanation: '',
+        },
       },
       {
-        id: 'r2', code: 'EXC_3', target_document_type_id: 'd1', target_document_type_code: 'DOC_A',
+        id: 'r2',
+        code: 'EXC_3',
+        target_document_type_id: 'd1',
+        target_document_type_code: 'DOC_A',
         rule_definition: {
-          version: 1, conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
+          version: 1,
+          conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
           effect: { type: 'EXCLUDE', priority: 3, explanation: 'Should NOT exclude' },
-          explanation: ''
-        }
-      }
+          explanation: '',
+        },
+      },
     ];
     const result = evaluateDocumentRules(rules, context);
     expect(result.recommended).toHaveLength(1);
@@ -245,21 +309,29 @@ describe('Rules DSL Evaluator', () => {
   it('34. Conflict: EXCLUDE priority 2 beats RECOMMEND priority 2', () => {
     const rules: RuleRecord[] = [
       {
-        id: 'r1', code: 'REC_2', target_document_type_id: 'd1', target_document_type_code: 'DOC_B',
+        id: 'r1',
+        code: 'REC_2',
+        target_document_type_id: 'd1',
+        target_document_type_code: 'DOC_B',
         rule_definition: {
-          version: 1, conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
+          version: 1,
+          conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
           effect: { type: 'RECOMMEND', priority: 2, explanation: 'Try recommend' },
-          explanation: ''
-        }
+          explanation: '',
+        },
       },
       {
-        id: 'r2', code: 'EXC_2', target_document_type_id: 'd1', target_document_type_code: 'DOC_B',
+        id: 'r2',
+        code: 'EXC_2',
+        target_document_type_id: 'd1',
+        target_document_type_code: 'DOC_B',
         rule_definition: {
-          version: 1, conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
+          version: 1,
+          conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
           effect: { type: 'EXCLUDE', priority: 2, explanation: 'Exclude wins tie' },
-          explanation: ''
-        }
-      }
+          explanation: '',
+        },
+      },
     ];
     const result = evaluateDocumentRules(rules, context);
     expect(result.excluded).toHaveLength(1);
@@ -270,21 +342,29 @@ describe('Rules DSL Evaluator', () => {
   it('35. REQUIRE always wins over EXCLUDE regardless of priority (legal obligation cannot be excluded by configuration)', () => {
     const rules: RuleRecord[] = [
       {
-        id: 'r1', code: 'REQ_2', target_document_type_id: 'd1', target_document_type_code: 'DOC_C',
+        id: 'r1',
+        code: 'REQ_2',
+        target_document_type_id: 'd1',
+        target_document_type_code: 'DOC_C',
         rule_definition: {
-          version: 1, conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
+          version: 1,
+          conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
           effect: { type: 'REQUIRE', priority: 2, explanation: 'Legal obligation' },
-          explanation: ''
-        }
+          explanation: '',
+        },
       },
       {
-        id: 'r2', code: 'EXC_1', target_document_type_id: 'd1', target_document_type_code: 'DOC_C',
+        id: 'r2',
+        code: 'EXC_1',
+        target_document_type_id: 'd1',
+        target_document_type_code: 'DOC_C',
         rule_definition: {
-          version: 1, conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
+          version: 1,
+          conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
           effect: { type: 'EXCLUDE', priority: 1, explanation: 'Attempted exclusion' },
-          explanation: ''
-        }
-      }
+          explanation: '',
+        },
+      },
     ];
     const result = evaluateDocumentRules(rules, context);
     expect(result.required).toHaveLength(1);
@@ -295,28 +375,36 @@ describe('Rules DSL Evaluator', () => {
     expect(result.warnings).toBeDefined();
     expect(result.warnings).toHaveLength(1);
     expect(result.warnings![0]!.message).toContain(
-      "Conflicto de configuración: la regla EXCLUDE 'EXC_1' fue ignorada porque 'REQ_2' de tipo REQUIRE tiene precedencia legal absoluta"
+      "Conflicto de configuración: la regla EXCLUDE 'EXC_1' fue ignorada porque 'REQ_2' de tipo REQUIRE tiene precedencia legal absoluta",
     );
   });
 
   it('36. Conflict: EXCLUDE priority 1 beats RECOMMEND priority 2', () => {
     const rules: RuleRecord[] = [
       {
-        id: 'r1', code: 'REC_2', target_document_type_id: 'd1', target_document_type_code: 'DOC_D',
+        id: 'r1',
+        code: 'REC_2',
+        target_document_type_id: 'd1',
+        target_document_type_code: 'DOC_D',
         rule_definition: {
-          version: 1, conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
+          version: 1,
+          conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
           effect: { type: 'RECOMMEND', priority: 2, explanation: '' },
-          explanation: ''
-        }
+          explanation: '',
+        },
       },
       {
-        id: 'r2', code: 'EXC_1', target_document_type_id: 'd1', target_document_type_code: 'DOC_D',
+        id: 'r2',
+        code: 'EXC_1',
+        target_document_type_id: 'd1',
+        target_document_type_code: 'DOC_D',
         rule_definition: {
-          version: 1, conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
+          version: 1,
+          conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
           effect: { type: 'EXCLUDE', priority: 1, explanation: '' },
-          explanation: ''
-        }
-      }
+          explanation: '',
+        },
+      },
     ];
     const result = evaluateDocumentRules(rules, context);
     expect(result.excluded).toHaveLength(1);
@@ -326,21 +414,29 @@ describe('Rules DSL Evaluator', () => {
   it('37. REQUIRE always beats RECOMMEND', () => {
     const rules: RuleRecord[] = [
       {
-        id: 'r1', code: 'REC_1', target_document_type_id: 'd1', target_document_type_code: 'DOC_E',
+        id: 'r1',
+        code: 'REC_1',
+        target_document_type_id: 'd1',
+        target_document_type_code: 'DOC_E',
         rule_definition: {
-          version: 1, conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
+          version: 1,
+          conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
           effect: { type: 'RECOMMEND', priority: 1, explanation: '' },
-          explanation: ''
-        }
+          explanation: '',
+        },
       },
       {
-        id: 'r2', code: 'REQ_10', target_document_type_id: 'd1', target_document_type_code: 'DOC_E',
+        id: 'r2',
+        code: 'REQ_10',
+        target_document_type_id: 'd1',
+        target_document_type_code: 'DOC_E',
         rule_definition: {
-          version: 1, conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
+          version: 1,
+          conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
           effect: { type: 'REQUIRE', priority: 10, explanation: '' },
-          explanation: ''
-        }
-      }
+          explanation: '',
+        },
+      },
     ];
     const result = evaluateDocumentRules(rules, context);
     expect(result.required).toHaveLength(1);
@@ -350,13 +446,17 @@ describe('Rules DSL Evaluator', () => {
   it('38. Unmatched rules do not affect outcome', () => {
     const rules: RuleRecord[] = [
       {
-        id: 'r1', code: 'REC_1', target_document_type_id: 'd1', target_document_type_code: 'DOC_F',
+        id: 'r1',
+        code: 'REC_1',
+        target_document_type_id: 'd1',
+        target_document_type_code: 'DOC_F',
         rule_definition: {
-          version: 1, conditions: { fact: 'case.priority', op: 'eq', value: 'LOW' },
+          version: 1,
+          conditions: { fact: 'case.priority', op: 'eq', value: 'LOW' },
           effect: { type: 'RECOMMEND', priority: 1, explanation: '' },
-          explanation: ''
-        }
-      }
+          explanation: '',
+        },
+      },
     ];
     const result = evaluateDocumentRules(rules, context);
     expect(result.recommended).toHaveLength(0);
@@ -365,21 +465,29 @@ describe('Rules DSL Evaluator', () => {
   it('39. Multiple doc types evaluated independently', () => {
     const rules: RuleRecord[] = [
       {
-        id: 'r1', code: 'REC_DOC1', target_document_type_id: 'd1', target_document_type_code: 'DOC_1',
+        id: 'r1',
+        code: 'REC_DOC1',
+        target_document_type_id: 'd1',
+        target_document_type_code: 'DOC_1',
         rule_definition: {
-          version: 1, conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
+          version: 1,
+          conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
           effect: { type: 'RECOMMEND', priority: 1, explanation: '' },
-          explanation: ''
-        }
+          explanation: '',
+        },
       },
       {
-        id: 'r2', code: 'REQ_DOC2', target_document_type_id: 'd2', target_document_type_code: 'DOC_2',
+        id: 'r2',
+        code: 'REQ_DOC2',
+        target_document_type_id: 'd2',
+        target_document_type_code: 'DOC_2',
         rule_definition: {
-          version: 1, conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
+          version: 1,
+          conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
           effect: { type: 'REQUIRE', priority: 1, explanation: '' },
-          explanation: ''
-        }
-      }
+          explanation: '',
+        },
+      },
     ];
     const result = evaluateDocumentRules(rules, context);
     expect(result.recommended).toHaveLength(1);
@@ -391,13 +499,17 @@ describe('Rules DSL Evaluator', () => {
   it('40. Rule trace tracks matching correctly', () => {
     const rules: RuleRecord[] = [
       {
-        id: 'r1', code: 'REC_1', target_document_type_id: 'd1', target_document_type_code: 'DOC_G',
+        id: 'r1',
+        code: 'REC_1',
+        target_document_type_id: 'd1',
+        target_document_type_code: 'DOC_G',
         rule_definition: {
-          version: 1, conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
+          version: 1,
+          conditions: { fact: 'case.priority', op: 'eq', value: 'HIGH' },
           effect: { type: 'RECOMMEND', priority: 1, explanation: '' },
-          explanation: ''
-        }
-      }
+          explanation: '',
+        },
+      },
     ];
     const result = evaluateDocumentRules(rules, context);
     expect(result.trace).toHaveLength(1);
@@ -406,7 +518,10 @@ describe('Rules DSL Evaluator', () => {
   });
 
   it('41. exists checks boolean flag properly', () => {
-    const result = evaluateCondition({ fact: 'case.priority', op: 'exists', value: false }, context);
+    const result = evaluateCondition(
+      { fact: 'case.priority', op: 'exists', value: false },
+      context,
+    );
     expect(result.matched).toBe(false);
   });
 });

@@ -8,7 +8,12 @@
 
 import type { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
-import { createDocumentError, type DocumentError } from '../services/documents.js';
+import {
+  createDocumentError,
+  authenticateUser,
+  verifyCaseAccess,
+  type DocumentError,
+} from '../services/documents.js';
 import { getSupabaseServiceClient } from '../storage/index.js';
 
 /* ------------------------------------------------------------------ */
@@ -82,11 +87,7 @@ export const approvalRoutes: FastifyPluginAsync = async (fastify) => {
       }
 
       try {
-        const result = await approveDocument(
-          userJwt,
-          paramsResult.data.id,
-          request.log,
-        );
+        const result = await approveDocument(userJwt, paramsResult.data.id, request.log);
         return reply.status(200).send({ success: true, data: result });
       } catch (err: unknown) {
         return errorResponse(reply, err);
@@ -152,15 +153,24 @@ async function approveDocument(
 ): Promise<{ id: string; approval_status: string }> {
   const supabase = getSupabaseServiceClient();
 
-  const { data: { user }, error: authErr } = await supabase.auth.getUser(userJwt);
-  if (authErr || !user) {
-    throw createDocumentError('Token inválido o sesión expirada', 401, 'UNAUTHORIZED');
-  }
+  // 1. Autenticación y verificación estricta del permiso 'documents.approve'
+  const user = await authenticateUser(supabase, userJwt, 'documents.approve');
 
-  // Fetch the generated document + its job (for four_eyes check)
+  // 2. Obtener documento generado vinculado con su trabajo de generación para resolver el caso
   const { data: genDoc, error: gdErr } = await supabase
     .from('generated_documents')
-    .select('id, approval_status, generation_job_id')
+    .select(
+      `
+      id,
+      approval_status,
+      generation_job_id,
+      case_document_id,
+      generation_jobs!inner (
+        case_id,
+        requested_by
+      )
+    `,
+    )
     .eq('id', generatedDocumentId)
     .single();
 
@@ -168,6 +178,16 @@ async function approveDocument(
     throw createDocumentError('Documento generado no encontrado', 404, 'NOT_FOUND');
   }
 
+  const job = (
+    genDoc as unknown as {
+      generation_jobs: { case_id: string; requested_by: string };
+    }
+  ).generation_jobs;
+
+  // 3. Verificación de acceso y permisos de escritura en el expediente
+  await verifyCaseAccess(supabase, user, job.case_id, { requireWrite: true });
+
+  // 4. Validación de transición de estado
   if (!['GENERATED', 'IN_REVIEW'].includes(genDoc.approval_status as string)) {
     throw createDocumentError(
       `No se puede aprobar un documento en estado ${genDoc.approval_status}`,
@@ -176,16 +196,10 @@ async function approveDocument(
     );
   }
 
-  // Check four_eyes rule
+  // 5. Regla de doble control (four_eyes): quien generó no puede aprobar
   const fourEyes = await isFourEyesEnabled(supabase);
   if (fourEyes) {
-    const { data: job } = await supabase
-      .from('generation_jobs')
-      .select('requested_by')
-      .eq('id', genDoc.generation_job_id)
-      .single();
-
-    if (job?.requested_by === user.id) {
+    if (job.requested_by === user.userId) {
       throw createDocumentError(
         'Regla de doble control: quien generó el documento no puede aprobarlo',
         403,
@@ -194,15 +208,19 @@ async function approveDocument(
     }
   }
 
-  // Mark previous approved versions as SUPERSEDED
-  await supersedePreviousVersions(supabase, genDoc.generation_job_id as string, generatedDocumentId);
+  // 6. Marcar versiones anteriores del mismo slot como SUPERSEDED
+  await supersedePreviousVersions(
+    supabase,
+    genDoc.generation_job_id as string,
+    generatedDocumentId,
+  );
 
   const now = new Date().toISOString();
   const { data: updated, error: updateErr } = await supabase
     .from('generated_documents')
     .update({
       approval_status: 'APPROVED',
-      approved_by: user.id,
+      approved_by: user.userId,
       approved_at: now,
     })
     .eq('id', generatedDocumentId)
@@ -213,7 +231,7 @@ async function approveDocument(
     throw createDocumentError('Error al aprobar el documento', 500, 'APPROVAL_FAILED');
   }
 
-  logger.info({ docId: generatedDocumentId, approvedBy: user.id }, 'Documento aprobado');
+  logger.info({ docId: generatedDocumentId, approvedBy: user.userId }, 'Documento aprobado');
   return { id: updated.id as string, approval_status: updated.approval_status as string };
 }
 
@@ -225,21 +243,41 @@ async function rejectDocument(
 ): Promise<{ id: string; approval_status: string }> {
   const supabase = getSupabaseServiceClient();
 
-  const { data: { user }, error: authErr } = await supabase.auth.getUser(userJwt);
-  if (authErr || !user) {
-    throw createDocumentError('Token inválido o sesión expirada', 401, 'UNAUTHORIZED');
-  }
+  // 1. Autenticación y verificación estricta del permiso 'documents.approve'
+  const user = await authenticateUser(supabase, userJwt, 'documents.approve');
 
-  const { data: genDoc } = await supabase
+  // 2. Obtener documento generado vinculado con su trabajo de generación para resolver el caso
+  const { data: genDoc, error: gdErr } = await supabase
     .from('generated_documents')
-    .select('id, approval_status')
+    .select(
+      `
+      id,
+      approval_status,
+      generation_job_id,
+      case_document_id,
+      generation_jobs!inner (
+        case_id,
+        requested_by
+      )
+    `,
+    )
     .eq('id', generatedDocumentId)
     .single();
 
-  if (!genDoc) {
+  if (gdErr || !genDoc) {
     throw createDocumentError('Documento generado no encontrado', 404, 'NOT_FOUND');
   }
 
+  const job = (
+    genDoc as unknown as {
+      generation_jobs: { case_id: string; requested_by: string };
+    }
+  ).generation_jobs;
+
+  // 3. Verificación de acceso y permisos de escritura en el expediente
+  await verifyCaseAccess(supabase, user, job.case_id, { requireWrite: true });
+
+  // 4. Validación de transición de estado
   if (!['GENERATED', 'IN_REVIEW'].includes(genDoc.approval_status as string)) {
     throw createDocumentError(
       `No se puede rechazar un documento en estado ${genDoc.approval_status}`,
@@ -252,7 +290,7 @@ async function rejectDocument(
     .from('generated_documents')
     .update({
       approval_status: 'REJECTED',
-      approved_by: user.id,
+      approved_by: user.userId,
       approved_at: new Date().toISOString(),
     })
     .eq('id', generatedDocumentId)
@@ -263,14 +301,14 @@ async function rejectDocument(
     throw createDocumentError('Error al rechazar el documento', 500, 'REJECT_FAILED');
   }
 
-  // Record rejection reason in audit
+  // Registrar motivo del rechazo en el log inmutable de auditoría
   await supabase.from('audit_logs').insert({
     table_name: 'generated_documents',
     record_id: generatedDocumentId,
     action: 'REJECT',
     old_values: { approval_status: genDoc.approval_status },
     new_values: { approval_status: 'REJECTED', reason },
-    performed_by: user.id,
+    performed_by: user.userId,
   });
 
   logger.info({ docId: generatedDocumentId, reason }, 'Documento rechazado');
@@ -281,7 +319,9 @@ async function rejectDocument(
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
 
-async function isFourEyesEnabled(supabase: ReturnType<typeof getSupabaseServiceClient>): Promise<boolean> {
+async function isFourEyesEnabled(
+  supabase: ReturnType<typeof getSupabaseServiceClient>,
+): Promise<boolean> {
   const { data } = await supabase
     .from('system_settings')
     .select('value')

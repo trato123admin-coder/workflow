@@ -1,9 +1,4 @@
-import {
-  RuleCondition,
-  RuleContext,
-  ConditionEvaluationTrace,
-  SimpleCondition,
-} from './types.js';
+import { RuleCondition, RuleContext, ConditionEvaluationTrace, SimpleCondition } from './types.js';
 
 function getFactValue(context: RuleContext, path: string): unknown {
   const parts = path.split('.');
@@ -17,7 +12,7 @@ function getFactValue(context: RuleContext, path: string): unknown {
 
 function evaluateSimpleCondition(
   condition: SimpleCondition,
-  context: RuleContext
+  context: RuleContext,
 ): ConditionEvaluationTrace {
   const actualValue = getFactValue(context, condition.fact);
   let matched = false;
@@ -81,13 +76,13 @@ function evaluateSimpleCondition(
       matched = actualValue !== undefined && actualValue !== null;
       // If value is explicitly passed as boolean, evaluate against that boolean
       if (typeof condition.value === 'boolean') {
-         matched = matched === condition.value;
+        matched = matched === condition.value;
       }
       break;
     case 'missing':
       matched = actualValue === undefined || actualValue === null;
-       if (typeof condition.value === 'boolean') {
-         matched = matched === condition.value;
+      if (typeof condition.value === 'boolean') {
+        matched = matched === condition.value;
       }
       break;
     case 'starts_with':
@@ -109,7 +104,7 @@ function evaluateSimpleCondition(
 
 export function evaluateCondition(
   condition: RuleCondition,
-  context: RuleContext
+  context: RuleContext,
 ): ConditionEvaluationTrace {
   if ('all' in condition) {
     const children = condition.all.map((c) => evaluateCondition(c, context));
@@ -123,7 +118,7 @@ export function evaluateCondition(
 
   if ('any' in condition) {
     if (condition.any.length === 0) {
-       return { matched: false, combinator: 'any', children: [] };
+      return { matched: false, combinator: 'any', children: [] };
     }
     const children = condition.any.map((c) => evaluateCondition(c, context));
     const matched = children.some((c) => c.matched);

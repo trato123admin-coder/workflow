@@ -63,72 +63,62 @@ export const generationRoutes: FastifyPluginAsync = async (fastify) => {
    * POST /v1/generation-jobs — Create an async generation job (idempotent).
    * The frontend subscribes to Realtime on generation_jobs for status updates.
    */
-  fastify.post(
-    '/v1/generation-jobs',
-    async (request: FastifyRequest, reply: FastifyReply) => {
-      const bodyResult = createJobBodySchema.safeParse(request.body);
-      if (!bodyResult.success) {
-        return reply.status(400).send({
-          error: 'INVALID_BODY',
-          message: bodyResult.error.errors[0]?.message ?? 'Cuerpo inválido',
-          statusCode: 400,
-        });
-      }
+  fastify.post('/v1/generation-jobs', async (request: FastifyRequest, reply: FastifyReply) => {
+    const bodyResult = createJobBodySchema.safeParse(request.body);
+    if (!bodyResult.success) {
+      return reply.status(400).send({
+        error: 'INVALID_BODY',
+        message: bodyResult.error.errors[0]?.message ?? 'Cuerpo inválido',
+        statusCode: 400,
+      });
+    }
 
-      let userJwt: string;
-      try {
-        userJwt = extractBearerToken(request.headers.authorization);
-      } catch (err: unknown) {
-        return errorResponse(reply, err);
-      }
+    let userJwt: string;
+    try {
+      userJwt = extractBearerToken(request.headers.authorization);
+    } catch (err: unknown) {
+      return errorResponse(reply, err);
+    }
 
-      try {
-        const result = await createGenerationJob(userJwt, bodyResult.data, request.log);
-        return reply.status(201).send({ success: true, data: result });
-      } catch (err: unknown) {
-        return errorResponse(reply, err);
-      }
-    },
-  );
+    try {
+      const result = await createGenerationJob(userJwt, bodyResult.data, request.log);
+      return reply.status(201).send({ success: true, data: result });
+    } catch (err: unknown) {
+      return errorResponse(reply, err);
+    }
+  });
 
   /**
    * POST /v1/documents/preview — Generate a temporary PDF preview with
    * BORRADOR watermark. Does not create a job or permanent version.
    */
-  fastify.post(
-    '/v1/documents/preview',
-    async (request: FastifyRequest, reply: FastifyReply) => {
-      const bodyResult = previewBodySchema.safeParse(request.body);
-      if (!bodyResult.success) {
-        return reply.status(400).send({
-          error: 'INVALID_BODY',
-          message: bodyResult.error.errors[0]?.message ?? 'Cuerpo inválido',
-          statusCode: 400,
-        });
-      }
+  fastify.post('/v1/documents/preview', async (request: FastifyRequest, reply: FastifyReply) => {
+    const bodyResult = previewBodySchema.safeParse(request.body);
+    if (!bodyResult.success) {
+      return reply.status(400).send({
+        error: 'INVALID_BODY',
+        message: bodyResult.error.errors[0]?.message ?? 'Cuerpo inválido',
+        statusCode: 400,
+      });
+    }
 
-      let userJwt: string;
-      try {
-        userJwt = extractBearerToken(request.headers.authorization);
-      } catch (err: unknown) {
-        return errorResponse(reply, err);
-      }
+    let userJwt: string;
+    try {
+      userJwt = extractBearerToken(request.headers.authorization);
+    } catch (err: unknown) {
+      return errorResponse(reply, err);
+    }
 
-      try {
-        const result = await generatePreview(
-          userJwt,
-          bodyResult.data,
-          request.log,
-        );
+    try {
+      const result = await generatePreview(userJwt, bodyResult.data, request.log);
 
-        reply.header('content-type', result.contentType);
-        reply.header('content-disposition', 'inline; filename="preview.pdf"');
-        return reply.send(result.buffer);
-      } catch (err: unknown) {
-        return errorResponse(reply, err);
-      }
-    },
-  );
+      reply.header('content-type', result.contentType);
+      reply.header('content-disposition', 'inline; filename="preview.pdf"');
+      return reply.send(result.buffer);
+    } catch (err: unknown) {
+      return errorResponse(reply, err);
+    }
+  });
 };
 
 /* ------------------------------------------------------------------ */
@@ -159,7 +149,10 @@ async function createGenerationJob(
   const supabase = getSupabaseServiceClient();
 
   // Verify user permissions via their JWT
-  const { data: { user }, error: authErr } = await supabase.auth.getUser(userJwt);
+  const {
+    data: { user },
+    error: authErr,
+  } = await supabase.auth.getUser(userJwt);
   if (authErr || !user) {
     throw createDocumentError('Token inválido o sesión expirada', 401, 'UNAUTHORIZED');
   }
@@ -252,7 +245,10 @@ async function generatePreview(
   const env = getEngineEnv();
 
   // Verify user
-  const { data: { user }, error: authErr } = await supabase.auth.getUser(userJwt);
+  const {
+    data: { user },
+    error: authErr,
+  } = await supabase.auth.getUser(userJwt);
   if (authErr || !user) {
     throw createDocumentError('Token inválido o sesión expirada', 401, 'UNAUTHORIZED');
   }

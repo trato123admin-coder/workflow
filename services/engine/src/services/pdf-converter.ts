@@ -93,18 +93,24 @@ export async function convertDocxToPdf(params: ConvertDocxToPdfParams): Promise<
     await mkdir(profileDir, { recursive: true });
     await writeFile(inputPath, docxBuffer);
 
-    await execFileAsync(bin, [
-      '--headless',
-      '--norestore',
-      '--nofirststartwizard',
-      '--convert-to', 'pdf',
-      '--outdir', workDir,
-      `-env:UserInstallation=file://${profileDir.replace(/\\/g, '/')}`,
-      inputPath,
-    ], {
-      timeout: env.LIBREOFFICE_TIMEOUT_MS,
-      env: { ...process.env, HOME: profileDir },
-    });
+    await execFileAsync(
+      bin,
+      [
+        '--headless',
+        '--norestore',
+        '--nofirststartwizard',
+        '--convert-to',
+        'pdf',
+        '--outdir',
+        workDir,
+        `-env:UserInstallation=file://${profileDir.replace(/\\/g, '/')}`,
+        inputPath,
+      ],
+      {
+        timeout: env.LIBREOFFICE_TIMEOUT_MS,
+        env: { ...process.env, HOME: profileDir },
+      },
+    );
 
     const pdfPath = join(workDir, 'document.pdf');
     const pdfBuffer = await readFile(pdfPath);

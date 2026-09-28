@@ -29,25 +29,23 @@ export const MissingFieldsForm: React.FC<MissingFieldsFormProps> = ({
 
   const templateFields = candidate.fields || [];
   const prefilledFields = templateFields.filter(
-    (f) => !f.is_missing && f.current_value !== undefined && f.current_value !== null
+    (f) => !f.is_missing && f.current_value !== undefined && f.current_value !== null,
   );
   const editableFields = templateFields.filter(
-    (f) => f.is_missing || f.current_value === undefined || f.current_value === null
+    (f) => f.is_missing || f.current_value === undefined || f.current_value === null,
   );
 
   const missingRequired = editableFields.filter(
-    (f) => f.is_required && !localValues[f.code]?.trim()
+    (f) => f.is_required && !localValues[f.code]?.trim(),
   );
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-foreground">
-          Paso 3: Datos de la plantilla
-        </h2>
+        <h2 className="text-lg font-semibold text-foreground">Paso 3: Datos de la plantilla</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Revise los datos extraídos automáticamente del expediente y complete los campos
-          necesarios para la plantilla {candidate.template ? `"${candidate.template.name}"` : ''}.
+          Revise los datos extraídos automáticamente del expediente y complete los campos necesarios
+          para la plantilla {candidate.template ? `"${candidate.template.name}"` : ''}.
         </p>
       </div>
 

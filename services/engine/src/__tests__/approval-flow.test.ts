@@ -20,6 +20,9 @@ describe('Engine: Legal Approval Flow & Four-Eyes Rule (S7-06)', () => {
 
   let fourEyesEnabled = true;
 
+  const validCaseId = '55555555-5555-5555-5555-555555555555';
+  let userPermissions = ['documents.approve', 'cases.read.all', 'cases.write.all'];
+
   beforeAll(async () => {
     app = await buildApp();
     await app.ready();
@@ -28,6 +31,20 @@ describe('Engine: Legal Approval Flow & Four-Eyes Rule (S7-06)', () => {
   beforeEach(() => {
     currentAuthUser = { id: approverUserId, email: 'lawyer@example.com' };
     fourEyesEnabled = true;
+    userPermissions = ['documents.approve', 'cases.read.all', 'cases.write.all'];
+
+    const createChainableBuilder = (defaultData: unknown = null) => {
+      const builder: Record<string, unknown> = {};
+      builder.select = vi.fn().mockReturnValue(builder);
+      builder.update = vi.fn().mockReturnValue(builder);
+      builder.insert = vi.fn().mockResolvedValue({ error: null });
+      builder.eq = vi.fn().mockReturnValue(builder);
+      builder.neq = vi.fn().mockReturnValue(builder);
+      builder.is = vi.fn().mockResolvedValue({ data: defaultData, error: null });
+      builder.single = vi.fn().mockResolvedValue({ data: defaultData, error: null });
+      builder.maybeSingle = vi.fn().mockResolvedValue({ data: defaultData, error: null });
+      return builder;
+    };
 
     mockSupabase = {
       auth: {
@@ -39,59 +56,80 @@ describe('Engine: Legal Approval Flow & Four-Eyes Rule (S7-06)', () => {
         }),
       },
       from: vi.fn().mockImplementation((table: string) => {
-        if (table === 'generated_documents') {
+        if (table === 'profiles') {
+          return createChainableBuilder({ is_active: true });
+        }
+
+        if (table === 'user_roles') {
           return {
             select: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                single: vi.fn().mockResolvedValue({
-                  data: {
-                    id: validDocId,
-                    approval_status: 'GENERATED',
-                    generation_job_id: validJobId,
-                    case_document_id: 'cd-123',
+              eq: vi.fn().mockResolvedValue({
+                data: [
+                  {
+                    roles: {
+                      id: 'role-1',
+                      is_superuser: false,
+                      is_active: true,
+                      requires_mfa: false,
+                      role_permissions: userPermissions.map((code) => ({
+                        permissions: { code },
+                      })),
+                    },
                   },
-                  error: null,
-                }),
-              }),
-            }),
-            update: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                select: vi.fn().mockReturnValue({
-                  single: vi.fn().mockResolvedValue({
-                    data: { id: validDocId, approval_status: 'APPROVED' },
-                    error: null,
-                  }),
-                }),
-                neq: vi.fn().mockResolvedValue({ data: null, error: null }),
+                ],
+                error: null,
               }),
             }),
           };
+        }
+
+        if (table === 'cases') {
+          return createChainableBuilder({
+            id: validCaseId,
+            is_confidential: false,
+            status: 'OPEN',
+          });
+        }
+
+        if (table === 'case_assignments') {
+          return createChainableBuilder([{ assignment_type: 'RESPONSIBLE' }]);
+        }
+
+        if (table === 'generated_documents') {
+          const docData = {
+            id: validDocId,
+            approval_status: 'GENERATED',
+            generation_job_id: validJobId,
+            case_document_id: 'cd-123',
+            generation_jobs: {
+              case_id: validCaseId,
+              requested_by: generatorUserId,
+            },
+          };
+          const updatedDoc = { id: validDocId, approval_status: 'APPROVED' };
+
+          const builder: Record<string, unknown> = {};
+          builder.select = vi.fn().mockReturnValue(builder);
+          builder.update = vi.fn().mockReturnValue(builder);
+          builder.eq = vi.fn().mockReturnValue(builder);
+          builder.neq = vi.fn().mockReturnValue(builder);
+          builder.single = vi.fn().mockImplementation(async () => {
+            return { data: builder.isUpdating ? updatedDoc : docData, error: null };
+          });
+          builder.maybeSingle = vi.fn().mockResolvedValue({ data: docData, error: null });
+          (builder.update as ReturnType<typeof vi.fn>).mockImplementation(() => {
+            builder.isUpdating = true;
+            return builder;
+          });
+          return builder;
         }
 
         if (table === 'system_settings') {
-          return {
-            select: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                maybeSingle: vi.fn().mockResolvedValue({
-                  data: { value: { enabled: fourEyesEnabled } },
-                  error: null,
-                }),
-              }),
-            }),
-          };
+          return createChainableBuilder({ value: { enabled: fourEyesEnabled } });
         }
 
         if (table === 'generation_jobs') {
-          return {
-            select: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                single: vi.fn().mockResolvedValue({
-                  data: { requested_by: generatorUserId },
-                  error: null,
-                }),
-              }),
-            }),
-          };
+          return createChainableBuilder({ case_id: validCaseId, requested_by: generatorUserId });
         }
 
         if (table === 'audit_logs') {
@@ -100,15 +138,27 @@ describe('Engine: Legal Approval Flow & Four-Eyes Rule (S7-06)', () => {
           };
         }
 
-        return {
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          single: vi.fn().mockResolvedValue({ data: null, error: null }),
-        };
+        return createChainableBuilder(null);
       }),
     } as unknown as SupabaseClient;
 
     setSupabaseServiceClient(mockSupabase);
+  });
+
+  it('rechaza aprobación si el usuario carece del permiso documents.approve (HTTP 403)', async () => {
+    userPermissions = ['cases.write.all']; // Sin documents.approve
+
+    const response = await app.inject({
+      method: 'POST',
+      url: `/v1/generated-documents/${validDocId}/approve`,
+      headers: {
+        authorization: 'Bearer valid-jwt-token',
+      },
+    });
+
+    expect(response.statusCode).toBe(403);
+    const body = JSON.parse(response.body);
+    expect(body.error).toBe('FORBIDDEN_INSUFFICIENT_PERMISSIONS');
   });
 
   it('rechaza aprobación sin encabezado Authorization (HTTP 401)', async () => {

@@ -33,9 +33,7 @@ export const CaseSelectorStep: React.FC<CaseSelectorStepProps> = ({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-foreground">
-          Paso 1: Seleccionar expediente
-        </h2>
+        <h2 className="text-lg font-semibold text-foreground">Paso 1: Seleccionar expediente</h2>
         <p className="text-sm text-muted-foreground mt-1">
           Elija el expediente sobre el cual se evaluarán las reglas documentales deterministas.
         </p>
@@ -87,9 +85,7 @@ export const CaseSelectorStep: React.FC<CaseSelectorStepProps> = ({
                       </span>
                     )}
                   </div>
-                  <h3 className="text-sm font-medium text-foreground truncate">
-                    {c.title}
-                  </h3>
+                  <h3 className="text-sm font-medium text-foreground truncate">{c.title}</h3>
                   <p className="text-[11px] text-muted-foreground mt-1">
                     Creado:{' '}
                     {new Date(c.created_at).toLocaleDateString('es-PE', {

@@ -18,7 +18,7 @@ export interface RuleRecord {
 
 export function evaluateDocumentRules(
   rules: RuleRecord[],
-  context: RuleContext
+  context: RuleContext,
 ): RuleEngineEvaluationResult {
   const trace: RuleEvaluationTrace[] = [];
   const matchedRules: RuleRecord[] = [];
@@ -111,7 +111,9 @@ export function evaluateDocumentRules(
         });
       }
     } else if (bestExclude && bestRecommend) {
-      if (bestExclude.rule_definition.effect.priority <= bestRecommend.rule_definition.effect.priority) {
+      if (
+        bestExclude.rule_definition.effect.priority <= bestRecommend.rule_definition.effect.priority
+      ) {
         finalEffect = 'EXCLUDE';
         winningRule = bestExclude;
       } else {
@@ -133,9 +135,9 @@ export function evaluateDocumentRules(
         effectType: finalEffect,
         priority: winningRule.rule_definition.effect.priority,
         explanation: winningRule.rule_definition.explanation,
-        matchingRuleCodes: (group[finalEffect.toLowerCase() as 'recommend' | 'exclude' | 'require']).map(
-          (r: RuleRecord) => r.code
-        ),
+        matchingRuleCodes: group[
+          finalEffect.toLowerCase() as 'recommend' | 'exclude' | 'require'
+        ].map((r: RuleRecord) => r.code),
       };
 
       if (finalEffect === 'REQUIRE') required.push(decision);

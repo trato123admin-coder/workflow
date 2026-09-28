@@ -43,7 +43,7 @@ export const ruleConditionSchema: z.ZodType<RuleCondition> = z.lazy(() =>
     z.object({ all: z.array(ruleConditionSchema) }),
     z.object({ any: z.array(ruleConditionSchema) }),
     z.object({ not: ruleConditionSchema }),
-  ])
+  ]),
 );
 
 export const ruleDefinitionSchema = z.object({

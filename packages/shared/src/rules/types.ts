@@ -29,10 +29,7 @@ export interface SimpleCondition {
 }
 
 export type RuleCondition =
-  | SimpleCondition
-  | { all: RuleCondition[] }
-  | { any: RuleCondition[] }
-  | { not: RuleCondition };
+  SimpleCondition | { all: RuleCondition[] } | { any: RuleCondition[] } | { not: RuleCondition };
 
 export interface RuleDefinition {
   version: number;
@@ -130,4 +127,3 @@ export interface RuleEngineEvaluationResult {
   trace: RuleEvaluationTrace[];
   warnings?: RuleConflictWarning[];
 }
-
