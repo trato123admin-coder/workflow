@@ -56,10 +56,7 @@ export const CashCharts: React.FC<CashChartsProps> = ({ balances, movements }) =
       });
   }, [balances, totalBalance]);
 
-  const maxBarValue = Math.max(
-    1,
-    ...categoryStats.flatMap((c) => [c.income, c.expense])
-  );
+  const maxBarValue = Math.max(1, ...categoryStats.flatMap((c) => [c.income, c.expense]));
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -166,7 +163,10 @@ export const CashCharts: React.FC<CashChartsProps> = ({ balances, movements }) =
           {donutData.map((d, i) => (
             <div key={i} className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-1.5 truncate max-w-[140px]">
-                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
+                <span
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: d.color }}
+                />
                 <span className="text-muted-foreground truncate">{d.name}</span>
               </div>
               <span className="font-semibold text-foreground">{d.percent}%</span>

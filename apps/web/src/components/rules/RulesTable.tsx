@@ -57,8 +57,8 @@ export const RulesTable: React.FC<RulesTableProps> = ({
               rule.effect_type === 'REQUIRE'
                 ? 'danger'
                 : rule.effect_type === 'RECOMMEND'
-                ? 'success'
-                : 'neutral';
+                  ? 'success'
+                  : 'neutral';
 
             return (
               <tr
@@ -69,9 +69,7 @@ export const RulesTable: React.FC<RulesTableProps> = ({
                   {rule.code}
                 </td>
                 <td className="px-4 py-3 max-w-xs">
-                  <div className="font-semibold text-slate-900 dark:text-white">
-                    {rule.name}
-                  </div>
+                  <div className="font-semibold text-slate-900 dark:text-white">{rule.name}</div>
                   <div className="text-xs text-slate-500 truncate" title={rule.explanation}>
                     {rule.explanation}
                   </div>

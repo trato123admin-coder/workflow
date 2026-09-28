@@ -99,10 +99,7 @@ export async function processQueuedJobs(limit = 5): Promise<number> {
 /* Job lifecycle                                                       */
 /* ------------------------------------------------------------------ */
 
-async function claimJob(
-  supabase: SupabaseClient,
-  jobId: string,
-): Promise<GenerationJob | null> {
+async function claimJob(supabase: SupabaseClient, jobId: string): Promise<GenerationJob | null> {
   const { data, error } = await supabase
     .from('generation_jobs')
     .update({ status: 'GENERATING', started_at: new Date().toISOString() })
@@ -170,10 +167,7 @@ async function executeJob(
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
 
-async function fetchTemplate(
-  supabase: SupabaseClient,
-  templateId: string,
-): Promise<Buffer> {
+async function fetchTemplate(supabase: SupabaseClient, templateId: string): Promise<Buffer> {
   const { data: template } = await supabase
     .from('templates')
     .select('storage_key')
@@ -212,9 +206,10 @@ async function uploadVersion(
 ): Promise<UploadResult> {
   const sha256 = computeSha256(fileBuffer);
   const ext = format.toLowerCase();
-  const mime = format === 'PDF'
-    ? 'application/pdf'
-    : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+  const mime =
+    format === 'PDF'
+      ? 'application/pdf'
+      : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
   // Get current max version for this case_document
   const { data: versions } = await supabase

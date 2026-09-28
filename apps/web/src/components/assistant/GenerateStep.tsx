@@ -93,12 +93,10 @@ export const GenerateStep: React.FC<GenerateStepProps> = ({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-foreground">
-          Paso 5: Confirmación y aprobación
-        </h2>
+        <h2 className="text-lg font-semibold text-foreground">Paso 5: Confirmación y aprobación</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Confirme la aprobación de la recomendación basada en reglas para registrar la decisión
-          en la estadística histórica y proceder con el documento.
+          Confirme la aprobación de la recomendación basada en reglas para registrar la decisión en
+          la estadística histórica y proceder con el documento.
         </p>
       </div>
 
@@ -120,14 +118,13 @@ export const GenerateStep: React.FC<GenerateStepProps> = ({
           <div>
             <span className="text-muted-foreground block">Plantilla:</span>
             <span className="font-semibold text-foreground">
-              {candidate.template?.name || 'Plantilla estándar'} (v{candidate.template?.version ?? 1})
+              {candidate.template?.name || 'Plantilla estándar'} (v
+              {candidate.template?.version ?? 1})
             </span>
           </div>
           <div>
             <span className="text-muted-foreground block">Motor evaluador:</span>
-            <span className="font-semibold text-foreground">
-              Reglas deterministas (RULES_ONLY)
-            </span>
+            <span className="font-semibold text-foreground">Reglas deterministas (RULES_ONLY)</span>
           </div>
         </div>
 

@@ -32,12 +32,22 @@ export interface SaveMovementInput {
 }
 
 export interface SaveRequestInput {
-  amount: number; currency: string; category_code: string; reason: string; case_id?: string;
+  amount: number;
+  currency: string;
+  category_code: string;
+  reason: string;
+  case_id?: string;
 }
 
 export interface SaveReconciliationInput {
-  cash_account_id: string; cash_period_id?: string; reconciliation_date: string;
-  period_start: string; period_end: string; system_balance: number; counted_balance: number; observations?: string;
+  cash_account_id: string;
+  cash_period_id?: string;
+  reconciliation_date: string;
+  period_start: string;
+  period_end: string;
+  system_balance: number;
+  counted_balance: number;
+  observations?: string;
 }
 
 export function useCashData() {
@@ -47,7 +57,9 @@ export function useCashData() {
   const [reconciliations, setReconciliations] = useState<CashReconciliation[]>([]);
   const [periods, setPeriods] = useState<CashPeriod[]>([]);
   const [categories, setCategories] = useState<Array<{ code: string; label: string }>>([]);
-  const [cases, setCases] = useState<Array<{ id: string; case_number: string; title?: string }>>([]);
+  const [cases, setCases] = useState<Array<{ id: string; case_number: string; title?: string }>>(
+    [],
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string>('');
@@ -96,12 +108,28 @@ export function useCashData() {
       await fetchAuthAndPerms();
       const [balRes, movRes, reqRes, recRes, perRes, catRes, caseRes] = await Promise.all([
         supabase.from('cash_account_balances').select('*'),
-        supabase.from('cash_movements').select('*').order('movement_date', { ascending: false }).order('created_at', { ascending: false }),
+        supabase
+          .from('cash_movements')
+          .select('*')
+          .order('movement_date', { ascending: false })
+          .order('created_at', { ascending: false }),
         supabase.from('cash_requests').select('*').order('created_at', { ascending: false }),
-        supabase.from('cash_reconciliations').select('*').order('reconciliation_date', { ascending: false }),
+        supabase
+          .from('cash_reconciliations')
+          .select('*')
+          .order('reconciliation_date', { ascending: false }),
         supabase.from('cash_periods').select('*'),
-        supabase.from('catalog_items').select('code, label').eq('catalog_code', 'cash_categories').eq('is_active', true).order('sort_order', { ascending: true }),
-        supabase.from('cases').select('id, case_number, title').order('case_number', { ascending: false }).limit(50),
+        supabase
+          .from('catalog_items')
+          .select('code, label')
+          .eq('catalog_code', 'cash_categories')
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true }),
+        supabase
+          .from('cases')
+          .select('id, case_number, title')
+          .order('case_number', { ascending: false })
+          .limit(50),
       ]);
       if (balRes.error) throw balRes.error;
       setBalances((balRes.data as CashAccountBalance[]) || []);
@@ -128,7 +156,9 @@ export function useCashData() {
     if (data.file) {
       const ext = data.file.name.split('.').pop();
       const path = `movements/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error: uploadErr } = await supabase.storage.from('cash-support').upload(path, data.file);
+      const { error: uploadErr } = await supabase.storage
+        .from('cash-support')
+        .upload(path, data.file);
       if (uploadErr) throw uploadErr;
       supportPath = path;
     }
@@ -196,7 +226,11 @@ export function useCashData() {
     const supabase = createClient();
     const { error } = await supabase
       .from('cash_requests')
-      .update({ status: 'APPROVED', approved_by: currentUserId, approved_at: new Date().toISOString() })
+      .update({
+        status: 'APPROVED',
+        approved_by: currentUserId,
+        approved_at: new Date().toISOString(),
+      })
       .eq('id', reqId);
     if (error) throw error;
     await loadData();
@@ -206,7 +240,12 @@ export function useCashData() {
     const supabase = createClient();
     const { error } = await supabase
       .from('cash_requests')
-      .update({ status: 'REJECTED', approved_by: currentUserId, rejection_reason: reason, updated_at: new Date().toISOString() })
+      .update({
+        status: 'REJECTED',
+        approved_by: currentUserId,
+        rejection_reason: reason,
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', reqId);
     if (error) throw error;
     await loadData();
@@ -261,7 +300,11 @@ export function useCashData() {
     const supabase = createClient();
     const { error } = await supabase
       .from('cash_reconciliations')
-      .update({ status: 'APPROVED', approved_by: currentUserId, approved_at: new Date().toISOString() })
+      .update({
+        status: 'APPROVED',
+        approved_by: currentUserId,
+        approved_at: new Date().toISOString(),
+      })
       .eq('id', recId);
     if (error) throw error;
     await loadData();
@@ -285,12 +328,31 @@ export function useCashData() {
   };
 
   return {
-    balances, movements, requests, reconciliations, periods, categories, cases,
-    isLoading, errorMessage, currentUserId, isMfaActive,
-    canWrite, canRequest, canApprove, canClose,
-    loadData, handleSaveMovement, handleConfirmReversal, handleSaveRequest,
-    handleApproveRequest, handleRejectRequest, handleDisburseRequest,
-    handleSaveReconciliation, handleApproveReconciliation, handleRejectReconciliation,
+    balances,
+    movements,
+    requests,
+    reconciliations,
+    periods,
+    categories,
+    cases,
+    isLoading,
+    errorMessage,
+    currentUserId,
+    isMfaActive,
+    canWrite,
+    canRequest,
+    canApprove,
+    canClose,
+    loadData,
+    handleSaveMovement,
+    handleConfirmReversal,
+    handleSaveRequest,
+    handleApproveRequest,
+    handleRejectRequest,
+    handleDisburseRequest,
+    handleSaveReconciliation,
+    handleApproveReconciliation,
+    handleRejectReconciliation,
     handleDownloadSupport,
   };
 }

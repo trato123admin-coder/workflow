@@ -8,12 +8,13 @@ import type { RuleContext } from '@workflow/shared';
  */
 export async function buildRuleContextFromCase(
   supabase: SupabaseClient,
-  caseId: string
+  caseId: string,
 ): Promise<RuleContext> {
   // 1. Fetch case with client person and model version
   const { data: caseRow, error: caseError } = await supabase
     .from('cases')
-    .select(`
+    .select(
+      `
       id,
       case_number,
       title,
@@ -33,20 +34,20 @@ export async function buildRuleContextFromCase(
         country,
         identity_document_type
       )
-    `)
+    `,
+    )
     .eq('id', caseId)
     .maybeSingle();
 
   if (caseError || !caseRow) {
-    throw new Error(
-      'Expediente no encontrado o no tiene permisos para acceder a él.'
-    );
+    throw new Error('Expediente no encontrado o no tiene permisos para acceder a él.');
   }
 
   // 2. Fetch active parties (causante, heirs, etc.)
   const { data: parties, error: partiesError } = await supabase
     .from('case_parties')
-    .select(`
+    .select(
+      `
       party_role,
       is_active,
       person:persons (
@@ -54,7 +55,8 @@ export async function buildRuleContextFromCase(
         marital_status,
         country
       )
-    `)
+    `,
+    )
     .eq('case_id', caseId)
     .eq('is_active', true);
 
@@ -76,11 +78,13 @@ export async function buildRuleContextFromCase(
   // 4. Fetch active case documents
   const { data: docs, error: docsError } = await supabase
     .from('case_documents')
-    .select(`
+    .select(
+      `
       status,
       is_active,
       document_type:document_types (code)
-    `)
+    `,
+    )
     .eq('case_id', caseId)
     .eq('is_active', true);
 
@@ -89,12 +93,16 @@ export async function buildRuleContextFromCase(
   }
 
   // 5. Extract causante and heirs data safely (without exposing minor PII)
-  type PersonInfo = { birth_date?: string | null; marital_status?: string | null; country?: string | null };
+  type PersonInfo = {
+    birth_date?: string | null;
+    marital_status?: string | null;
+    country?: string | null;
+  };
   const causanteParty = parties?.find((p) => p.party_role === 'CAUSANTE');
   const causantePerson = causanteParty?.person as PersonInfo | undefined;
 
   const heirs = parties?.filter((p) => p.party_role === 'HEREDERO') || [];
-  
+
   const now = new Date();
   const hasMinorHeir = heirs.some((h) => {
     const person = h.person as PersonInfo | undefined;
@@ -114,10 +122,11 @@ export async function buildRuleContextFromCase(
   const createdDate = new Date(caseRow.created_at);
   const ageDays = Math.max(
     0,
-    Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24))
+    Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24)),
   );
 
-  const clientPerson = caseRow.client as { person_type?: string; country?: string; identity_document_type?: string } | undefined;
+  const clientPerson = caseRow.client as
+    { person_type?: string; country?: string; identity_document_type?: string } | undefined;
   const modelVersion = caseRow.case_model_version as { case_model?: { code?: string } } | undefined;
 
   const docCodes: string[] = [];
@@ -135,11 +144,11 @@ export async function buildRuleContextFromCase(
     }
   }
 
-  const assetTypes = Array.from(new Set(assets?.map((a) => a.asset_type).filter(Boolean) as string[]));
-  const totalEstimatedValue = assets?.reduce(
-    (sum, a) => sum + (Number(a.estimated_value) || 0),
-    0
-  ) || 0;
+  const assetTypes = Array.from(
+    new Set(assets?.map((a) => a.asset_type).filter(Boolean) as string[]),
+  );
+  const totalEstimatedValue =
+    assets?.reduce((sum, a) => sum + (Number(a.estimated_value) || 0), 0) || 0;
 
   return {
     client: {

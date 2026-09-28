@@ -2,7 +2,15 @@
 
 import React from 'react';
 import { KpiCard } from '../ui/KpiCard';
-import { Coins, Wallet, ArrowDownRight, ArrowUpRight, Clock, ShieldCheck, ShieldAlert } from 'lucide-react';
+import {
+  Coins,
+  Wallet,
+  ArrowDownRight,
+  ArrowUpRight,
+  Clock,
+  ShieldCheck,
+  ShieldAlert,
+} from 'lucide-react';
 import type { CashAccountBalance } from '@workflow/shared';
 
 interface CashKpiCardsProps {

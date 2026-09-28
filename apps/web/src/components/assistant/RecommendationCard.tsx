@@ -52,8 +52,9 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
             </span>
           </div>
           <p>
-            El sistema organiza y sugiere con base en reglas deterministas preconfiguradas; no decide
-            derechos. Toda recomendación debe ser revisada y validada por el abogado o notario a cargo.
+            El sistema organiza y sugiere con base en reglas deterministas preconfiguradas; no
+            decide derechos. Toda recomendación debe ser revisada y validada por el abogado o
+            notario a cargo.
           </p>
         </div>
       </div>
@@ -76,9 +77,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                 {topCandidate.documentTypeCode}
               </span>
             </div>
-            <h3 className="text-xl font-bold text-foreground">
-              {topCandidate.documentTypeName}
-            </h3>
+            <h3 className="text-xl font-bold text-foreground">{topCandidate.documentTypeName}</h3>
           </div>
 
           {/* System Score Badge */}
@@ -88,9 +87,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                 Puntuación
               </div>
-              <div className="text-lg font-bold text-foreground">
-                {scorePercent}%
-              </div>
+              <div className="text-lg font-bold text-foreground">{scorePercent}%</div>
             </div>
           </div>
         </div>
@@ -125,9 +122,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               <ClipboardList className="w-3.5 h-3.5" />
               <span>Completitud de datos</span>
             </div>
-            <div className="text-sm font-semibold text-foreground">
-              {completenessPercent}%
-            </div>
+            <div className="text-sm font-semibold text-foreground">{completenessPercent}%</div>
           </div>
         </div>
 
@@ -158,7 +153,9 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
           <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs space-y-1.5">
             <div className="flex items-center gap-1.5 font-semibold text-amber-800 dark:text-amber-300">
               <AlertTriangle className="w-4 h-4 shrink-0" />
-              <span>Campos requeridos faltantes en el expediente ({topCandidate.missingFields.length}):</span>
+              <span>
+                Campos requeridos faltantes en el expediente ({topCandidate.missingFields.length}):
+              </span>
             </div>
             <div className="flex flex-wrap gap-1.5 pt-1">
               {topCandidate.missingFields.map((field, idx) => (

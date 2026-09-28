@@ -64,11 +64,15 @@ export const ReversalModal: React.FC<ReversalModalProps> = ({
         <div className="p-3.5 rounded-xl bg-muted/40 border border-border space-y-2 text-xs">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Movimiento original:</span>
-            <span className="font-mono font-bold text-foreground">{movement.movement_number || movement.id}</span>
+            <span className="font-mono font-bold text-foreground">
+              {movement.movement_number || movement.id}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Descripción:</span>
-            <span className="font-semibold text-foreground truncate max-w-[220px]">{movement.description}</span>
+            <span className="font-semibold text-foreground truncate max-w-[220px]">
+              {movement.description}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Monto original:</span>
@@ -79,7 +83,8 @@ export const ReversalModal: React.FC<ReversalModalProps> = ({
           <div className="flex justify-between pt-1 border-t border-border/60">
             <span className="text-muted-foreground">Efecto del reverso:</span>
             <span className="font-bold text-primary flex items-center gap-1">
-              <RotateCcw className="w-3.5 h-3.5" /> Generará {reverseDir} por S/ {movement.amount.toFixed(2)}
+              <RotateCcw className="w-3.5 h-3.5" /> Generará {reverseDir} por S/{' '}
+              {movement.amount.toFixed(2)}
             </span>
           </div>
         </div>
@@ -99,7 +104,8 @@ export const ReversalModal: React.FC<ReversalModalProps> = ({
         <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs flex items-start gap-2">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>
-            Esta acción es irreversible y quedará registrada en el libro con fecha de hoy y su usuario en auditoría.
+            Esta acción es irreversible y quedará registrada en el libro con fecha de hoy y su
+            usuario en auditoría.
           </span>
         </div>
 

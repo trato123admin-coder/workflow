@@ -59,7 +59,8 @@ export const CashReconciliationsTable: React.FC<CashReconciliationsTableProps> =
         <div>
           <h3 className="text-sm font-bold text-foreground">Arqueos y Cierre de Período</h3>
           <p className="text-xs text-muted-foreground">
-            Control dual: la aprobación de un arqueo sella el período contable e impide movimientos retroactivos.
+            Control dual: la aprobación de un arqueo sella el período contable e impide movimientos
+            retroactivos.
           </p>
         </div>
         <button
@@ -95,7 +96,9 @@ export const CashReconciliationsTable: React.FC<CashReconciliationsTableProps> =
                 </tr>
               ) : (
                 reconciliations.map((r) => {
-                  const diff = Number((r.difference ?? (r.counted_balance - r.system_balance)).toFixed(2));
+                  const diff = Number(
+                    (r.difference ?? r.counted_balance - r.system_balance).toFixed(2),
+                  );
                   const isOpenedByMe = Boolean(currentUserId && r.opened_by === currentUserId);
 
                   return (

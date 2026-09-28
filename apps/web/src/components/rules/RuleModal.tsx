@@ -86,8 +86,8 @@ export const RuleModal: React.FC<RuleModalProps> = ({
             explanation: 'Sugerido para trámite notarial',
           },
           null,
-          2
-        )
+          2,
+        ),
       );
     }
     setValidationError(null);
@@ -100,8 +100,11 @@ export const RuleModal: React.FC<RuleModalProps> = ({
       if (!res.success) {
         setValidationError(
           res.error.errors
-            .map((e: { path: (string | number)[]; message: string }) => `${e.path.join('.')}: ${e.message}`)
-            .join('; ')
+            .map(
+              (e: { path: (string | number)[]; message: string }) =>
+                `${e.path.join('.')}: ${e.message}`,
+            )
+            .join('; '),
         );
         return false;
       }
@@ -133,15 +136,10 @@ export const RuleModal: React.FC<RuleModalProps> = ({
       };
 
       if (isEditing && rule) {
-        const { error } = await supabase
-          .from('document_rules')
-          .update(payload)
-          .eq('id', rule.id);
+        const { error } = await supabase.from('document_rules').update(payload).eq('id', rule.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from('document_rules')
-          .insert(payload);
+        const { error } = await supabase.from('document_rules').insert(payload);
         if (error) throw error;
       }
 

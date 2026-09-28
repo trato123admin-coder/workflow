@@ -30,9 +30,7 @@ export const CashMovementsTable: React.FC<CashMovementsTableProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
 
   // IDs de movimientos que ya han sido reversados
-  const reversedIds = new Set(
-    movements.filter((m) => m.reversal_of).map((m) => m.reversal_of!)
-  );
+  const reversedIds = new Set(movements.filter((m) => m.reversal_of).map((m) => m.reversal_of!));
 
   const filtered = movements.filter((m) => {
     if (selectedAccount !== 'ALL' && m.cash_account_id !== selectedAccount) return false;
@@ -179,9 +177,16 @@ export const CashMovementsTable: React.FC<CashMovementsTableProps> = ({
                         <div className="font-semibold text-foreground truncate">
                           {getCategoryLabel(m.category_code)}
                         </div>
-                        <div className="text-[11px] text-muted-foreground truncate" title={m.description}>
+                        <div
+                          className="text-[11px] text-muted-foreground truncate"
+                          title={m.description}
+                        >
                           {m.description}
-                          {m.reference && <span className="ml-1 font-mono text-[10px] bg-muted px-1 rounded">Ref: {m.reference}</span>}
+                          {m.reference && (
+                            <span className="ml-1 font-mono text-[10px] bg-muted px-1 rounded">
+                              Ref: {m.reference}
+                            </span>
+                          )}
                         </div>
                       </td>
 
@@ -223,7 +228,9 @@ export const CashMovementsTable: React.FC<CashMovementsTableProps> = ({
                           <div className="text-[10px] text-amber-600 font-sans italic">Reverso</div>
                         )}
                         {isAlreadyReversed && (
-                          <div className="text-[10px] text-muted-foreground font-sans italic">Anulado</div>
+                          <div className="text-[10px] text-muted-foreground font-sans italic">
+                            Anulado
+                          </div>
                         )}
                       </td>
 

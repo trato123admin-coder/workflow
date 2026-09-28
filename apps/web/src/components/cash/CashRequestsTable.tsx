@@ -75,7 +75,9 @@ export const CashRequestsTable: React.FC<CashRequestsTableProps> = ({
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-bold text-foreground">Solicitudes de Fondos</h3>
-          <p className="text-xs text-muted-foreground">Flujo: Gestor solicita → Administrador aprueba → Caja desembolsa</p>
+          <p className="text-xs text-muted-foreground">
+            Flujo: Gestor solicita → Administrador aprueba → Caja desembolsa
+          </p>
         </div>
         <button
           type="button"
@@ -117,7 +119,10 @@ export const CashRequestsTable: React.FC<CashRequestsTableProps> = ({
                     <td className="py-3 px-4 font-medium text-foreground">
                       {r.category_code?.replace(/_/g, ' ')}
                     </td>
-                    <td className="py-3 px-4 max-w-xs truncate text-muted-foreground" title={r.reason}>
+                    <td
+                      className="py-3 px-4 max-w-xs truncate text-muted-foreground"
+                      title={r.reason}
+                    >
                       {r.reason}
                     </td>
                     <td className="py-3 px-4 font-bold text-foreground">

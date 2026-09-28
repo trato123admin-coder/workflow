@@ -60,7 +60,9 @@ export const CaseExpensesTab: React.FC<CaseExpensesTabProps> = ({
           <div className="text-xl font-bold text-rose-600 dark:text-rose-400 font-mono">
             S/ {summary.totalExpense.toFixed(2)}
           </div>
-          <p className="text-[11px] text-muted-foreground">{summary.count} operaciones registradas</p>
+          <p className="text-[11px] text-muted-foreground">
+            {summary.count} operaciones registradas
+          </p>
         </div>
 
         <div className="p-4 rounded-xl border border-border bg-card shadow-sm space-y-1">
@@ -108,7 +110,9 @@ export const CaseExpensesTab: React.FC<CaseExpensesTabProps> = ({
       <div className="border border-border rounded-xl overflow-hidden bg-card shadow-sm">
         <div className="px-4 py-3 bg-muted/30 border-b border-border flex items-center justify-between">
           <span className="text-xs font-bold text-foreground">Detalle de Asientos del Caso</span>
-          <span className="text-[11px] text-muted-foreground font-mono">{caseMovements.length} asientos</span>
+          <span className="text-[11px] text-muted-foreground font-mono">
+            {caseMovements.length} asientos
+          </span>
         </div>
 
         <div className="overflow-x-auto">
@@ -134,7 +138,9 @@ export const CaseExpensesTab: React.FC<CaseExpensesTabProps> = ({
               ) : (
                 caseMovements.map((m) => (
                   <tr key={m.id} className="hover:bg-muted/20 transition-colors">
-                    <td className="py-2.5 px-4 text-muted-foreground font-mono">{m.movement_date}</td>
+                    <td className="py-2.5 px-4 text-muted-foreground font-mono">
+                      {m.movement_date}
+                    </td>
                     <td className="py-2.5 px-4 font-bold font-mono text-foreground">
                       {m.movement_number || 'MOV-PND'}
                     </td>
@@ -143,7 +149,11 @@ export const CaseExpensesTab: React.FC<CaseExpensesTabProps> = ({
                     </td>
                     <td className="py-2.5 px-4 text-muted-foreground">
                       {m.description}
-                      {m.reference && <span className="ml-1 text-[10px] bg-muted px-1 rounded">Ref: {m.reference}</span>}
+                      {m.reference && (
+                        <span className="ml-1 text-[10px] bg-muted px-1 rounded">
+                          Ref: {m.reference}
+                        </span>
+                      )}
                     </td>
                     <td className="py-2.5 px-4">
                       {m.support_document_path ? (

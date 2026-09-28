@@ -33,7 +33,8 @@ import {
   Coins,
 } from 'lucide-react';
 
-type DetailTab = 'processes' | 'parties' | 'estate' | 'documents' | 'filings' | 'activity' | 'expenses';
+type DetailTab =
+  'processes' | 'parties' | 'estate' | 'documents' | 'filings' | 'activity' | 'expenses';
 type ProcessView = 'table' | 'kanban';
 
 export default function CaseDetailPage() {
@@ -275,7 +276,11 @@ export default function CaseDetailPage() {
           isOpen={isRequestModalOpen}
           onClose={() => setIsRequestModalOpen(false)}
           categories={categories}
-          cases={caseData ? [{ id: caseData.id, case_number: caseData.case_number, title: caseData.title }] : []}
+          cases={
+            caseData
+              ? [{ id: caseData.id, case_number: caseData.case_number, title: caseData.title }]
+              : []
+          }
           initialCaseId={caseId}
           onSave={handleSaveRequestFromCase}
         />

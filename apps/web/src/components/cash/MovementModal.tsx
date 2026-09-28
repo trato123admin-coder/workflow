@@ -30,7 +30,12 @@ interface MovementModalProps {
 }
 
 export const MovementModal: React.FC<MovementModalProps> = ({
-  isOpen, onClose, accounts, categories, cases = [], onSave,
+  isOpen,
+  onClose,
+  accounts,
+  categories,
+  cases = [],
+  onSave,
 }) => {
   const [accountId, setAccountId] = useState(accounts[0]?.cash_account_id || '');
   const [movementType, setMovementType] = useState<'INCOME' | 'EXPENSE' | 'ADJUSTMENT'>('EXPENSE');
@@ -120,9 +125,21 @@ export const MovementModal: React.FC<MovementModalProps> = ({
           <FormField id="movement-type-select" label="Tipo de Operación" required>
             <div className="flex gap-2">
               {[
-                { t: 'EXPENSE' as const, l: 'Egreso (Gasto)', a: 'bg-rose-500 text-white border-rose-600' },
-                { t: 'INCOME' as const, l: 'Ingreso', a: 'bg-emerald-500 text-white border-emerald-600' },
-                { t: 'ADJUSTMENT' as const, l: 'Ajuste', a: 'bg-primary text-white border-primary' },
+                {
+                  t: 'EXPENSE' as const,
+                  l: 'Egreso (Gasto)',
+                  a: 'bg-rose-500 text-white border-rose-600',
+                },
+                {
+                  t: 'INCOME' as const,
+                  l: 'Ingreso',
+                  a: 'bg-emerald-500 text-white border-emerald-600',
+                },
+                {
+                  t: 'ADJUSTMENT' as const,
+                  l: 'Ajuste',
+                  a: 'bg-primary text-white border-primary',
+                },
               ].map(({ t, l, a }) => (
                 <button
                   key={t}
@@ -248,7 +265,8 @@ export const MovementModal: React.FC<MovementModalProps> = ({
           <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs flex items-start gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
             <div>
-              <span className="font-bold">Comprobante obligatorio por umbral:</span> Gastos superiores a S/ 50.00 deben adjuntar comprobante para arqueo conforme.
+              <span className="font-bold">Comprobante obligatorio por umbral:</span> Gastos
+              superiores a S/ 50.00 deben adjuntar comprobante para arqueo conforme.
             </div>
           </div>
         )}
@@ -257,7 +275,8 @@ export const MovementModal: React.FC<MovementModalProps> = ({
           <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-800 dark:text-blue-300 text-xs flex items-start gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
             <div>
-              <span className="font-bold">Aviso de umbral mayor:</span> Desembolsos mayores a S/ 300.00 requieren autorización administrativa previa.
+              <span className="font-bold">Aviso de umbral mayor:</span> Desembolsos mayores a S/
+              300.00 requieren autorización administrativa previa.
             </div>
           </div>
         )}

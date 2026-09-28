@@ -14,7 +14,13 @@ export type CashDirection = (typeof CASH_DIRECTIONS)[number];
 export const CASH_ACCOUNT_TYPES = ['CASH', 'BANK', 'CARD', 'OTHER'] as const;
 export type CashAccountType = (typeof CASH_ACCOUNT_TYPES)[number];
 
-export const CASH_REQUEST_STATUSES = ['PENDING', 'APPROVED', 'REJECTED', 'DISBURSED', 'CANCELLED'] as const;
+export const CASH_REQUEST_STATUSES = [
+  'PENDING',
+  'APPROVED',
+  'REJECTED',
+  'DISBURSED',
+  'CANCELLED',
+] as const;
 export type CashRequestStatus = (typeof CASH_REQUEST_STATUSES)[number];
 
 export const CASH_PERIOD_STATUSES = ['OPEN', 'CLOSED'] as const;
@@ -37,19 +43,21 @@ export const cashAccountSchema = z.object({
 
 export type CashAccount = z.infer<typeof cashAccountSchema>;
 
-export const cashPeriodSchema = z.object({
-  id: z.string().uuid().optional(),
-  cash_account_id: z.string().uuid('ID de cuenta requerido'),
-  period_start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha YYYY-MM-DD inválido'),
-  period_end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha YYYY-MM-DD inválido'),
-  status: z.enum(CASH_PERIOD_STATUSES).default('OPEN'),
-  closed_at: z.string().nullable().optional(),
-  closed_by: z.string().uuid().nullable().optional(),
-  notes: z.string().nullable().optional(),
-}).refine((data) => data.period_end >= data.period_start, {
-  message: 'La fecha de fin debe ser posterior o igual a la de inicio',
-  path: ['period_end'],
-});
+export const cashPeriodSchema = z
+  .object({
+    id: z.string().uuid().optional(),
+    cash_account_id: z.string().uuid('ID de cuenta requerido'),
+    period_start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha YYYY-MM-DD inválido'),
+    period_end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha YYYY-MM-DD inválido'),
+    status: z.enum(CASH_PERIOD_STATUSES).default('OPEN'),
+    closed_at: z.string().nullable().optional(),
+    closed_by: z.string().uuid().nullable().optional(),
+    notes: z.string().nullable().optional(),
+  })
+  .refine((data) => data.period_end >= data.period_start, {
+    message: 'La fecha de fin debe ser posterior o igual a la de inicio',
+    path: ['period_end'],
+  });
 
 export type CashPeriod = z.infer<typeof cashPeriodSchema>;
 
@@ -98,33 +106,41 @@ export const cashRequestSchema = z.object({
 
 export type CashRequest = z.infer<typeof cashRequestSchema>;
 
-export const cashReconciliationSchema = z.object({
-  id: z.string().uuid().optional(),
-  cash_account_id: z.string().uuid('ID de cuenta requerido'),
-  cash_period_id: z.string().uuid().nullable().optional(),
-  reconciliation_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha YYYY-MM-DD inválido'),
-  period_start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha YYYY-MM-DD inválido'),
-  period_end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha YYYY-MM-DD inválido'),
-  system_balance: z.number(),
-  counted_balance: z.number().min(0, 'El saldo contado no puede ser negativo'),
-  difference: z.number().optional(),
-  observations: z.string().nullable().optional(),
-  status: z.enum(CASH_RECONCILIATION_STATUSES).default('DRAFT'),
-  opened_by: z.string().uuid().optional(),
-  opened_at: z.string().optional(),
-  approved_by: z.string().uuid().nullable().optional(),
-  approved_at: z.string().nullable().optional(),
-  rejection_reason: z.string().nullable().optional(),
-}).refine((data) => {
-  const diff = Number((data.counted_balance - data.system_balance).toFixed(2));
-  if (Math.abs(diff) > 0.001) {
-    return Boolean(data.observations && data.observations.trim().length >= 3);
-  }
-  return true;
-}, {
-  message: 'Si existe diferencia entre el saldo del sistema y el contado, las observaciones son obligatorias',
-  path: ['observations'],
-});
+export const cashReconciliationSchema = z
+  .object({
+    id: z.string().uuid().optional(),
+    cash_account_id: z.string().uuid('ID de cuenta requerido'),
+    cash_period_id: z.string().uuid().nullable().optional(),
+    reconciliation_date: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha YYYY-MM-DD inválido'),
+    period_start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha YYYY-MM-DD inválido'),
+    period_end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha YYYY-MM-DD inválido'),
+    system_balance: z.number(),
+    counted_balance: z.number().min(0, 'El saldo contado no puede ser negativo'),
+    difference: z.number().optional(),
+    observations: z.string().nullable().optional(),
+    status: z.enum(CASH_RECONCILIATION_STATUSES).default('DRAFT'),
+    opened_by: z.string().uuid().optional(),
+    opened_at: z.string().optional(),
+    approved_by: z.string().uuid().nullable().optional(),
+    approved_at: z.string().nullable().optional(),
+    rejection_reason: z.string().nullable().optional(),
+  })
+  .refine(
+    (data) => {
+      const diff = Number((data.counted_balance - data.system_balance).toFixed(2));
+      if (Math.abs(diff) > 0.001) {
+        return Boolean(data.observations && data.observations.trim().length >= 3);
+      }
+      return true;
+    },
+    {
+      message:
+        'Si existe diferencia entre el saldo del sistema y el contado, las observaciones son obligatorias',
+      path: ['observations'],
+    },
+  );
 
 export type CashReconciliation = z.infer<typeof cashReconciliationSchema>;
 
@@ -145,7 +161,7 @@ export interface CashAccountBalance {
  */
 export function calculateBalance(
   openingBalance: number,
-  movements: Array<{ direction: CashDirection; amount: number }>
+  movements: Array<{ direction: CashDirection; amount: number }>,
 ): number {
   let net = Number(openingBalance) || 0;
   for (const m of movements) {
@@ -163,8 +179,14 @@ export function calculateBalance(
  * Validación de reglas de reverso contable
  */
 export function validateReversal(
-  original: { id: string; amount: number; direction: CashDirection; movement_type: CashMovementType; reversal_of?: string | null },
-  existingReversals: Array<{ reversal_of?: string | null }>
+  original: {
+    id: string;
+    amount: number;
+    direction: CashDirection;
+    movement_type: CashMovementType;
+    reversal_of?: string | null;
+  },
+  existingReversals: Array<{ reversal_of?: string | null }>,
 ): { isValid: boolean; error?: string; reverseDirection?: CashDirection } {
   if (original.movement_type === 'REVERSAL' || original.reversal_of) {
     return { isValid: false, error: 'No se puede reversar un movimiento que ya es un reverso' };
@@ -190,7 +212,7 @@ export function calculateCaseExpenses(
     category_code: string;
     currency?: string;
   }>,
-  caseId: string
+  caseId: string,
 ): {
   totalExpense: number;
   totalIncome: number;

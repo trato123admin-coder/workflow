@@ -37,7 +37,9 @@ export const ReconciliationModal: React.FC<ReconciliationModalProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   const selectedAccount = accounts.find((a) => a.cash_account_id === accountId);
-  const activePeriod = openPeriods.find((p) => p.cash_account_id === accountId && p.status === 'OPEN');
+  const activePeriod = openPeriods.find(
+    (p) => p.cash_account_id === accountId && p.status === 'OPEN',
+  );
   const systemBalance = selectedAccount?.current_balance ?? 0;
   const numCounted = parseFloat(countedBalance) || 0;
   const difference = Number((numCounted - systemBalance).toFixed(2));
@@ -48,7 +50,9 @@ export const ReconciliationModal: React.FC<ReconciliationModalProps> = ({
     if (!accountId) return setError('Seleccione una cuenta');
     if (isNaN(numCounted) || numCounted < 0) return setError('Ingrese un saldo contado válido');
     if (hasDiscrepancy && (!observations.trim() || observations.trim().length < 4)) {
-      return setError('Al haber diferencia entre el sistema y el conteo físico, las observaciones son obligatorias');
+      return setError(
+        'Al haber diferencia entre el sistema y el conteo físico, las observaciones son obligatorias',
+      );
     }
 
     try {
@@ -120,9 +124,7 @@ export const ReconciliationModal: React.FC<ReconciliationModalProps> = ({
         <div className="grid grid-cols-2 gap-4 pt-1">
           <div className="p-3 rounded-xl bg-card border border-border space-y-1">
             <span className="text-[11px] text-muted-foreground">Saldo según Sistema</span>
-            <div className="text-lg font-bold text-foreground">
-              S/ {systemBalance.toFixed(2)}
-            </div>
+            <div className="text-lg font-bold text-foreground">S/ {systemBalance.toFixed(2)}</div>
           </div>
 
           <FormField id="counted-balance-input" label="Saldo Contado Físico" required>
@@ -159,7 +161,11 @@ export const ReconciliationModal: React.FC<ReconciliationModalProps> = ({
             </span>
           </div>
           <span className="text-sm font-bold font-mono">
-            {difference > 0 ? `+ S/ ${difference.toFixed(2)} (Sobrante)` : difference < 0 ? `- S/ ${Math.abs(difference).toFixed(2)} (Faltante)` : 'S/ 0.00'}
+            {difference > 0
+              ? `+ S/ ${difference.toFixed(2)} (Sobrante)`
+              : difference < 0
+                ? `- S/ ${Math.abs(difference).toFixed(2)} (Faltante)`
+                : 'S/ 0.00'}
           </span>
         </div>
 

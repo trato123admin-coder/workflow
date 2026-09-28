@@ -23,7 +23,8 @@ export const DocumentPreviewStep: React.FC<DocumentPreviewStepProps> = ({
 
   // Merge values: from extracted DB or user input
   const allFields = (candidate.fields || []).map((f) => {
-    const val = fieldValues[f.code] ?? (f.current_value !== undefined ? String(f.current_value) : '');
+    const val =
+      fieldValues[f.code] ?? (f.current_value !== undefined ? String(f.current_value) : '');
     return {
       code: f.code,
       label: f.label,
@@ -39,7 +40,8 @@ export const DocumentPreviewStep: React.FC<DocumentPreviewStepProps> = ({
           Paso 4: Vista previa del documento
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Verifique la plantilla y los datos consolidados antes de registrar la generación definitiva.
+          Verifique la plantilla y los datos consolidados antes de registrar la generación
+          definitiva.
         </p>
       </div>
 
@@ -87,8 +89,8 @@ export const DocumentPreviewStep: React.FC<DocumentPreviewStepProps> = ({
         <div className="mb-6 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center gap-2 text-xs text-amber-900 dark:text-amber-200">
           <ShieldAlert className="w-4 h-4 text-amber-500 shrink-0" />
           <span>
-            Documento preliminar en estado <strong>BORRADOR</strong>. Sujeto a revisión y firma
-            por el abogado responsable.
+            Documento preliminar en estado <strong>BORRADOR</strong>. Sujeto a revisión y firma por
+            el abogado responsable.
           </span>
         </div>
 
@@ -116,7 +118,9 @@ export const DocumentPreviewStep: React.FC<DocumentPreviewStepProps> = ({
                     </span>
                   </div>
                   <div className="sm:w-1/2 font-mono text-sm text-foreground truncate">
-                    {item.value || <span className="text-muted-foreground italic">&lt;vacío&gt;</span>}
+                    {item.value || (
+                      <span className="text-muted-foreground italic">&lt;vacío&gt;</span>
+                    )}
                   </div>
                   <div className="sm:w-1/4 text-right">
                     <span className="text-[10px] px-2 py-0.5 rounded bg-muted text-muted-foreground font-medium">

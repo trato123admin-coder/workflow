@@ -16,19 +16,38 @@ import { useCashData } from '../../lib/useCashData';
 import type { CashMovement } from '@workflow/shared';
 
 export default function CashPage() {
-  const [activeTab, setActiveTab] = useState<'movements' | 'requests' | 'reconciliations'>('movements');
+  const [activeTab, setActiveTab] = useState<'movements' | 'requests' | 'reconciliations'>(
+    'movements',
+  );
   const [isMovementModalOpen, setIsMovementModalOpen] = useState(false);
   const [reversingMovement, setReversingMovement] = useState<CashMovement | null>(null);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [isReconciliationModalOpen, setIsReconciliationModalOpen] = useState(false);
 
   const {
-    balances, movements, requests, reconciliations, periods, categories, cases,
-    isLoading, errorMessage, currentUserId, isMfaActive,
-    canWrite, canApprove,
-    loadData, handleSaveMovement, handleConfirmReversal, handleSaveRequest,
-    handleApproveRequest, handleRejectRequest, handleDisburseRequest,
-    handleSaveReconciliation, handleApproveReconciliation, handleRejectReconciliation,
+    balances,
+    movements,
+    requests,
+    reconciliations,
+    periods,
+    categories,
+    cases,
+    isLoading,
+    errorMessage,
+    currentUserId,
+    isMfaActive,
+    canWrite,
+    canApprove,
+    loadData,
+    handleSaveMovement,
+    handleConfirmReversal,
+    handleSaveRequest,
+    handleApproveRequest,
+    handleRejectRequest,
+    handleDisburseRequest,
+    handleSaveReconciliation,
+    handleApproveReconciliation,
+    handleRejectReconciliation,
     handleDownloadSupport,
   } = useCashData();
 

@@ -29,7 +29,7 @@ export interface CompletenessResult {
  */
 export async function getHistoricalAcceptanceRate(
   supabase: SupabaseClient,
-  documentTypeId: string
+  documentTypeId: string,
 ): Promise<HistoricalStats> {
   const { data, error } = await supabase
     .from('ai_recommendations')
@@ -68,11 +68,12 @@ function extractValueFromPath(obj: unknown, path: string): unknown {
 export async function calculateCompletenessAndMissingFields(
   supabase: SupabaseClient,
   templateId: string,
-  context: RuleContext
+  context: RuleContext,
 ): Promise<CompletenessResult> {
   const { data: templateFields, error } = await supabase
     .from('template_fields')
-    .select(`
+    .select(
+      `
       id,
       is_required,
       placeholder,
@@ -83,7 +84,8 @@ export async function calculateCompletenessAndMissingFields(
         source_path,
         is_required
       )
-    `)
+    `,
+    )
     .eq('template_id', templateId);
 
   if (error || !templateFields || templateFields.length === 0) {
@@ -135,8 +137,7 @@ export async function calculateCompletenessAndMissingFields(
     });
   }
 
-  const completeness =
-    requiredCount > 0 ? presentRequiredCount / requiredCount : 1.0;
+  const completeness = requiredCount > 0 ? presentRequiredCount / requiredCount : 1.0;
 
   return {
     completeness,
@@ -164,7 +165,7 @@ export interface RecordRecommendationParams {
  */
 export async function recordOrReuseRecommendation(
   supabase: SupabaseClient,
-  params: RecordRecommendationParams
+  params: RecordRecommendationParams,
 ): Promise<string> {
   // Check for existing pending recommendation
   let query = supabase
@@ -229,7 +230,7 @@ export async function recordOrReuseRecommendation(
 export async function updateRecommendationDecision(
   supabase: SupabaseClient,
   recommendationId: string,
-  wasAccepted: boolean
+  wasAccepted: boolean,
 ): Promise<void> {
   const updateData: Record<string, unknown> = {
     was_accepted: wasAccepted,

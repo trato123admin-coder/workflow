@@ -87,11 +87,7 @@ export const approvalRoutes: FastifyPluginAsync = async (fastify) => {
       }
 
       try {
-        const result = await approveDocument(
-          userJwt,
-          paramsResult.data.id,
-          request.log,
-        );
+        const result = await approveDocument(userJwt, paramsResult.data.id, request.log);
         return reply.status(200).send({ success: true, data: result });
       } catch (err: unknown) {
         return errorResponse(reply, err);
@@ -163,7 +159,8 @@ async function approveDocument(
   // 2. Obtener documento generado vinculado con su trabajo de generación para resolver el caso
   const { data: genDoc, error: gdErr } = await supabase
     .from('generated_documents')
-    .select(`
+    .select(
+      `
       id,
       approval_status,
       generation_job_id,
@@ -172,7 +169,8 @@ async function approveDocument(
         case_id,
         requested_by
       )
-    `)
+    `,
+    )
     .eq('id', generatedDocumentId)
     .single();
 
@@ -180,9 +178,11 @@ async function approveDocument(
     throw createDocumentError('Documento generado no encontrado', 404, 'NOT_FOUND');
   }
 
-  const job = (genDoc as unknown as {
-    generation_jobs: { case_id: string; requested_by: string };
-  }).generation_jobs;
+  const job = (
+    genDoc as unknown as {
+      generation_jobs: { case_id: string; requested_by: string };
+    }
+  ).generation_jobs;
 
   // 3. Verificación de acceso y permisos de escritura en el expediente
   await verifyCaseAccess(supabase, user, job.case_id, { requireWrite: true });
@@ -209,7 +209,11 @@ async function approveDocument(
   }
 
   // 6. Marcar versiones anteriores del mismo slot como SUPERSEDED
-  await supersedePreviousVersions(supabase, genDoc.generation_job_id as string, generatedDocumentId);
+  await supersedePreviousVersions(
+    supabase,
+    genDoc.generation_job_id as string,
+    generatedDocumentId,
+  );
 
   const now = new Date().toISOString();
   const { data: updated, error: updateErr } = await supabase
@@ -245,7 +249,8 @@ async function rejectDocument(
   // 2. Obtener documento generado vinculado con su trabajo de generación para resolver el caso
   const { data: genDoc, error: gdErr } = await supabase
     .from('generated_documents')
-    .select(`
+    .select(
+      `
       id,
       approval_status,
       generation_job_id,
@@ -254,7 +259,8 @@ async function rejectDocument(
         case_id,
         requested_by
       )
-    `)
+    `,
+    )
     .eq('id', generatedDocumentId)
     .single();
 
@@ -262,9 +268,11 @@ async function rejectDocument(
     throw createDocumentError('Documento generado no encontrado', 404, 'NOT_FOUND');
   }
 
-  const job = (genDoc as unknown as {
-    generation_jobs: { case_id: string; requested_by: string };
-  }).generation_jobs;
+  const job = (
+    genDoc as unknown as {
+      generation_jobs: { case_id: string; requested_by: string };
+    }
+  ).generation_jobs;
 
   // 3. Verificación de acceso y permisos de escritura en el expediente
   await verifyCaseAccess(supabase, user, job.case_id, { requireWrite: true });
@@ -311,7 +319,9 @@ async function rejectDocument(
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
 
-async function isFourEyesEnabled(supabase: ReturnType<typeof getSupabaseServiceClient>): Promise<boolean> {
+async function isFourEyesEnabled(
+  supabase: ReturnType<typeof getSupabaseServiceClient>,
+): Promise<boolean> {
   const { data } = await supabase
     .from('system_settings')
     .select('value')
