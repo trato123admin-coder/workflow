@@ -8,10 +8,12 @@ export type WorkflowStatusCategory = 'NOT_STARTED' | 'IN_PROGRESS' | 'WAITING' |
 
 export interface KPICaseInput {
   id: string;
-  status_id: string;
+  status_id?: string;
+  status?: string;
   created_at: string;
   due_date?: string | null;
   progress?: number | null;
+  current_progress?: number | null;
   is_confidential?: boolean;
 }
 
@@ -101,12 +103,30 @@ const CATEGORY_LABELS: Record<WorkflowStatusCategory, string> = {
   DONE: 'Finalizado',
 };
 
+export function getCaseCategory(
+  c: KPICaseInput,
+  statusMap: Map<string, WorkflowStatusCategory>,
+): WorkflowStatusCategory {
+  if (c.status_id && statusMap.has(c.status_id)) {
+    return statusMap.get(c.status_id)!;
+  }
+  if (c.status) {
+    if (statusMap.has(c.status)) return statusMap.get(c.status)!;
+    if (c.status === 'COMPLETED' || c.status === 'CLOSED' || c.status === 'ARCHIVED') return 'DONE';
+    if (c.status === 'ON_HOLD') return 'WAITING';
+    if (c.status === 'DRAFT') return 'NOT_STARTED';
+    if (c.status === 'OPEN' || c.status === 'IN_PROGRESS') return 'IN_PROGRESS';
+  }
+  return 'NOT_STARTED';
+}
+
 // 1. Distribución porcentual y conteo por categoría semántica (Consistencia A.7 #4)
 export function computeStatusDistribution(
   cases: KPICaseInput[],
   statuses: KPIStatusInput[],
 ): StatusDistribution {
   const statusMap = new Map(statuses.map((s) => [s.id, s.category]));
+  statuses.forEach((s) => statusMap.set(s.code, s.category));
   const counts: Record<WorkflowStatusCategory, number> = {
     NOT_STARTED: 0,
     IN_PROGRESS: 0,
@@ -116,7 +136,7 @@ export function computeStatusDistribution(
   };
 
   for (const c of cases) {
-    const category = statusMap.get(c.status_id) || 'NOT_STARTED';
+    const category = getCaseCategory(c, statusMap);
     counts[category] = (counts[category] || 0) + 1;
   }
 
@@ -195,11 +215,11 @@ export function computeDashboardKPIs(
   let activeCount = 0;
 
   for (const c of cases) {
-    const cat = statusMap.get(c.status_id) || 'NOT_STARTED';
+    const cat = getCaseCategory(c, statusMap);
     if (cat !== 'DONE') {
       activeCasesMap.add(c.id);
       activeCount++;
-      progressSum += Number(c.progress || 0);
+      progressSum += Number(c.current_progress ?? c.progress ?? 0);
       if (isCaseOverdue(c, cat, now)) {
         overdueCount++;
       }
@@ -251,10 +271,10 @@ export function computeGestorKPIs(
   let progressSum = 0;
 
   for (const c of myCases) {
-    const cat = statusMap.get(c.status_id) || 'NOT_STARTED';
+    const cat = getCaseCategory(c, statusMap);
     if (cat !== 'DONE') {
       myActive++;
-      progressSum += Number(c.progress || 0);
+      progressSum += Number(c.current_progress ?? c.progress ?? 0);
       if (isCaseOverdue(c, cat, now)) {
         myOverdue++;
       }
@@ -280,6 +300,7 @@ export function computeWorkloadByAnalyst(
   now = new Date(),
 ): AnalystWorkload[] {
   const statusMap = new Map(statuses.map((s) => [s.id, s.category]));
+  statuses.forEach((s) => statusMap.set(s.code, s.category));
   const casesMap = new Map(cases.map((c) => [c.id, c]));
 
   const userAssignments = new Map<string, KPIAssignmentInput[]>();
@@ -303,7 +324,7 @@ export function computeWorkloadByAnalyst(
     for (const a of userAsg) {
       const c = casesMap.get(a.case_id);
       if (!c) continue;
-      const cat = statusMap.get(c.status_id) || 'NOT_STARTED';
+      const cat = getCaseCategory(c, statusMap);
       if (cat === 'DONE') {
         completed++;
       } else {

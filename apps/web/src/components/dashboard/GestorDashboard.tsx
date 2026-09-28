@@ -54,7 +54,7 @@ export const GestorDashboard: React.FC = () => {
         supabase.from('cases').select(`
           id, case_number, title, route, status, priority, is_confidential, has_dispute,
           ai_allowed, current_progress, last_activity_at, created_at, updated_at,
-          client_person_id, case_model_version_id, status_id, due_date,
+          client_person_id, case_model_version_id, due_date,
           client_person:persons(id, person_type, identity_document_type, identity_document_number, first_name, last_name, legal_name)
         `),
         supabase

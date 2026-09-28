@@ -62,7 +62,7 @@ export const AdminDashboard: React.FC = () => {
         supabase
           .from('cases')
           .select(
-            'id, case_number, title, created_at, due_date, current_progress, status_id, is_confidential',
+            'id, case_number, title, created_at, due_date, current_progress, status, is_confidential',
           ),
         supabase
           .from('workflow_statuses')
@@ -73,7 +73,9 @@ export const AdminDashboard: React.FC = () => {
           .from('case_assignments')
           .select('case_id, user_id, assignment_type, is_primary, ended_at'),
         supabase.from('profiles').select('id, first_name, last_name, email').eq('is_active', true),
-        supabase.from('case_processes').select('sequence, name, definition_id, status_id'),
+        supabase
+          .from('case_processes')
+          .select('sequence, status_id, process_definition:process_definitions(name, code)'),
         supabase
           .from('user_preferences')
           .select('value')
@@ -95,12 +97,13 @@ export const AdminDashboard: React.FC = () => {
       const statuses = (statusesRes.data || []) as unknown as KPIStatusInput[];
       const assignments = (asgRes.data || []) as unknown as KPIAssignmentInput[];
       const profiles = (profRes.data || []) as unknown as KPIProfileInput[];
-      const processes = (procRes.data || []) as {
+      interface ProcessItem {
         sequence: number;
-        name: string;
-        definition_id: string;
         status_id: string;
-      }[];
+        process_definition?: { name?: string; code?: string } | null;
+        name?: string;
+      }
+      const processes = (procRes.data || []) as unknown as ProcessItem[];
 
       setRawCases(cases);
 
@@ -115,7 +118,7 @@ export const AdminDashboard: React.FC = () => {
       // 3. Calcular Embudo de Procesos
       const stageCountMap = new Map<string, { sequence: number; name: string; count: number }>();
       for (const p of processes) {
-        const key = p.name || `Paso ${p.sequence}`;
+        const key = p.process_definition?.name || p.name || `Paso ${p.sequence}`;
         const current = stageCountMap.get(key) || { sequence: p.sequence, name: key, count: 0 };
         current.count++;
         stageCountMap.set(key, current);
