@@ -175,25 +175,30 @@ export function useAssistantEvaluation(supabase: SupabaseClient) {
         // 7. Sort by score descending
         evaluatedList.sort((a, b) => b.score - a.score);
 
-        // 8. Record or reuse recommendation for top candidate idempotently
-        if (evaluatedList.length > 0) {
-          const top = evaluatedList[0];
-          const recId = await recordOrReuseRecommendation(supabase, {
-            caseId,
-            documentTypeId: top.documentTypeId,
-            templateId: top.template?.id || null,
-            score: top.score,
-            reasons: top.reasons,
-            missingFields: top.missingFields,
-            alternatives: evaluatedList.slice(1).map((alt) => ({
+        // 8. Record or reuse recommendation for EVERY candidate idempotently
+        // This ensures every shown candidate gets a valid recommendationId and counts towards historical Laplace stats
+        for (let i = 0; i < evaluatedList.length; i++) {
+          const cand = evaluatedList[i];
+          const otherAlternatives = evaluatedList
+            .filter((_, idx) => idx !== i)
+            .map((alt) => ({
               document_type_id: alt.documentTypeId,
               code: alt.documentTypeCode,
               name: alt.documentTypeName,
               score: alt.score,
-            })),
-            rulesTriggered: top.matchingRules,
+            }));
+
+          const recId = await recordOrReuseRecommendation(supabase, {
+            caseId,
+            documentTypeId: cand.documentTypeId,
+            templateId: cand.template?.id || null,
+            score: cand.score,
+            reasons: cand.reasons,
+            missingFields: cand.missingFields,
+            alternatives: otherAlternatives,
+            rulesTriggered: cand.matchingRules,
           });
-          top.recommendationId = recId;
+          cand.recommendationId = recId;
         }
 
         setCandidates(evaluatedList);

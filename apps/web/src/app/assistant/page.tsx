@@ -107,7 +107,25 @@ function AssistantContent() {
 
   const handleConfirmGenerate = async () => {
     if (!selectedCandidate?.recommendationId) return;
-    await updateRecommendationDecision(supabase, selectedCandidate.recommendationId, true);
+    setIsProcessingDecision(true);
+    try {
+      // 1. Mark selected candidate as was_accepted = true
+      await updateRecommendationDecision(supabase, selectedCandidate.recommendationId, true);
+
+      // 2. Mark unselected alternatives from this session as was_accepted = false.
+      // Decision rationale: The user was shown these candidates and chose a different one.
+      // Recording them as not accepted reflects realistic conversion rates for Laplace smoothing.
+      const otherCandidates = candidates.filter(
+        (c) => c.documentTypeId !== selectedCandidate.documentTypeId && c.recommendationId
+      );
+      await Promise.all(
+        otherCandidates.map((c) =>
+          updateRecommendationDecision(supabase, c.recommendationId!, false)
+        )
+      );
+    } finally {
+      setIsProcessingDecision(false);
+    }
   };
 
   const handleReset = () => {
