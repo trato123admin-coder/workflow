@@ -54,7 +54,7 @@ export default function LoginPage() {
         return;
       }
 
-      let target = '/users';
+      let target = '/dashboard';
       if (typeof window !== 'undefined') {
         const param = new URLSearchParams(window.location.search).get('redirectTo');
         if (param && param.startsWith('/') && !param.startsWith('//')) {
