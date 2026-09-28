@@ -318,7 +318,7 @@ select throws_ok(
            approved_by = 'a2222222-2222-2222-2222-222222222222'
      where id = 'e0000000-0000-0000-0000-000000000001'
   $$,
-  'P0403',
+  'Control dual violado',
   'Control dual: quien abre el arqueo no puede auto-aprobarlo'
 );
 
