@@ -290,6 +290,7 @@ async function rejectDocument(
     .from('generated_documents')
     .update({
       approval_status: 'REJECTED',
+      rejection_reason: reason,
       approved_by: user.userId,
       approved_at: new Date().toISOString(),
     })
@@ -301,16 +302,7 @@ async function rejectDocument(
     throw createDocumentError('Error al rechazar el documento', 500, 'REJECT_FAILED');
   }
 
-  // Registrar motivo del rechazo en el log inmutable de auditoría
-  await supabase.from('audit_logs').insert({
-    table_name: 'generated_documents',
-    record_id: generatedDocumentId,
-    action: 'REJECT',
-    old_values: { approval_status: genDoc.approval_status },
-    new_values: { approval_status: 'REJECTED', reason },
-    performed_by: user.userId,
-  });
-
+  // La auditoría se realiza automáticamente mediante el trigger de BD `trg_audit_generated_documents` (private.tg_audit_log())
   logger.info({ docId: generatedDocumentId, reason }, 'Documento rechazado');
   return { id: updated.id as string, approval_status: updated.approval_status as string };
 }

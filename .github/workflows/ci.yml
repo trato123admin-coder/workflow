@@ -107,3 +107,26 @@ jobs:
               echo "::error title=pgTAP::$line"
             done
           fi
+
+  engine-docker:
+    name: Engine Docker Build & LibreOffice Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Engine Docker Image
+        run: |
+          docker build -t workflow-engine:ci -f services/engine/Dockerfile .
+
+      - name: Verify LibreOffice Headless in Container
+        run: |
+          docker run --rm workflow-engine:ci soffice --version
+
+      - name: Verify Liberation and Carlito Fonts
+        run: |
+          docker run --rm workflow-engine:ci fc-list : family | grep -E "Liberation|Carlito"
+

@@ -16,6 +16,10 @@ revoke insert, update, delete on public.generation_jobs from public, anon, authe
 grant select on public.generation_jobs to authenticated;
 grant all on public.generation_jobs to service_role;
 
+-- Añadir columna rejection_reason para almacenar el motivo del rechazo en el registro
+-- y permitir que el trigger automático private.tg_audit_log lo capture en auditoría
+alter table public.generated_documents add column if not exists rejection_reason text;
+
 
 -- 2. RPC create_generation_job REFORZADA
 create or replace function public.create_generation_job(
