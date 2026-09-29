@@ -26,14 +26,14 @@ Registro de migraciones ejecutadas, entorno de aplicación y resultado de su res
 
 ---
 
-## Resumen de Estado de Migraciones (Sprint 11)
+## Resumen de Estado de Migraciones (Staging)
 
 - **Total de migraciones en repositorio (`supabase/migrations/`):** 17
 - **Total de migraciones aplicadas en Staging:** 17
 - **Total de migraciones verificadas con `verify.sql`:** 17
 - **Migraciones pendientes por aplicar:** 0 (Ninguna)
 - **Fecha de última verificación:** 2026-09-28
-- **Próximas migraciones:** N/A (Sprint 11 completado y verificado en Staging).
+- **Próximas migraciones:** N/A (Sprint 7 / MVP verificado en Staging; listo para Sprint 8).
 
 ### Procedimiento de comprobación en SQL Editor de Supabase (Catálogo de Objetos):
 ```sql
