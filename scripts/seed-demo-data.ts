@@ -17,15 +17,21 @@ async function seedDemoData() {
   console.log('Iniciando carga de datos demo para Dashboard y Caja Chica...');
 
   // 1. Obtener perfiles existentes
-  const { data: profiles, error: profErr } = await supabase.from('profiles').select('id, email, first_name, last_name');
+  const { data: profiles, error: profErr } = await supabase
+    .from('profiles')
+    .select('id, email, first_name, last_name');
   if (profErr || !profiles || profiles.length === 0) {
     throw new Error('No se encontraron perfiles en la base de datos');
   }
 
-  const adminUser = profiles.find((p) => p.email.includes('admin') || p.email.includes('trato123')) || profiles[0];
+  const adminUser =
+    profiles.find((p) => p.email.includes('admin') || p.email.includes('trato123')) || profiles[0];
   const gestor1 = profiles.find((p) => p.email.includes('gestor1')) || profiles[1] || adminUser;
   const gestor2 = profiles.find((p) => p.email.includes('gestor2')) || profiles[2] || adminUser;
-  const abogado = profiles.find((p) => p.email.includes('agencia') || p.email.includes('carlos')) || profiles[3] || adminUser;
+  const abogado =
+    profiles.find((p) => p.email.includes('agencia') || p.email.includes('carlos')) ||
+    profiles[3] ||
+    adminUser;
 
   console.log(`Perfiles asignados:
   - Admin: ${adminUser.email} (${adminUser.id})
@@ -34,79 +40,158 @@ async function seedDemoData() {
   - Abogado: ${abogado.email} (${abogado.id})`);
 
   // 2. Obtener estados de workflow
-  const { data: statuses } = await supabase.from('workflow_statuses').select('*').order('sort_order', { ascending: true });
+  const { data: statuses } = await supabase
+    .from('workflow_statuses')
+    .select('*')
+    .order('sort_order', { ascending: true });
   const inProgressStatus = statuses?.find((s) => s.category === 'IN_PROGRESS') || statuses?.[1];
-  const doneStatus = statuses?.find((s) => s.category === 'DONE') || statuses?.[statuses.length - 1];
+  const doneStatus =
+    statuses?.find((s) => s.category === 'DONE') || statuses?.[statuses.length - 1];
   const waitingStatus = statuses?.find((s) => s.category === 'WAITING') || inProgressStatus;
 
   // 3. Enriquecer los casos existentes
-  const { data: existingCases } = await supabase.from('cases').select('id, case_number').order('case_number', { ascending: true });
+  const { data: existingCases } = await supabase
+    .from('cases')
+    .select('id, case_number')
+    .order('case_number', { ascending: true });
   console.log(`Casos existentes a actualizar: ${existingCases?.length || 0}`);
 
   if (existingCases && existingCases.length >= 5) {
     // Caso 1: En trámite, 65% de avance
-    await supabase.from('cases').update({
-      status: 'IN_PROGRESS',
-      due_date: '2026-10-15',
-    }).eq('id', existingCases[0].id);
+    await supabase
+      .from('cases')
+      .update({
+        status: 'IN_PROGRESS',
+        due_date: '2026-10-15',
+      })
+      .eq('id', existingCases[0].id);
 
     // Caso 2: Vencido (alerta en dashboard y ¿Qué hago hoy?), 35% de avance
-    await supabase.from('cases').update({
-      status: 'OPEN',
-      due_date: '2026-09-20', // Vencido hace 8 días
-      priority: 'URGENT',
-    }).eq('id', existingCases[1].id);
+    await supabase
+      .from('cases')
+      .update({
+        status: 'OPEN',
+        due_date: '2026-09-20', // Vencido hace 8 días
+        priority: 'URGENT',
+      })
+      .eq('id', existingCases[1].id);
 
     // Caso 3: Finalizado (100% de avance, COMPLETED)
-    await supabase.from('cases').update({
-      status: 'COMPLETED',
-      due_date: '2026-09-10',
-      closed_at: '2026-09-24T18:00:00Z',
-    }).eq('id', existingCases[2].id);
+    await supabase
+      .from('cases')
+      .update({
+        status: 'COMPLETED',
+        due_date: '2026-09-10',
+        closed_at: '2026-09-24T18:00:00Z',
+      })
+      .eq('id', existingCases[2].id);
 
     // Caso 4: En espera / Pausado, sin abogado asignado (para probar KPI sin abogado y estado WAITING)
-    await supabase.from('cases').update({
-      status: 'ON_HOLD',
-      due_date: '2026-10-01',
-    }).eq('id', existingCases[3].id);
+    await supabase
+      .from('cases')
+      .update({
+        status: 'ON_HOLD',
+        due_date: '2026-10-01',
+      })
+      .eq('id', existingCases[3].id);
 
     // Caso 5: Vencido crítico, 15% de avance
-    await supabase.from('cases').update({
-      current_progress: 15.0,
-      status: 'OPEN',
-      due_date: '2026-09-25', // Vencido hace 3 días
-      priority: 'HIGH',
-    }).eq('id', existingCases[4].id);
+    await supabase
+      .from('cases')
+      .update({
+        current_progress: 15.0,
+        status: 'OPEN',
+        due_date: '2026-09-25', // Vencido hace 3 días
+        priority: 'HIGH',
+      })
+      .eq('id', existingCases[4].id);
     console.log('✓ Casos actualizados con progreso, estados y fechas SLA');
 
     // 4. Asignaciones de casos para la carga de trabajo por analista
     // Limpiar asignaciones previas de estos 5 casos
-    await supabase.from('case_assignments').delete().in('case_id', existingCases.map((c) => c.id));
+    await supabase
+      .from('case_assignments')
+      .delete()
+      .in(
+        'case_id',
+        existingCases.map((c) => c.id),
+      );
 
     await supabase.from('case_assignments').insert([
       // Caso 1: Responsable Gestor 1, Abogado
-      { case_id: existingCases[0].id, user_id: gestor1.id, assignment_type: 'RESPONSIBLE', is_primary: true },
-      { case_id: existingCases[0].id, user_id: abogado.id, assignment_type: 'LAWYER', is_primary: false },
+      {
+        case_id: existingCases[0].id,
+        user_id: gestor1.id,
+        assignment_type: 'RESPONSIBLE',
+        is_primary: true,
+      },
+      {
+        case_id: existingCases[0].id,
+        user_id: abogado.id,
+        assignment_type: 'LAWYER',
+        is_primary: false,
+      },
 
       // Caso 2: Responsable Gestor 2, Abogado
-      { case_id: existingCases[1].id, user_id: gestor2.id, assignment_type: 'RESPONSIBLE', is_primary: true },
-      { case_id: existingCases[1].id, user_id: abogado.id, assignment_type: 'LAWYER', is_primary: false },
+      {
+        case_id: existingCases[1].id,
+        user_id: gestor2.id,
+        assignment_type: 'RESPONSIBLE',
+        is_primary: true,
+      },
+      {
+        case_id: existingCases[1].id,
+        user_id: abogado.id,
+        assignment_type: 'LAWYER',
+        is_primary: false,
+      },
 
       // Caso 3: Responsable Admin (Completado)
-      { case_id: existingCases[2].id, user_id: adminUser.id, assignment_type: 'RESPONSIBLE', is_primary: true },
-      { case_id: existingCases[2].id, user_id: abogado.id, assignment_type: 'LAWYER', is_primary: false },
+      {
+        case_id: existingCases[2].id,
+        user_id: adminUser.id,
+        assignment_type: 'RESPONSIBLE',
+        is_primary: true,
+      },
+      {
+        case_id: existingCases[2].id,
+        user_id: abogado.id,
+        assignment_type: 'LAWYER',
+        is_primary: false,
+      },
 
       // Caso 4: Responsable Gestor 1 (SIN ABOGADO para KPI "Sin Abogado")
-      { case_id: existingCases[3].id, user_id: gestor1.id, assignment_type: 'RESPONSIBLE', is_primary: true },
+      {
+        case_id: existingCases[3].id,
+        user_id: gestor1.id,
+        assignment_type: 'RESPONSIBLE',
+        is_primary: true,
+      },
 
       // Caso 5: Responsable Gestor 2, Abogado
-      { case_id: existingCases[4].id, user_id: gestor2.id, assignment_type: 'RESPONSIBLE', is_primary: true },
-      { case_id: existingCases[4].id, user_id: abogado.id, assignment_type: 'LAWYER', is_primary: false },
+      {
+        case_id: existingCases[4].id,
+        user_id: gestor2.id,
+        assignment_type: 'RESPONSIBLE',
+        is_primary: true,
+      },
+      {
+        case_id: existingCases[4].id,
+        user_id: abogado.id,
+        assignment_type: 'LAWYER',
+        is_primary: false,
+      },
     ]);
     console.log('✓ Asignaciones de analistas creadas');
 
     // 5. Actualizar estados de case_processes para el embudo (Process Funnel)
-    const { data: procs } = await supabase.from('case_processes').select('id, case_id, sequence').in('case_id', existingCases.map((c) => c.id));
+    const { data: procs } = await supabase
+      .from('case_processes')
+      .select('id, case_id, sequence')
+      .in(
+        'case_id',
+        existingCases.map((c) => c.id),
+      );
     if (procs) {
       for (const pr of procs) {
         let stId = inProgressStatus.id;
@@ -126,32 +211,35 @@ async function seedDemoData() {
   let acc3Id: string;
 
   if (!existingAccounts || existingAccounts.length === 0) {
-    const { data: createdAccs, error: accErr } = await supabase.from('cash_accounts').insert([
-      {
-        name: 'Caja Chica Central - Efectivo',
-        account_type: 'CASH',
-        currency: 'PEN',
-        opening_balance: 1500.0,
-        responsible_user_id: adminUser.id,
-        is_active: true,
-      },
-      {
-        name: 'Cuenta Operativa BCP',
-        account_type: 'BANK',
-        currency: 'PEN',
-        opening_balance: 12000.0,
-        responsible_user_id: adminUser.id,
-        is_active: true,
-      },
-      {
-        name: 'Caja Fondo Dólares (USD)',
-        account_type: 'CASH',
-        currency: 'USD',
-        opening_balance: 800.0,
-        responsible_user_id: gestor1.id,
-        is_active: true,
-      },
-    ]).select('id, name');
+    const { data: createdAccs, error: accErr } = await supabase
+      .from('cash_accounts')
+      .insert([
+        {
+          name: 'Caja Chica Central - Efectivo',
+          account_type: 'CASH',
+          currency: 'PEN',
+          opening_balance: 1500.0,
+          responsible_user_id: adminUser.id,
+          is_active: true,
+        },
+        {
+          name: 'Cuenta Operativa BCP',
+          account_type: 'BANK',
+          currency: 'PEN',
+          opening_balance: 12000.0,
+          responsible_user_id: adminUser.id,
+          is_active: true,
+        },
+        {
+          name: 'Caja Fondo Dólares (USD)',
+          account_type: 'CASH',
+          currency: 'USD',
+          opening_balance: 800.0,
+          responsible_user_id: gestor1.id,
+          is_active: true,
+        },
+      ])
+      .select('id, name');
     if (accErr) throw accErr;
     acc1Id = createdAccs[0].id;
     acc2Id = createdAccs[1].id;
@@ -338,7 +426,8 @@ async function seedDemoData() {
 
     const { error: movErr } = await supabase.from('cash_movements').insert(movementsPayload);
     if (movErr) console.warn('Error insertando movimientos:', movErr.message);
-    else console.log('✓ Movimientos contables creados: 8 (Ingresos y Egresos con categorías y casos)');
+    else
+      console.log('✓ Movimientos contables creados: 8 (Ingresos y Egresos con categorías y casos)');
   }
 
   // 10. CAJA CHICA: Arqueos de caja (cash_reconciliations)
