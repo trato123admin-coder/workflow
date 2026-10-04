@@ -4,8 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   AlertTriangle,
-  Clock,
-  Users,
   CheckCircle2,
   ChevronRight,
   ShieldAlert,

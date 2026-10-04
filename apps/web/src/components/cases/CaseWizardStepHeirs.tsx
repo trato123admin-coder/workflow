@@ -13,7 +13,7 @@ import {
   isMinor,
   calculateAge,
 } from '@workflow/shared';
-import { Users, Plus, Trash2, ShieldAlert, Percent } from 'lucide-react';
+import { Users, Plus, Trash2, ShieldAlert } from 'lucide-react';
 
 interface HeirEntry extends InitialPartyInput {
   personName: string;

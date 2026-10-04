@@ -38,7 +38,7 @@ export const PersonPicker: React.FC<PersonPickerProps> = ({ selectedPersonId, on
         const { data, error } = await query;
         if (error) throw error;
         setPersons((data as PersonItem[]) || []);
-      } catch (err) {
+      } catch {
         // silent fallback for tests
       } finally {
         setIsLoading(false);

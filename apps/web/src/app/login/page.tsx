@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { LoginSchema } from '@workflow/shared';
 import { FormField } from '../../components/ui/FormField';
-import { createClient } from '../../lib/supabase/client';
 import { Lock, Mail, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {

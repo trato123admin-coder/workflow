@@ -56,7 +56,7 @@ function AssistantContent() {
 
         if (error) throw error;
         setCases(data || []);
-      } catch (err: unknown) {
+      } catch {
         // Handled silently or empty state displayed
       } finally {
         setIsLoadingCases(false);

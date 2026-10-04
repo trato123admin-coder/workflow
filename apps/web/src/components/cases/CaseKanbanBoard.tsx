@@ -1,15 +1,11 @@
 'use client';
 
 import React from 'react';
-import { StatusBadge } from '../ui/StatusBadge';
 import {
-  Clock,
   CheckCircle2,
-  AlertCircle,
   Play,
   Check,
   Pause,
-  ArrowRight,
   ShieldAlert,
 } from 'lucide-react';
 import type { CaseProcessItem } from '@workflow/shared';

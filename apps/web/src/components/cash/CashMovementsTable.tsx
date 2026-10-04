@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { StatusBadge } from '../ui/StatusBadge';
-import { Plus, RotateCcw, FileText, Search, Filter, Briefcase } from 'lucide-react';
+import { Plus, RotateCcw, FileText, Search, Briefcase } from 'lucide-react';
 import type { CashMovement, CashAccountBalance } from '@workflow/shared';
 
 interface CashMovementsTableProps {

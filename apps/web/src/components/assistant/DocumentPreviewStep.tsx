@@ -2,7 +2,7 @@
 
 import React from 'react';
 import type { EvaluatedCandidate } from './types';
-import { ArrowLeft, ArrowRight, FileText, Clock, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, ArrowRight, FileText, Clock, ShieldAlert } from 'lucide-react';
 
 interface DocumentPreviewStepProps {
   candidate: EvaluatedCandidate;
