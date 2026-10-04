@@ -9,14 +9,38 @@ describe('Shared Package Defaults & Schemas', () => {
     expect(APP_DEFAULTS.LOCALE).toBe('es-PE');
   });
 
-  it('should validate engine env with defaults', () => {
-    const parsed = engineEnvSchema.parse({});
+  it('[unitaria] should validate engine env with dev defaults', () => {
+    const parsed = engineEnvSchema.parse({ NODE_ENV: 'development' });
     expect(parsed.PORT).toBe(3001);
     expect(parsed.HOST).toBe('0.0.0.0');
     expect(parsed.NODE_ENV).toBe('development');
+    expect(parsed.ENGINE_TICK_SECRET).toBe('dev_tick_secret_placeholder');
   });
 
-  it('should reject invalid NODE_ENV', () => {
+  it('[unitaria] should treat missing NODE_ENV as production and reject placeholder secret', () => {
+    expect(() => engineEnvSchema.parse({})).toThrowError(
+      /ENGINE_TICK_SECRET es obligatorio en producción/,
+    );
+  });
+
+  it('[unitaria] should reject production when secret is less than 32 characters', () => {
+    expect(() =>
+      engineEnvSchema.parse({
+        NODE_ENV: 'production',
+        ENGINE_TICK_SECRET: 'short_secret_below_32_chars',
+      }),
+    ).toThrowError(/ENGINE_TICK_SECRET es obligatorio en producción/);
+  });
+
+  it('[unitaria] should accept valid production secret of 32+ characters', () => {
+    const parsed = engineEnvSchema.parse({
+      NODE_ENV: 'production',
+      ENGINE_TICK_SECRET: 'a_very_secure_random_engine_tick_secret_32_chars_long',
+    });
+    expect(parsed.NODE_ENV).toBe('production');
+  });
+
+  it('[unitaria] should reject invalid NODE_ENV', () => {
     expect(() =>
       engineEnvSchema.parse({
         NODE_ENV: 'invalid_env',

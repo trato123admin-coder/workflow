@@ -136,3 +136,35 @@ export function getRemainingBusinessDays(
 
   return isFuture ? count : -count;
 }
+
+/**
+ * Convierte un timestamp ISO o Date a string 'YYYY-MM-DD' en la zona horaria America/Lima (UTC-5).
+ */
+export function toLimaDateString(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
+}
+
+/**
+ * Cuenta los días hábiles transcurridos entre dos fechas (valor absoluto).
+ * Tolera tabla de feriados vacía: simplemente descuenta sábados y domingos.
+ *
+ * Definición y reglas de conteo:
+ * - Mismo día hábil: countBusinessDays(d, d) === 0 (no ha transcurrido un día completo).
+ * - Viernes a Lunes: countBusinessDays('2026-10-02', '2026-10-05') === 1.
+ *   El fin de semana (sábado y domingo) se descuenta íntegramente; el lunes representa
+ *   exactamente 1 día hábil transcurrido desde el viernes.
+ * - Cruce de fin de semana con feriado: si el lunes es feriado, Viernes a Martes === 1.
+ * - Frontera horaria UTC / Lima: los timestamps se normalizan a la fecha civil de Lima (UTC-5)
+ *   antes del cálculo (ej. 2026-10-01T04:30:00Z corresponde a 2026-09-30 en Lima).
+ */
+export function countBusinessDays(
+  startDate: Date | string,
+  endDate: Date | string,
+  holidays: (string | Date)[] = [],
+): number {
+  const startIso = typeof startDate === 'string' && startDate.length === 10 ? startDate : toLimaDateString(startDate);
+  const endIso = typeof endDate === 'string' && endDate.length === 10 ? endDate : toLimaDateString(endDate);
+  return Math.abs(getRemainingBusinessDays(endIso, holidays, startIso));
+}
+
