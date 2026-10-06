@@ -11,7 +11,6 @@ import {
   type RuleRecord,
 } from '@workflow/shared';
 import { buildRuleContextFromCase } from '../../lib/rules-context-builder';
-import { StatusBadge } from '../ui/StatusBadge';
 import {
   Play,
   AlertTriangle,

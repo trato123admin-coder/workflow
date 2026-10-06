@@ -81,7 +81,7 @@ export function useCaseWizardData(isOpen: boolean) {
             setResponsibleId(formattedUsers[0].id);
           }
         }
-      } catch (err) {
+      } catch {
         // Fallback
       }
     };

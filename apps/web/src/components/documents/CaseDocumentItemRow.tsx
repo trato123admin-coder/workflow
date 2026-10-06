@@ -10,7 +10,6 @@ import {
   FileText,
   Clock,
   AlertCircle,
-  Eye,
 } from 'lucide-react';
 import type { CaseDocumentStatus } from '@workflow/shared';
 

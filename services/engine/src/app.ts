@@ -8,9 +8,12 @@ import { documentRoutes } from './routes/documents.js';
 import { templateRoutes } from './routes/templates.js';
 import { generationRoutes } from './routes/generation.js';
 import { approvalRoutes } from './routes/approval.js';
+import { jobsRoutes } from './routes/jobs.js';
+import { initializeAlertEngine } from './services/alert-engine.js';
 import { getEngineEnv } from './config/env.js';
 
 export async function buildApp(): Promise<FastifyInstance> {
+  initializeAlertEngine();
   const env = getEngineEnv();
 
   const fastify = Fastify({
@@ -58,6 +61,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await fastify.register(templateRoutes);
   await fastify.register(generationRoutes);
   await fastify.register(approvalRoutes);
+  await fastify.register(jobsRoutes);
 
   return fastify;
 }

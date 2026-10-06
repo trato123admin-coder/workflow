@@ -20,7 +20,6 @@ import {
   HardDrive,
   Settings as SettingsIcon,
   CheckCircle2,
-  Clock,
   CalendarDays,
 } from 'lucide-react';
 
@@ -40,7 +39,6 @@ import type {
   CatalogItem,
   FeatureFlag,
   SettingDefinition,
-  SystemSetting,
   CustomFieldDefinition,
   SettingsHistoryItem,
 } from '@workflow/shared';
@@ -471,7 +469,7 @@ const SECURITY_DEFINITIONS: SettingDefinition[] = [
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<string>('appearance');
-  const [catalogs, setCatalogs] = useState<Catalog[]>(INITIAL_CATALOGS);
+  const [catalogs] = useState<Catalog[]>(INITIAL_CATALOGS);
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>(INITIAL_CATALOG_ITEMS);
   const [flags, setFlags] = useState<FeatureFlag[]>(INITIAL_FLAGS);
   const [customFields, setCustomFields] = useState<CustomFieldDefinition[]>(INITIAL_CUSTOM_FIELDS);

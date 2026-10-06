@@ -6,7 +6,6 @@ import {
   evaluateDocumentRules,
   calculateRecommendationScore,
   type RuleRecord,
-  type RuleContext,
 } from '@workflow/shared';
 import { buildRuleContextFromCase } from '../../lib/rules-context-builder';
 import {

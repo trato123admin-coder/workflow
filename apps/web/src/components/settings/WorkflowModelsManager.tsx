@@ -65,7 +65,7 @@ export const WorkflowModelsManager: React.FC = () => {
         const defaultModel =
           formatted.find((m) => m.code === 'SUCESION_INTESTADA_NOTARIAL') || formatted[0];
         if (defaultModel) setSelectedModelId(defaultModel.id);
-      } catch (err) {
+      } catch {
         // Fallback for tests
       }
     };
@@ -127,7 +127,7 @@ export const WorkflowModelsManager: React.FC = () => {
           })),
         }));
         setProcesses(formattedProcs);
-      } catch (err) {
+      } catch {
         // silent fallback
       }
     };

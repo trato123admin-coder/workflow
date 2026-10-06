@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from '../ui/Modal';
 import { ruleDefinitionSchema } from '@workflow/shared';
-import { AlertCircle, CheckCircle2, Code2 } from 'lucide-react';
+import { AlertCircle, Code2 } from 'lucide-react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface DocumentRuleRow {

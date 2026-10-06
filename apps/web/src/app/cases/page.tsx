@@ -78,7 +78,7 @@ export default function CasesPage() {
       });
 
       setCases(formatted);
-    } catch (err) {
+    } catch {
       // Handled gracefully
     } finally {
       setIsLoading(false);

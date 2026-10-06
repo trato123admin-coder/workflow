@@ -3,7 +3,7 @@
 import React from 'react';
 import { calculateCaseExpenses } from '@workflow/shared';
 import type { CashMovement } from '@workflow/shared';
-import { Plus, Receipt, FileText, CheckCircle2 } from 'lucide-react';
+import { Plus, Receipt, FileText } from 'lucide-react';
 
 interface CaseExpensesTabProps {
   caseId: string;

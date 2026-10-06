@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { CheckCircle2, AlertTriangle, Loader2 } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { createClient } from '../../lib/supabase/client';
-import type { CaseDocumentStatus } from '@workflow/shared';
 
 interface DocumentStatusModalProps {
   caseDocumentId: string | null;

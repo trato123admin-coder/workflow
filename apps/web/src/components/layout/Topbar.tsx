@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Bell, Sun, Moon, LogOut, User } from 'lucide-react';
+import { Search, Sun, Moon, LogOut, User } from 'lucide-react';
 import { createClient } from '../../lib/supabase/client';
 import { GlobalSearchDialog } from './GlobalSearchDialog';
+import { NotificationsBell } from './NotificationsBell';
 
 interface TopbarProps {
   userEmail?: string;
@@ -87,14 +88,7 @@ export const Topbar: React.FC<TopbarProps> = ({
         </button>
 
         {/* Notifications */}
-        <button
-          type="button"
-          aria-label="Notificaciones"
-          className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary transition-colors relative"
-        >
-          <Bell className="w-4 h-4" />
-          <span className="w-2 h-2 rounded-full bg-primary absolute top-2 right-2 ring-2 ring-card" />
-        </button>
+        <NotificationsBell />
 
         {/* User Profile Menu */}
         <div className="relative ml-2">

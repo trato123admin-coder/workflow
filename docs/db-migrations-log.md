@@ -22,18 +22,26 @@ Registro de migraciones ejecutadas, entorno de aplicación y resultado de su res
 | `20260927000000_document_rules_and_recommendations_schema.sql` | 2026-09-26 | Staging (Cloud) | Verificado OK (Verify #13) | Aplicada manualmente por el operador en Staging. Tablas `document_rules` y `ai_recommendations` con RLS habilitada y optimizada con `(select ...)`. Triggers `trg_audit_document_rules` y `trg_audit_ai_recommendations` conectados a `private.tg_audit_log`. Permiso `ai.use` asignado a rol `LAWYER`. Restricción `CHECK` `ck_ai_recommendations_model_provider` forzando `RULES_ONLY`. Carga de las 7 reglas semilla de `00-maestro` §4.4 asociadas a versión 1 de `SUCESION_INTESTADA_NOTARIAL`. |
 | `20260927100000_generation_jobs_schema.sql` | 2026-09-28 | Staging (Cloud) | Verificado OK | Tablas `generation_jobs` y `generated_documents`, enum `gen_status`, triggers de auditoría `trg_audit_generation_jobs` y `trg_audit_generated_documents` conectados a `private.tg_audit_log()`, suscripción Realtime y función RPC `create_generation_job` con idempotencia. |
 | `20260928000000_generation_jobs_security_hardening.sql` | 2026-09-28 | Staging (Cloud) | Verificado OK | Blindaje RLS de `generation_jobs` (revocado INSERT directo a `authenticated`, creación exclusiva vía RPC SECURITY DEFINER), validación de pertenencia de `case_document_id` al caso, validación de lista blanca de `input_data` contra campos activos y adición de columna `rejection_reason` en `generated_documents` para auditoría automática. |
-| `20260928110000_cash_management_schema.sql` | 2026-09-28 | Staging (Cloud) | Verificado OK (Verify #15) | Aplicada por el operador en Staging. Tablas `cash_accounts`, `cash_periods`, `cash_requests`, `cash_movements`, `cash_reconciliations`, vista `cash_account_balances`, bucket `cash-support`, triggers inmutabilidad y control dual, permisos `cash.*` y flag `module.cash`. |
+| `20260928110000_cash_management_schema.sql` | 2026-09-28 | Staging (Cloud) | Verificado OK (Verify #15) | Aplicada por el operador en Staging. Tablas `cash_accounts`, `cash_periods`, `cash_requests`, `cash_movements`, `cash_reconciliations`, vista `cash_account_balances`, bucket `cash-support`, triggers inmutabilidad y control dual, permisos `cash.*` y flag `module.cash`. [PENDIENTE DE AUDITORÍA RETROACTIVA - ADR-006: desarrollada y fusionada fuera de orden por urgencia; pendiente de auditoría retroactiva exhaustiva antes de cualquier dato real y antes de la lista go-live del Sprint 13]. |
+| `20260929100000_job_queue_and_claim_jobs.sql` | 2026-09-30 | Staging (Cloud) | Verificado OK (Verify #16) | Aplicada por el operador en Staging. Índices optimizados para SKIP LOCKED en `job_queue`, función `claim_jobs` con recuperación de bloqueos huérfanos, `complete_job`, `fail_job` con backoff exponencial a DEAD (exclusivas `service_role`), `retry_job` con `settings.manage`, y parámetros `platform.jobs_mode` (TICK) y `platform.lock_timeout_minutes` (15). |
+| `20260929110000_notifications_schema.sql` | 2026-10-01 | Staging (Cloud) | Verificado OK (Verify #17) | Aplicada por el operador en Staging. Tablas `notifications` y `notification_preferences`, RLS de aislamiento estricto por usuario, suscripción Realtime, `dedupe_key` diario único, función `create_notification` (exclusiva `service_role` con validación de privacidad del destinatario para expedientes) y RPCs `mark_notification_as_read` y `mark_all_notifications_as_read`. |
+| `20260929120000_cron_schedules_tick_mode.sql` | 2026-10-01 | Staging (Cloud) | Verificado OK (Verify #18) | Aplicada por el operador en Staging. Extensiones `pg_net`, `pg_cron`, `supabase_vault`, función `private.trigger_engine_tick()` para modo TICK (exclusiva `service_role`), parámetros `platform.engine_url` y `platform.engine_tick_secret`, y 4 cron jobs programados con hora UTC exacta (`due_alerts`, `daily_digest`, `nightly_maintenance`, `engine_tick`). |
+| `20260929130000_harden_engine_tick.sql` | 2026-10-06 | Staging (Cloud) | Verificado OK (Verify #19) | Aplicada por el operador en Staging. Eliminación de `platform.engine_tick_secret` en `setting_definitions` y `system_settings`, lectura de secreto exclusivamente desde Supabase Vault con longitud >= 32, regex HTTPS en URL del engine, timeout de 90s y códigos P0500/P0501. |
+| `20260929140000_secure_notifications.sql` | 2026-10-06 | Staging (Cloud) | Verificado OK (Verify #20) | Aplicada por el operador en Staging. Helper `private.user_can_access_case`, validación de destinatario activo (`P0404`/`P0403`), revocación de UPDATE directo sobre `notifications` a `authenticated`, RLS blindada filtrando por asignación de caso y índice `idx_notifications_case_id`. |
+| `20260929143000_automation_settings_seeds.sql` | 2026-10-06 | Staging (Cloud) | Verificado OK (Verify #21) | Aplicada por el operador en Staging. Semillas de `alerts.doc_expiry_days` ([30, 15, 5]), `alerts.working_days` ([1, 2, 3, 4, 5]), `retention.done_jobs_days` (7) y `retention.notifications_days` (30). Unificación de `alerts.default_channels` a `["APP"]` (deuda técnica #7). |
+| `20260929150000_monitoring_jobs.sql` | 2026-10-06 | Staging (Cloud) | Verificado OK (Verify #22) | Aplicada por el operador en Staging. Función RPC `public.get_monitoring_jobs()` con paginación `p_offset`, redacción condicional de `payload` y `last_error` según `settings.manage`/`monitoring.read`, revocación de SELECT directo sobre `job_queue` a `authenticated`, y trigger de auditoría `trg_audit_job_retry`. |
 
 ---
 
 ## Resumen de Estado de Migraciones (Staging)
 
-- **Total de migraciones en repositorio (`supabase/migrations/`):** 17
-- **Total de migraciones aplicadas en Staging:** 17
-- **Total de migraciones verificadas con `verify.sql`:** 17
+- **Total de migraciones en repositorio (`supabase/migrations/`):** 24
+- **Total de migraciones aplicadas en Staging:** 24
+- **Total de migraciones verificadas con `verify.sql`:** 24
 - **Migraciones pendientes por aplicar:** 0 (Ninguna)
-- **Fecha de última verificación:** 2026-09-28
-- **Próximas migraciones:** N/A (Sprint 7 / MVP verificado en Staging; listo para Sprint 8).
+- **Advertencias vigentes:** Migración `20260928110000_cash_management_schema.sql` (Sprint 11) marcada como **PENDIENTE DE AUDITORÍA RETROACTIVA** (ADR-006).
+- **Fecha de última verificación:** 2026-10-06
+- **Próximas migraciones:** Ninguna pendiente para Sprint 8.
 
 ### Procedimiento de comprobación en SQL Editor de Supabase (Catálogo de Objetos):
 ```sql
@@ -95,6 +103,40 @@ with migration_check as (
          exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'cash_accounts')
          and exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'cash_movements')
          and exists(select 1 from information_schema.views where table_schema = 'public' and table_name = 'cash_account_balances')
+  union all
+  select '20260929100000_job_queue_and_claim_jobs',
+         exists(select 1 from pg_proc where proname = 'claim_jobs')
+         and not has_function_privilege('authenticated', 'public.claim_jobs(text, integer, integer)', 'EXECUTE')
+         and has_function_privilege('service_role', 'public.claim_jobs(text, integer, integer)', 'EXECUTE')
+         and exists(select 1 from public.system_settings where key = 'platform.jobs_mode')
+  union all
+  select '20260929110000_notifications_schema',
+         exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'notifications')
+         and exists(select 1 from information_schema.tables where table_schema = 'public' and table_name = 'notification_preferences')
+         and not has_function_privilege('authenticated', 'public.create_notification(uuid, text, text, text, text, uuid, uuid, text, text, text, text, jsonb)', 'EXECUTE')
+         and has_function_privilege('service_role', 'public.create_notification(uuid, text, text, text, text, uuid, uuid, text, text, text, text, jsonb)', 'EXECUTE')
+  union all
+  select '20260929120000_cron_schedules_tick_mode',
+         exists(select 1 from pg_proc where proname = 'trigger_engine_tick')
+         and has_function_privilege('service_role', 'private.trigger_engine_tick()', 'EXECUTE')
+         and not has_function_privilege('authenticated', 'private.trigger_engine_tick()', 'EXECUTE')
+         and exists(select 1 from public.system_settings where key = 'platform.engine_url')
+  union all
+  select '20260929130000_harden_engine_tick',
+         not exists(select 1 from public.setting_definitions where key = 'platform.engine_tick_secret')
+         and exists(select 1 from pg_proc where proname = 'trigger_engine_tick')
+  union all
+  select '20260929140000_secure_notifications',
+         exists(select 1 from pg_proc where proname = 'user_can_access_case')
+         and not has_table_privilege('authenticated', 'public.notifications', 'UPDATE')
+  union all
+  select '20260929143000_automation_settings_seeds',
+         exists(select 1 from public.setting_definitions where key = 'alerts.doc_expiry_days')
+         and exists(select 1 from public.setting_definitions where key = 'retention.done_jobs_days')
+  union all
+  select '20260929150000_monitoring_jobs',
+         exists(select 1 from pg_proc where proname = 'get_monitoring_jobs')
+         and not has_table_privilege('authenticated', 'public.job_queue', 'SELECT')
 )
 select 
   migration,
@@ -106,4 +148,9 @@ order by migration asc;
 -- Ejecutar el contenido de:
 -- supabase/verify/20260928110000_cash_management_schema.verify.sql
 -- Debe retornar: 'VERIFICACIÓN EXITOSA: Tablas de caja chica con RLS, libro inmutable, control dual de arqueo, bucket cash-support y feature flag module.cash activos.'
+
+-- 3. Confirmación funcional de la migración de Programación Cron y Modo TICK (Sprint 8 - P04)
+-- Ejecutar el contenido de:
+-- supabase/verify/20260929120000_cron_schedules_tick_mode.verify.sql
+-- Debe retornar: 'VERIFICACIÓN EXITOSA: pg_cron (horarios UTC), pg_net, modo TICK y trigger_engine_tick activos y comprobados.'
 ```

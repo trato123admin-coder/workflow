@@ -29,7 +29,7 @@ export default function PersonsPage() {
       const { data, error } = await query;
       if (error) throw error;
       setPersons((data as PersonItem[]) || []);
-    } catch (err) {
+    } catch {
       // Handled gracefully
     } finally {
       setIsLoading(false);

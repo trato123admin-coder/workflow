@@ -12,7 +12,6 @@ import {
   History,
   ClipboardList,
   ArrowRight,
-  RefreshCw,
   Info,
 } from 'lucide-react';
 

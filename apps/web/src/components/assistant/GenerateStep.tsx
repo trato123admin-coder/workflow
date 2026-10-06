@@ -10,7 +10,6 @@ import {
   ExternalLink,
   RotateCcw,
   ShieldCheck,
-  Scale,
 } from 'lucide-react';
 
 interface GenerateStepProps {

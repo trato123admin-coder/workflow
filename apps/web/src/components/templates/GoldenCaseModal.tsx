@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Modal } from '../ui/Modal';
-import { Sparkles, Copy, Check, Info } from 'lucide-react';
+import { Sparkles, Copy, Check } from 'lucide-react';
 
 interface GoldenCaseModalProps {
   isOpen: boolean;
