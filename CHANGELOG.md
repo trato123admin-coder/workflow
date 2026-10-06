@@ -6,6 +6,46 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Sprint 8 — Automatización I: Cola de trabajos, alertas de dominio, notificaciones y monitoreo
+
+#### Agregado
+
+- **Base de Datos & Seguridad (Supabase):**
+  - Migración `20260929100000_job_queue_and_claim_jobs.sql`: tabla `job_queue` con índices SKIP LOCKED, función de bloqueo `claim_jobs()`, `complete_job()`, `fail_job()` con reintentos exponenciales a `DEAD`, y `retry_job()`.
+  - Migración `20260929110000_notifications_schema.sql`: tablas `notifications` y `notification_preferences`, deduplicación canónica diaria, función `create_notification()` (exclusiva `service_role`), RPCs `mark_notification_as_read()` y `mark_all_notifications_as_read()`, y suscripción Realtime.
+  - Migración `20260929120000_cron_schedules_tick_mode.sql`: extensiones `pg_net` y `pg_cron`, función disparadora `private.trigger_engine_tick()` y 4 cron jobs programados (`due_alerts`, `daily_digest`, `nightly_maintenance`, `engine_tick`).
+  - Migración `20260929130000_harden_engine_tick.sql` (Migración A): almacenamiento de secreto en Supabase Vault (`engine_tick_secret` >= 32 chars), eliminación de secreto en texto plano, validación de URL HTTPS y timeout de 90s con códigos `P0500`/`P0501`.
+  - Migración `20260929140000_secure_notifications.sql` (Migración B): helper de seguridad `private.user_can_access_case()`, validación de destinatario activo (`P0404`) y privacidad por expediente (`P0403`), revocación de UPDATE directo sobre `notifications` a `authenticated` y RLS blindada.
+  - Migración `20260929143000_automation_settings_seeds.sql` (Migración C): semillas de caducidad documental (`alerts.doc_expiry_days`), días laborables (`alerts.working_days`), retención provisional (`retention.done_jobs_days`, `retention.notifications_days`) y unificación de canal `APP` (deuda técnica #7).
+  - Migración `20260929150000_monitoring_jobs.sql` (Migración D): RPC segura `public.get_monitoring_jobs()` con paginación `p_offset` y redacción de datos sensibles, revocación de SELECT directo sobre `job_queue` a `authenticated`, y trigger inmutable de auditoría `trg_audit_job_retry`.
+  - Pruebas pgTAP `12_job_queue_security.test.sql` (18 tests) y `13_notifications_security.test.sql` (14 tests).
+
+- **Paquete Compartido (`@workflow/shared`):**
+  - Módulo `packages/shared/src/jobs.ts`: esquemas Zod (`jobStatusSchema`, `jobTypeSchema`, `jobQueueItemSchema`, `claimJobsInputSchema`, `tickResultSchema`), interfaces tipadas y utilitarios de ciclo de vida.
+  - Módulo `packages/shared/src/notifications.ts`: esquemas Zod (`notificationSeveritySchema`, `notificationChannelSchema`, `notificationSchema`, `notificationPreferenceSchema`), deduplicación canónica (`buildCanonicalDedupeKey`) y validación de severidad.
+  - Módulo `packages/shared/src/business-days.ts`: utilitarios de conteo y suma de días laborables (`countBusinessDays`, `addBusinessDays`, `toLimaDateString`) con normalización a fecha civil de Lima (UTC-5).
+  - Módulo `packages/shared/src/env.ts`: variables de entorno del motor (`ENGINE_TICK_SECRET`, `ENGINE_ALLOWED_ORIGINS`).
+  - 170 pruebas unitarias pasando en Vitest.
+
+- **Engine (`services/engine`):**
+  - `jobs-worker.ts`: worker asíncrono que procesa lotes de jobs con `claim_jobs`, manejo de reintentos con backoff y transición a `DEAD`.
+  - `routes/jobs.ts`: endpoint seguro `POST /v1/jobs/tick` autenticado por `Bearer ENGINE_TICK_SECRET` con `crypto.timingSafeEqual` o JWT con `settings.manage`.
+  - `alert-engine.ts` y motores especializados:
+    - `alert-engine-filings.ts`: detección de trámites por vencer o vencidos (T-3, T-1, T-0) en días útiles con feriados.
+    - `alert-engine-parties.ts`: caducidad de DNIs y certificados (T-30, T-15, T-5 días hábiles), y alertas de herederos sin documentos requeridos.
+    - `alert-engine-cases.ts`: detección de estancamiento pausando estados `WAITING`, controversias y casos sin abogado asignado.
+  - `daily-digest.ts`: generación matutina de resumen diario a las 07:30 Lima con enlace directo a `/today`.
+  - `nightly-maintenance.ts`: purga nocturna de trabajos `DONE` y notificaciones leídas según umbrales de retención.
+  - `settings-reader.ts`: lectura y tipado de configuración desde base de datos con caché y valores fallback.
+  - 106 pruebas unitarias y de integración pasando en Vitest.
+
+- **Aplicación Web (`apps/web`):**
+  - `NotificationsBell.tsx`: campana en `Topbar` con indicador visual de no leídas, lista reactiva con badges de severidad, marcado individual y masivo como leídas vía RPC, y suscripción Realtime.
+  - `today/page.tsx` ("Qué Hago Hoy"): bandeja de priorización operativa que consolida trámites por vencer y documentos observados exclusivamente de casos asignados al usuario actual, con deduplicación de alertas.
+  - `approvals/page.tsx` ("Cola de Aprobaciones"): bandeja para usuarios con `documents.approve` que valida la regla de cuatro ojos (`docs.four_eyes`), visualización de borradores y flujo de aprobación o rechazo con justificación.
+  - `monitoring/jobs/page.tsx` ("Monitoreo de Trabajos"): consola administrativa con listado paginado vía RPC `get_monitoring_jobs`, filtro por estado, reintento manual de trabajos caídos y botón de disparo de tick inmediato.
+  - 39 pruebas unitarias de frontend pasando en Vitest y 31 páginas compiladas sin errores en Next.js.
+
 ### Sprint 11 — Caja chica: Libro inmutable, solicitudes, arqueo y cierre
 
 #### Agregado

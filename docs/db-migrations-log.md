@@ -26,18 +26,22 @@ Registro de migraciones ejecutadas, entorno de aplicación y resultado de su res
 | `20260929100000_job_queue_and_claim_jobs.sql` | 2026-09-30 | Staging (Cloud) | Verificado OK (Verify #16) | Aplicada por el operador en Staging. Índices optimizados para SKIP LOCKED en `job_queue`, función `claim_jobs` con recuperación de bloqueos huérfanos, `complete_job`, `fail_job` con backoff exponencial a DEAD (exclusivas `service_role`), `retry_job` con `settings.manage`, y parámetros `platform.jobs_mode` (TICK) y `platform.lock_timeout_minutes` (15). |
 | `20260929110000_notifications_schema.sql` | 2026-10-01 | Staging (Cloud) | Verificado OK (Verify #17) | Aplicada por el operador en Staging. Tablas `notifications` y `notification_preferences`, RLS de aislamiento estricto por usuario, suscripción Realtime, `dedupe_key` diario único, función `create_notification` (exclusiva `service_role` con validación de privacidad del destinatario para expedientes) y RPCs `mark_notification_as_read` y `mark_all_notifications_as_read`. |
 | `20260929120000_cron_schedules_tick_mode.sql` | 2026-10-01 | Staging (Cloud) | Verificado OK (Verify #18) | Aplicada por el operador en Staging. Extensiones `pg_net`, `pg_cron`, `supabase_vault`, función `private.trigger_engine_tick()` para modo TICK (exclusiva `service_role`), parámetros `platform.engine_url` y `platform.engine_tick_secret`, y 4 cron jobs programados con hora UTC exacta (`due_alerts`, `daily_digest`, `nightly_maintenance`, `engine_tick`). |
+| `20260929130000_harden_engine_tick.sql` | 2026-10-06 | Staging (Cloud) | Verificado OK (Verify #19) | Aplicada por el operador en Staging. Eliminación de `platform.engine_tick_secret` en `setting_definitions` y `system_settings`, lectura de secreto exclusivamente desde Supabase Vault con longitud >= 32, regex HTTPS en URL del engine, timeout de 90s y códigos P0500/P0501. |
+| `20260929140000_secure_notifications.sql` | 2026-10-06 | Staging (Cloud) | Verificado OK (Verify #20) | Aplicada por el operador en Staging. Helper `private.user_can_access_case`, validación de destinatario activo (`P0404`/`P0403`), revocación de UPDATE directo sobre `notifications` a `authenticated`, RLS blindada filtrando por asignación de caso y índice `idx_notifications_case_id`. |
+| `20260929143000_automation_settings_seeds.sql` | 2026-10-06 | Staging (Cloud) | Verificado OK (Verify #21) | Aplicada por el operador en Staging. Semillas de `alerts.doc_expiry_days` ([30, 15, 5]), `alerts.working_days` ([1, 2, 3, 4, 5]), `retention.done_jobs_days` (7) y `retention.notifications_days` (30). Unificación de `alerts.default_channels` a `["APP"]` (deuda técnica #7). |
+| `20260929150000_monitoring_jobs.sql` | 2026-10-06 | Staging (Cloud) | Verificado OK (Verify #22) | Aplicada por el operador en Staging. Función RPC `public.get_monitoring_jobs()` con paginación `p_offset`, redacción condicional de `payload` y `last_error` según `settings.manage`/`monitoring.read`, revocación de SELECT directo sobre `job_queue` a `authenticated`, y trigger de auditoría `trg_audit_job_retry`. |
 
 ---
 
 ## Resumen de Estado de Migraciones (Staging)
 
-- **Total de migraciones en repositorio (`supabase/migrations/`):** 20
-- **Total de migraciones aplicadas en Staging:** 20
-- **Total de migraciones verificadas con `verify.sql`:** 20
+- **Total de migraciones en repositorio (`supabase/migrations/`):** 24
+- **Total de migraciones aplicadas en Staging:** 24
+- **Total de migraciones verificadas con `verify.sql`:** 24
 - **Migraciones pendientes por aplicar:** 0 (Ninguna)
 - **Advertencias vigentes:** Migración `20260928110000_cash_management_schema.sql` (Sprint 11) marcada como **PENDIENTE DE AUDITORÍA RETROACTIVA** (ADR-006).
-- **Fecha de última verificación:** 2026-10-01
-- **Próximas migraciones:** Correcciones pendientes de P03 y P04 (cierre Sprint 8); sin aplicar.
+- **Fecha de última verificación:** 2026-10-06
+- **Próximas migraciones:** Ninguna pendiente para Sprint 8.
 
 ### Procedimiento de comprobación en SQL Editor de Supabase (Catálogo de Objetos):
 ```sql
@@ -117,6 +121,22 @@ with migration_check as (
          and has_function_privilege('service_role', 'private.trigger_engine_tick()', 'EXECUTE')
          and not has_function_privilege('authenticated', 'private.trigger_engine_tick()', 'EXECUTE')
          and exists(select 1 from public.system_settings where key = 'platform.engine_url')
+  union all
+  select '20260929130000_harden_engine_tick',
+         not exists(select 1 from public.setting_definitions where key = 'platform.engine_tick_secret')
+         and exists(select 1 from pg_proc where proname = 'trigger_engine_tick')
+  union all
+  select '20260929140000_secure_notifications',
+         exists(select 1 from pg_proc where proname = 'user_can_access_case')
+         and not has_table_privilege('authenticated', 'public.notifications', 'UPDATE')
+  union all
+  select '20260929143000_automation_settings_seeds',
+         exists(select 1 from public.setting_definitions where key = 'alerts.doc_expiry_days')
+         and exists(select 1 from public.setting_definitions where key = 'retention.done_jobs_days')
+  union all
+  select '20260929150000_monitoring_jobs',
+         exists(select 1 from pg_proc where proname = 'get_monitoring_jobs')
+         and not has_table_privilege('authenticated', 'public.job_queue', 'SELECT')
 )
 select 
   migration,
