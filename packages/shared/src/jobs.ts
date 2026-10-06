@@ -6,13 +6,7 @@
 
 import { z } from 'zod';
 
-export const JobStatusSchema = z.enum([
-  'QUEUED',
-  'RUNNING',
-  'DONE',
-  'FAILED',
-  'DEAD',
-]);
+export const JobStatusSchema = z.enum(['QUEUED', 'RUNNING', 'DONE', 'FAILED', 'DEAD']);
 export type JobStatus = z.infer<typeof JobStatusSchema>;
 
 export const JobsModeSchema = z.enum(['TICK', 'CONTINUOUS']);
@@ -60,7 +54,7 @@ export type ClaimJobsParams = z.infer<typeof ClaimJobsParamsSchema>;
 export function calculateExponentialBackoff(
   attempts: number,
   baseSeconds = 30,
-  maxSeconds = 3600
+  maxSeconds = 3600,
 ): number {
   if (attempts <= 0) return 0;
   const backoff = baseSeconds * Math.pow(2, attempts - 1);

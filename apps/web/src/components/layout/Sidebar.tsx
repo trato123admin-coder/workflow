@@ -18,6 +18,8 @@ import {
   ShieldCheck,
   Settings,
   Activity,
+  CalendarCheck,
+  CheckSquare,
 } from 'lucide-react';
 
 import type { FeatureFlagKey } from '@workflow/shared';
@@ -35,6 +37,11 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Inicio',
     href: '/dashboard',
     icon: <LayoutDashboard className="w-5 h-5 shrink-0" />,
+  },
+  {
+    label: 'Qué Hago Hoy',
+    href: '/today',
+    icon: <CalendarCheck className="w-5 h-5 shrink-0" />,
   },
   {
     label: 'Casos',
@@ -59,6 +66,12 @@ export const NAV_ITEMS: NavItem[] = [
     href: '/documents',
     icon: <FileText className="w-5 h-5 shrink-0" />,
     permission: ['documents.read'],
+  },
+  {
+    label: 'Aprobaciones',
+    href: '/approvals',
+    icon: <CheckSquare className="w-5 h-5 shrink-0" />,
+    permission: ['documents.approve'],
   },
   {
     label: 'Plantillas',
@@ -110,6 +123,13 @@ export const NAV_ITEMS: NavItem[] = [
     href: '/monitoring',
     icon: <Activity className="w-5 h-5 shrink-0" />,
     permission: ['monitoring.read'],
+    featureFlag: 'module.monitoring',
+  },
+  {
+    label: 'Cola de trabajos',
+    href: '/monitoring/jobs',
+    icon: <Activity className="w-5 h-5 shrink-0" />,
+    permission: ['monitoring.read', 'settings.manage'],
     featureFlag: 'module.monitoring',
   },
 ];

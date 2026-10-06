@@ -84,6 +84,7 @@ select throws_ok(
     'Mensaje'
   ),
   '42501',
+  null,
   'Ejecución real: authenticated recibe 42501 al intentar ejecutar create_notification'
 );
 
@@ -94,8 +95,8 @@ reset role;
 -- 5. VALIDACIÓN DE PRIVACIDAD DEL DESTINATARIO (Regla e)
 -- Si p_case_id no es nulo, el destinatario DEBE tener acceso al caso
 -- ============================================================================
--- 5.1 Destinatario ficticio sin asignación ni acceso a caso confidencial/restringido
--- Intentar enviarle alerta de expediente DEBE FALLAR con 42501
+-- 5.1 Destinatario ficticio sin perfil activo ni acceso
+-- Intentar enviarle alerta de expediente DEBE FALLAR con P0404
 select throws_ok(
   format(
     'select public.create_notification(%L::uuid, %L, %L, %L, %L, %L::uuid, %L::uuid)',
@@ -107,8 +108,9 @@ select throws_ok(
     '00000000-0000-0000-0000-000000000001',
     '00000000-0000-0000-0000-000000000001'
   ),
-  '42501',
-  'create_notification rechaza enviar alerta de expediente si el DESTINATARIO carece de acceso al caso'
+  'P0404',
+  null,
+  'create_notification rechaza con P0404 si el DESTINATARIO no existe o esta inactivo'
 );
 
 -- ============================================================================

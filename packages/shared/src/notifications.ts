@@ -67,7 +67,7 @@ export function buildNotificationDedupeKey(
   type: string,
   entityId: string,
   userId: string,
-  dateStr: string
+  dateStr: string,
 ): string {
   const sanitizedEntity = entityId.trim().toLowerCase();
   const sanitizedUser = userId.trim().toLowerCase();
@@ -91,7 +91,7 @@ export function isWorkingHour(
   startHour = '08:00',
   endHour = '18:00',
   workingDays: number[] = [1, 2, 3, 4, 5],
-  timeZone = 'America/Lima'
+  timeZone = 'America/Lima',
 ): boolean {
   // Format date in target timezone to inspect day of week and hour:minute
   const formatter = new Intl.DateTimeFormat('en-US', {

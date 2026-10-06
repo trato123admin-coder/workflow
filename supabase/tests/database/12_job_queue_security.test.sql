@@ -23,8 +23,8 @@ select ok(
 -- authenticated solo tiene SELECT condicional, NUNCA INSERT/UPDATE/DELETE directo
 -- ============================================================================
 select ok(
-  has_table_privilege('authenticated', 'public.job_queue', 'SELECT'),
-  'authenticated tiene privilegio SELECT en job_queue (gobernado por RLS)'
+  not has_table_privilege('authenticated', 'public.job_queue', 'SELECT'),
+  'authenticated NO tiene privilegio SELECT directo en job_queue (restringido a RPC get_monitoring_jobs)'
 );
 
 select ok(
@@ -103,6 +103,7 @@ set local "request.jwt.claims" = '{"sub": "00000000-0000-0000-0000-000000000099"
 select throws_ok(
   'select * from public.claim_jobs(''malicious-worker'', 1, 15)',
   '42501',
+  null,
   'Ejecución real: authenticated recibe 42501 al intentar ejecutar claim_jobs'
 );
 
@@ -110,6 +111,7 @@ select throws_ok(
 select throws_ok(
   format('select public.complete_job(%L::uuid, ''{}''::jsonb)', '00000000-0000-0000-0000-000000000001'),
   '42501',
+  null,
   'Ejecución real: authenticated recibe 42501 al intentar ejecutar complete_job'
 );
 
@@ -117,6 +119,7 @@ select throws_ok(
 select throws_ok(
   format('select public.fail_job(%L::uuid, ''error'')', '00000000-0000-0000-0000-000000000001'),
   '42501',
+  null,
   'Ejecución real: authenticated recibe 42501 al intentar ejecutar fail_job'
 );
 
@@ -124,6 +127,7 @@ select throws_ok(
 select throws_ok(
   format('select public.retry_job(%L::uuid)', '00000000-0000-0000-0000-000000000001'),
   '42501',
+  null,
   'Ejecución real: retry_job rechaza con 42501 a usuario authenticated sin settings.manage'
 );
 

@@ -17,12 +17,8 @@ export const CaseProcessesTable: React.FC<CaseProcessesTableProps> = ({
   onAdvanceProcess,
   isUpdating,
 }) => {
-  const doneStatus =
-    workflowStatuses.find((s) => s.category === 'DONE') ||
-    workflowStatuses.find((s) => s.code === 'FINALIZADO');
-  const inProgressStatus =
-    workflowStatuses.find((s) => s.category === 'IN_PROGRESS') ||
-    workflowStatuses.find((s) => s.code === 'EN_PROCESO');
+  const doneStatus = workflowStatuses.find((s) => s.category === 'DONE');
+  const inProgressStatus = workflowStatuses.find((s) => s.category === 'IN_PROGRESS');
 
   return (
     <div className="border border-border rounded-xl bg-card overflow-hidden">

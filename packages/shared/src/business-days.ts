@@ -163,8 +163,11 @@ export function countBusinessDays(
   endDate: Date | string,
   holidays: (string | Date)[] = [],
 ): number {
-  const startIso = typeof startDate === 'string' && startDate.length === 10 ? startDate : toLimaDateString(startDate);
-  const endIso = typeof endDate === 'string' && endDate.length === 10 ? endDate : toLimaDateString(endDate);
+  const startIso =
+    typeof startDate === 'string' && startDate.length === 10
+      ? startDate
+      : toLimaDateString(startDate);
+  const endIso =
+    typeof endDate === 'string' && endDate.length === 10 ? endDate : toLimaDateString(endDate);
   return Math.abs(getRemainingBusinessDays(endIso, holidays, startIso));
 }
-

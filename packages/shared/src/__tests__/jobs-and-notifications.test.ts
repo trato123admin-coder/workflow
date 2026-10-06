@@ -41,7 +41,7 @@ describe('Job Queue Schemas & Backoff', () => {
 
   it('builds standard job dedupe keys', () => {
     expect(buildJobDedupeKey('nightly_maintenance', '2026-09-30')).toBe(
-      'nightly_maintenance:2026-09-30'
+      'nightly_maintenance:2026-09-30',
     );
   });
 
@@ -81,7 +81,7 @@ describe('Notifications & Alert Rules', () => {
 
     const key = buildNotificationDedupeKey(type, entityId, userId, dateStr);
     expect(key).toBe(
-      'FILING_DUE_SOON:11111111-2222-3333-4444-555555555555:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee:2026-09-30'
+      'FILING_DUE_SOON:11111111-2222-3333-4444-555555555555:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee:2026-09-30',
     );
 
     // Exact duplicate check

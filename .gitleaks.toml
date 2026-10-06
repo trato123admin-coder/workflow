@@ -7,9 +7,11 @@ useDefault = true
 description = "Global allowlist for documentation examples and templates"
 paths = [
   '''^\.env\.example$''',
+  '''^services/engine/\.env\.example$''',
   '''docs/.*''',
 ]
 regexes = [
   '''APIINTI_API_KEY=''',
   '''SUPABASE_.*_KEY=''',
+  '''dev_tick_secret_placeholder''',
 ]
