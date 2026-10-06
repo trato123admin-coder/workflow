@@ -34,8 +34,8 @@ select ok(
 );
 
 select ok(
-  has_table_privilege('authenticated', 'public.notifications', 'UPDATE'),
-  'authenticated tiene privilegio UPDATE en notifications'
+  not has_table_privilege('authenticated', 'public.notifications', 'UPDATE'),
+  'authenticated NO tiene privilegio UPDATE directo en notifications (restringido a RPC mark_notification_as_read)'
 );
 
 select ok(
